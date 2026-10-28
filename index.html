@@ -302,8 +302,10 @@
    <div><div class="feed" id="feed"><article class="post"><div class="post-top"><span>OdontoUdeC</span><span>Bienvenida</span></div><h4>Construyamos este espacio entre todos</h4><p>¿Qué recurso, enlace o información te gustaría encontrar aquí? Comparte ideas sin publicar datos privados ni información clínica identificable.</p></article></div><button class="btn secondary" id="clearPosts" style="margin-top:12px">Borrar publicaciones de prueba</button></div>
   <div id="adminPanel" class="community-panel hidden" style="margin-top:22px;border:2px solid var(--gold)">
    <h3>Panel de administrador</h3>
-   <p>Tu cuenta tiene permisos de administración de OdontoUdeC.</p>
+   <p>Desde aquí puedes revisar reportes y moderar publicaciones de la comunidad.</p>
    <p id="adminStatus" role="status">Comprobando permisos…</p>
+   <div id="adminReports"></div>
+   <button type="button" class="btn secondary" id="refreshAdmin">Actualizar reportes</button>
   </div>
   </div>
  </div>
@@ -391,7 +393,35 @@ async function checkAdmin(){
  if(error){panel.classList.add('hidden');console.info('No se pudo comprobar admin:',error.message);return;}
  panel.classList.toggle('hidden',data!==true);
  status.textContent=data===true?'Administrador activo.':'Esta cuenta no tiene rol de administrador.';
+ if(data===true) await loadAdminReports();
 }
+async function loadAdminReports(){
+ const status=document.getElementById('adminStatus'),box=document.getElementById('adminReports');
+ status.textContent='Cargando reportes…';box.innerHTML='';
+ const {data:reports,error}=await supabaseClient.from('content_reports').select('id,post_id,reporter_id,reason,created_at').order('created_at',{ascending:false}).limit(100);
+ if(error){status.textContent='No se pudieron cargar los reportes. Comprueba que ejecutaste el SQL de moderación. Detalle: '+error.message;return;}
+ if(!reports||reports.length===0){status.textContent='Administrador activo. No hay reportes por revisar.';return;}
+ status.textContent='Administrador activo. Reportes por revisar: '+reports.length;
+ for(const report of reports){
+  const {data:post,error:postError}=await supabaseClient.from('posts').select('id,title,content,author_id').eq('id',report.post_id).maybeSingle();
+  const card=document.createElement('article');card.className='post';card.style.marginTop='12px';
+  card.innerHTML='<div class="post-top"><span>Reporte #'+safe(report.id)+'</span><span>'+safe(new Date(report.created_at).toLocaleString('es-CO'))+'</span></div><p><strong>Motivo:</strong> '+safe(report.reason)+'</p><p><strong>ID de publicación:</strong> '+safe(report.post_id)+'</p><p><strong>Contenido:</strong> '+safe(post?(post.title+' — '+post.content).slice(0,700):'(la publicación ya no existe o no se pudo consultar)')+'</p>';
+  if(post&&!postError){
+   const remove=document.createElement('button');remove.className='btn secondary';remove.type='button';remove.textContent='Eliminar publicación';remove.addEventListener('click',async()=>{
+    if(!confirm('¿Seguro que quieres eliminar esta publicación? Esta acción no se puede deshacer.'))return;
+    const {error:delError}=await supabaseClient.from('posts').delete().eq('id',post.id);
+    if(delError){notify('No se pudo eliminar. Revisa la política de administradores en Supabase: '+delError.message);return;}
+    notify('Publicación eliminada.');await loadAdminReports();await loadPosts();
+   });card.appendChild(remove);
+  }
+  const close=document.createElement('button');close.className='btn secondary';close.type='button';close.style.marginLeft='8px';close.textContent='Cerrar reporte';close.addEventListener('click',async()=>{
+   const {error:closeError}=await supabaseClient.from('content_reports').delete().eq('id',report.id);
+   if(closeError){notify('No se pudo cerrar el reporte. Revisa la política en Supabase: '+closeError.message);return;}
+   notify('Reporte cerrado.');await loadAdminReports();
+  });card.appendChild(close);box.appendChild(card);
+ }
+}
+document.getElementById('refreshAdmin').addEventListener('click',loadAdminReports);
 
 let postsLoadVersion=0;
 async function loadPosts(){
