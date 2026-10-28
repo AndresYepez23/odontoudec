@@ -300,6 +300,11 @@
     <p class="disclaimer">Debes iniciar sesión para publicar. Evita incluir datos personales, información clínica identificable o acusaciones con datos identificables.</p>
    </div>
    <div><div class="feed" id="feed"><article class="post"><div class="post-top"><span>OdontoUdeC</span><span>Bienvenida</span></div><h4>Construyamos este espacio entre todos</h4><p>¿Qué recurso, enlace o información te gustaría encontrar aquí? Comparte ideas sin publicar datos privados ni información clínica identificable.</p></article></div><button class="btn secondary" id="clearPosts" style="margin-top:12px">Borrar publicaciones de prueba</button></div>
+  <div id="adminPanel" class="community-panel hidden" style="margin-top:22px;border:2px solid var(--gold)">
+   <h3>Panel de administrador</h3>
+   <p>Tu cuenta tiene permisos de administración de OdontoUdeC.</p>
+   <p id="adminStatus" role="status">Comprobando permisos…</p>
+  </div>
   </div>
  </div>
 </section>
@@ -377,6 +382,17 @@ async function ensureProfile(user){
  if(error) throw error;
  if(!data){const {error:insertError}=await supabaseClient.from('profiles').insert({id:user.id,display_name:displayName});if(insertError) throw insertError;}
 }
+
+async function checkAdmin(){
+ const panel=document.getElementById('adminPanel');
+ const status=document.getElementById('adminStatus');
+ if(!currentUser){panel.classList.add('hidden');return;}
+ const {data,error}=await supabaseClient.rpc('is_admin');
+ if(error){panel.classList.add('hidden');console.info('No se pudo comprobar admin:',error.message);return;}
+ panel.classList.toggle('hidden',data!==true);
+ status.textContent=data===true?'Administrador activo.':'Esta cuenta no tiene rol de administrador.';
+}
+
 let postsLoadVersion=0;
 async function loadPosts(){
  const version=++postsLoadVersion;
@@ -450,9 +466,10 @@ form.addEventListener('submit',async e=>{e.preventDefault();if(!currentUser){not
 supabaseClient.auth.onAuthStateChange((event,session)=>{
  currentUser=session?.user||null;
  setAuthUI();
+ checkAdmin();
  if(event!=='INITIAL_SESSION') loadPosts();
 });
-(async()=>{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;setAuthUI();await loadPosts();})();
+(async()=>{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;setAuthUI();await checkAdmin();await loadPosts();})();
 
 // Calendario académico y biblioteca: requieren las tablas academic_events y academic_resources en Supabase.
 const eventList=document.getElementById('eventList'),eventStatus=document.getElementById('eventStatus');
