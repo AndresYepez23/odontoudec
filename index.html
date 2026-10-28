@@ -68,6 +68,32 @@
 @media(max-width:800px){.semester-folders{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:480px){.semester-folders{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.semester-folder{min-height:100px;padding:13px 11px}}
 
+
+/* Calendario mensual y comunidad */
+.month-calendar{border:1px solid #e9e0ef;border-radius:18px;padding:16px;margin:16px 0;background:#fff}
+.month-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.month-head button{border:1px solid #e4d8ed;background:#faf7fc;color:var(--purple);border-radius:10px;padding:8px 12px;cursor:pointer}
+.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.month-day-name{text-align:center;font-size:.78rem;font-weight:700;color:var(--muted);padding:6px 0}
+.month-day{min-height:66px;border:1px solid #eee7f2;border-radius:10px;padding:7px;font-size:.82rem;background:#fff}
+.month-day.muted{opacity:.38}.month-day.today{border-color:var(--purple);box-shadow:inset 0 0 0 1px var(--purple)}
+.month-day.has-event{background:#f7effb}.month-day-num{font-weight:700}.month-event-dot{display:block;margin-top:5px;font-size:.7rem;line-height:1.2;color:#68418a;overflow-wrap:anywhere}
+.video-prayer{padding:34px 0;background:linear-gradient(135deg,#faf7fc,#fff)}
+.prayer-video-card{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:24px;align-items:center;border:1px solid #eadff0;border-radius:20px;padding:18px;background:#fff;box-shadow:0 12px 32px rgba(56,30,76,.06)}
+.prayer-video-frame{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:13px;background:#21172b}
+.prayer-video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.prayer-video-copy h2{font-size:clamp(1.3rem,2vw,1.8rem);margin:8px 0}
+.prayer-video-copy p{color:var(--muted);line-height:1.65}
+.post-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.post-action{border:1px solid #e5dbea;background:#fff;color:#55356b;border-radius:999px;padding:7px 12px;cursor:pointer;font:inherit;font-size:.88rem}
+.post-action:disabled{opacity:.55;cursor:not-allowed}
+.post-comments{border-top:1px solid #eee7f2;margin-top:12px;padding-top:12px}
+.post-comment{font-size:.9rem;padding:8px 10px;background:#faf8fc;border-radius:9px;margin:7px 0}
+.comment-form{display:flex;gap:8px;margin-top:9px}
+.comment-form input{flex:1;min-width:0}
+.post-report{margin-left:auto;color:#76687f}
+@media(max-width:680px){.prayer-video-card{grid-template-columns:1fr;padding:12px;gap:14px}.month-calendar{padding:10px}.month-day{min-height:52px;padding:4px;font-size:.74rem}.month-event-dot{font-size:.63rem}.month-grid{gap:3px}.month-head h3{font-size:1rem}.comment-form{flex-direction:column}}
+
 </style>
 </head>
 <body>
@@ -80,7 +106,7 @@
     </a>
     <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-label="Abrir menú">☰</button>
     <div class="navlinks" id="navlinks">
-      <a href="#anuncios">Novedades</a><a href="#agenda">Calendario</a><a href="#biblioteca">Biblioteca</a><a href="#recursos">Recursos</a><a href="#tarifario">Tarifario</a><a href="#comunidad">Comunidad</a><a href="#convivencia">Convivencia</a>
+      <a href="#anuncios">Novedades</a><a href="#agenda">Calendario</a><a href="#biblioteca">Biblioteca</a><a href="#recursos">Recursos</a><a href="#tarifario">Tarifario</a><a href="#comunidad">Comunidad</a><a href="#oracion-pacientes">Oración</a><a href="#convivencia">Convivencia</a>
     </div>
     <a class="nav-cta" href="#recursos">Accesos útiles ↗</a>
   </nav>
@@ -105,6 +131,23 @@
    <a class="quick" href="https://drive.google.com/drive/folders/1--QEAplHQKQCeA9wlS5ElyRVYEZcn0jk" target="_blank" rel="noopener"><span class="ico">📁</span><strong>Drive clínico</strong><small>Abrir carpeta compartida ↗</small></a>
    <a class="quick" href="#tarifario"><span class="ico">💰</span><strong>Tarifario 2026-2</strong><small>Consultar procedimientos</small></a>
    <a class="quick" href="#agenda"><span class="ico">🗓️</span><strong>Agenda académica</strong><small>Eventos y fechas importantes</small></a>
+  </div>
+ </div>
+</section>
+
+
+<section class="video-prayer" id="oracion-pacientes" aria-labelledby="prayerVideoTitle">
+ <div class="container">
+  <div class="prayer-video-card">
+   <div class="prayer-video-frame">
+    <iframe src="https://www.youtube-nocookie.com/embed/5gtJhUho0yA?rel=0" title="Oración para conseguir pacientes | Herencia Divina" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+   </div>
+   <div class="prayer-video-copy">
+    <span class="kicker">Un momento de fe</span>
+    <h2 id="prayerVideoTitle">Una oración antes de atender a nuestros pacientes</h2>
+    <p>Un espacio breve para poner nuestro trabajo, nuestras manos y a cada paciente en oración, con fe, vocación y esperanza.</p>
+    <a class="text-link" href="https://youtu.be/5gtJhUho0yA" target="_blank" rel="noopener noreferrer">Ver en YouTube · Herencia Divina ↗</a>
+   </div>
   </div>
  </div>
 </section>
@@ -208,6 +251,10 @@
     <input id="eventSearch" type="search" placeholder="Buscar evento o asignatura" aria-label="Buscar eventos">
     <select id="eventSemester" aria-label="Filtrar calendario por semestre"><option value="">Todos los semestres</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option value="Todos">Todos los estudiantes</option></select>
     <select id="eventType" aria-label="Filtrar por tipo de evento"><option value="">Todos los tipos</option><option>Parcial</option><option>Entrega</option><option>Práctica</option><option>Clínica</option><option>Evento</option><option>Otro</option></select>
+   </div>
+   <div class="month-calendar" aria-label="Vista mensual del calendario">
+    <div class="month-head"><button type="button" id="monthPrev" aria-label="Mes anterior">←</button><h3 id="monthTitle" style="margin:0">Calendario mensual</h3><button type="button" id="monthNext" aria-label="Mes siguiente">→</button></div>
+    <div id="monthCalendar" class="month-grid"></div>
    </div>
    <div id="eventStatus" class="disclaimer" role="status">Cargando calendario…</div>
    <div id="eventList" class="planner-list"><div class="empty-state">Consultando fechas…</div></div>
@@ -337,14 +384,48 @@ async function loadPosts(){
  if(version!==postsLoadVersion)return;
  if(error){notify('No pudimos cargar las publicaciones: '+error.message);return;}
  if(!data || data.length===0){feed.innerHTML='<article class="empty">Todavía no hay publicaciones. ¡Puedes iniciar la conversación!</article>';return;}
- const ids=[...new Set(data.map(p=>p.author_id))];
+ const ids=[...new Set(data.map(p=>p.author_id))],postIds=data.map(p=>p.id);
  const {data:profiles}=await supabaseClient.from('profiles').select('id,display_name').in('id',ids);
+ const [commentResult,reactionResult]=await Promise.all([
+  supabaseClient.from('post_comments').select('id,post_id,author_id,content,created_at').in('post_id',postIds).order('created_at',{ascending:true}),
+  supabaseClient.from('post_reactions').select('post_id,user_id,reaction').in('post_id',postIds)
+ ]);
  if(version!==postsLoadVersion)return;
  const names=new Map((profiles||[]).map(p=>[p.id,p.display_name]));
+ const commentRows=commentResult.error?[]:(commentResult.data||[]),reactionRows=reactionResult.error?[]:(reactionResult.data||[]);
+ const commentNames=new Map();
+ const commentAuthors=[...new Set(commentRows.map(c=>c.author_id).filter(Boolean))];
+ if(commentAuthors.length){const {data:cp}=await supabaseClient.from('profiles').select('id,display_name').in('id',commentAuthors);(cp||[]).forEach(p=>commentNames.set(p.id,p.display_name));}
  const fragment=document.createDocumentFragment();
- data.forEach(post=>{const article=document.createElement('article');article.className='post';article.dataset.postId=post.id;const date=new Date(post.created_at).toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});article.innerHTML='<div class="post-top"><span>'+safe(names.get(post.author_id)||'Estudiante')+'</span><span>'+safe(post.category)+' · '+safe(date)+'</span></div><h4>'+safe(post.title)+'</h4><p>'+safe(post.content)+'</p>';fragment.appendChild(article);});
- if(version===postsLoadVersion){feed.replaceChildren(fragment);}
+ data.forEach(post=>{
+  const article=document.createElement('article');article.className='post';article.dataset.postId=post.id;
+  const date=new Date(post.created_at).toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});
+  const pc=commentRows.filter(c=>String(c.post_id)===String(post.id));
+  const pr=reactionRows.filter(x=>String(x.post_id)===String(post.id));
+  const likes=pr.filter(x=>x.reaction==='apoyo').length,hasLiked=currentUser&&pr.some(x=>x.user_id===currentUser.id&&x.reaction==='apoyo');
+  const commentsHtml=pc.map(c=>'<div class="post-comment"><strong>'+safe(commentNames.get(c.author_id)||'Estudiante')+'</strong><p>'+safe(c.content)+'</p></div>').join('');
+  article.innerHTML='<div class="post-top"><span>'+safe(names.get(post.author_id)||'Estudiante')+'</span><span>'+safe(post.category)+' · '+safe(date)+'</span></div><h4>'+safe(post.title)+'</h4><p>'+safe(post.content)+'</p><div class="post-actions"><button type="button" class="post-action reaction-btn" data-action="react" '+(!currentUser?'disabled':'')+' aria-pressed="'+Boolean(hasLiked)+'">💜 Apoyar · '+likes+'</button><button type="button" class="post-action" data-action="toggle-comments">💬 Comentarios · '+pc.length+'</button><button type="button" class="post-action post-report" data-action="report">⚑ Reportar</button></div><div class="post-comments" hidden><div class="comments-list">'+commentsHtml+'</div><form class="comment-form"><input name="comment" maxlength="1200" required placeholder="Escribe un comentario respetuoso…" aria-label="Comentario" '+(!currentUser?'disabled':'')+'><button class="post-action" type="submit" '+(!currentUser?'disabled':'')+'>Enviar</button></form>'+(!currentUser?'<small>Inicia sesión para comentar o apoyar.</small>':'')+'</div>';
+  fragment.appendChild(article);
+ });
+ if(version===postsLoadVersion)feed.replaceChildren(fragment);
+ if(commentResult.error||reactionResult.error)console.info('Activa las tablas post_comments y post_reactions con el SQL de instalación para habilitar interacciones.');
 }
+
+feed.addEventListener('click',async e=>{
+ const btn=e.target.closest('[data-action]');if(!btn)return;
+ const article=btn.closest('.post'),postId=article?.dataset.postId;if(!article||!postId)return;
+ const action=btn.dataset.action;
+ if(action==='toggle-comments'){const panel=article.querySelector('.post-comments');panel.hidden=!panel.hidden;return;}
+ if(action==='report'){if(!currentUser){notify('Inicia sesión para reportar una publicación.');return;}const reason=prompt('¿Por qué quieres reportar esta publicación? (spam, acoso, información privada, otro)');if(!reason||!reason.trim())return;const {error}=await supabaseClient.from('content_reports').insert({post_id:postId,reporter_id:currentUser.id,reason:reason.trim().slice(0,500)});if(error){notify('No se pudo enviar el reporte. Comprueba la configuración de moderación en Supabase.');return;}notify('Reporte enviado para revisión. Gracias por cuidar la comunidad.');return;}
+ if(action==='react'){if(!currentUser){notify('Inicia sesión para apoyar una publicación.');return;}const {data:existing,error:readError}=await supabaseClient.from('post_reactions').select('post_id').eq('post_id',postId).eq('user_id',currentUser.id).eq('reaction','apoyo').maybeSingle();if(readError){notify('Falta configurar las interacciones en Supabase.');return;}let result;if(existing)result=await supabaseClient.from('post_reactions').delete().eq('post_id',postId).eq('user_id',currentUser.id).eq('reaction','apoyo');else result=await supabaseClient.from('post_reactions').insert({post_id:postId,user_id:currentUser.id,reaction:'apoyo'});if(result.error){notify('No se pudo guardar tu reacción.');return;}await loadPosts();}
+});
+feed.addEventListener('submit',async e=>{
+ const formEl=e.target.closest('.comment-form');if(!formEl)return;e.preventDefault();if(!currentUser){notify('Inicia sesión para comentar.');return;}
+ const article=formEl.closest('.post'),postId=article.dataset.postId,content=new FormData(formEl).get('comment').toString().trim();if(!content)return;
+ const {error}=await supabaseClient.from('post_comments').insert({post_id:postId,author_id:currentUser.id,content});
+ if(error){notify('No se pudo guardar el comentario. Comprueba la configuración de interacciones en Supabase.');return;}await loadPosts();const updated=feed.querySelector('[data-post-id="'+postId+'"] .post-comments');if(updated)updated.hidden=false;
+});
+
 async function handleAuth(mode){
  const email=document.getElementById('authEmail').value.trim();
  const password=document.getElementById('authPassword').value;
@@ -386,10 +467,29 @@ async function loadAcademicEvents(){
  if(error){eventStatus.textContent=error.code==='42P01'?'Falta configurar la tabla del calendario en Supabase.':'No se pudo cargar el calendario: '+error.message;eventList.innerHTML='<div class="empty-state">El calendario está listo en la página, pero falta configurar su tabla en Supabase.</div>';return;}
  eventRows=data||[];renderAcademicEvents();
 }
+let calendarMonth=new Date();calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth(),1);
+function renderMonthCalendar(filtered){
+ const grid=document.getElementById('monthCalendar');if(!grid)return;
+ const year=calendarMonth.getFullYear(),month=calendarMonth.getMonth();
+ document.getElementById('monthTitle').textContent=new Intl.DateTimeFormat('es-CO',{month:'long',year:'numeric'}).format(calendarMonth);
+ const names=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];grid.innerHTML=names.map(n=>'<div class="month-day-name">'+n+'</div>').join('');
+ const first=(new Date(year,month,1).getDay()+6)%7,days=new Date(year,month+1,0).getDate(),prevDays=new Date(year,month,0).getDate(),today=new Date();
+ for(let cell=0;cell<42;cell++){
+  let d,other=false;if(cell<first){d=new Date(year,month-1,prevDays-first+cell+1);other=true;}else if(cell>=first+days){d=new Date(year,month+1,cell-first-days+1);other=true;}else d=new Date(year,month,cell-first+1);
+  const dayEvents=filtered.filter(e=>{const ed=new Date(e.event_date);return ed.getFullYear()===d.getFullYear()&&ed.getMonth()===d.getMonth()&&ed.getDate()===d.getDate();});
+  const isToday=d.toDateString()===today.toDateString();
+  const cellEl=document.createElement('div');cellEl.className='month-day'+(other?' muted':'')+(isToday?' today':'')+(dayEvents.length?' has-event':'');
+  cellEl.innerHTML='<span class="month-day-num">'+d.getDate()+'</span>'+dayEvents.slice(0,2).map(e=>'<span class="month-event-dot" title="'+escapeText(e.title)+'">• '+escapeText(e.title)+'</span>').join('')+(dayEvents.length>2?'<span class="month-event-dot">+'+(dayEvents.length-2)+' más</span>':'');
+  grid.appendChild(cellEl);
+ }
+}
+document.getElementById('monthPrev')?.addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);renderAcademicEvents();});
+document.getElementById('monthNext')?.addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);renderAcademicEvents();});
 function renderAcademicEvents(){
  const query=norm(document.getElementById('eventSearch').value.trim()),semester=document.getElementById('eventSemester').value,type=document.getElementById('eventType').value;
  const filtered=eventRows.filter(e=>(!query||norm([e.title,e.description,e.category].join(' ')).includes(query))&&(!semester||String(e.semester??'')===semester)&&(!type||e.category===type));
  eventStatus.textContent=filtered.length+' fecha(s) encontrada(s).';
+ renderMonthCalendar(filtered);
  eventList.innerHTML=filtered.length?filtered.map(e=>'<article class="event-item"><span class="event-date">📅 '+escapeText(prettyDate(e.event_date))+'</span><h3>'+escapeText(e.title)+'</h3><div class="event-meta">'+escapeText(e.category||'Evento')+' · '+escapeText(e.semester==null?'Todos los semestres':'Semestre '+e.semester)+'</div><p>'+escapeText(e.description||'Sin detalles adicionales.')+'</p></article>').join(''):'<div class="empty-state">No hay fechas que coincidan con esos filtros.</div>';
 }
 ['eventSearch','eventSemester','eventType'].forEach(id=>document.getElementById(id).addEventListener(id==='eventSearch'?'input':'change',renderAcademicEvents));
