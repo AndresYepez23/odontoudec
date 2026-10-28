@@ -9,6 +9,31 @@
 <style>
 :root{--purple:#32105f;--purple2:#54218b;--gold:#d7a928;--gold2:#f4d978;--ink:#211a2b;--muted:#706879;--paper:#fbfafc;--line:#ece6f2;--white:#fff;--green:#236b4c;--shadow:0 12px 35px rgba(40,16,74,.08)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--paper);line-height:1.55}a{color:inherit}button,input,select{font:inherit}.topbar{background:var(--purple);color:#fff;text-align:center;padding:8px 16px;font-size:.82rem}.topbar strong{color:var(--gold2)}header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.nav{max-width:1180px;margin:auto;padding:12px 22px;display:flex;align-items:center;gap:18px}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;min-width:max-content}.brand img{width:43px;height:43px;object-fit:contain}.brandmark{font-weight:900;font-size:1.15rem;letter-spacing:-.04em;color:var(--purple)}.brandmark span{color:#b88912}.navlinks{display:flex;align-items:center;gap:5px;margin-left:auto}.navlinks a{font-size:.9rem;text-decoration:none;color:#554b61;padding:9px 10px;border-radius:10px}.navlinks a:hover{background:#f3edf9;color:var(--purple)}.nav-cta,.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:12px;background:var(--purple);color:#fff;text-decoration:none;padding:11px 16px;font-weight:750;cursor:pointer}.nav-cta:hover,.btn:hover{background:var(--purple2)}.menu-btn{display:none;background:#f3edf9;color:var(--purple);border:0;border-radius:10px;padding:9px 12px}.container{max-width:1180px;margin:auto;padding:0 22px}.hero{padding:54px 0 35px;background:radial-gradient(ellipse at 83% 18%,rgba(215,169,40,.17),transparent 32%),linear-gradient(180deg,#fff 0%,#fbf8ff 100%)}.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;align-items:center;gap:40px}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--purple2);background:#f0e7fb;border:1px solid #e3d4f5;padding:6px 11px;border-radius:99px;font-size:.8rem;font-weight:800}.dot{width:7px;height:7px;border-radius:50%;background:#2c9467}.hero h1{font-size:clamp(2.45rem,5vw,4.5rem);line-height:1.02;letter-spacing:-.065em;color:var(--purple);margin:18px 0}.hero h1 em{font-style:normal;color:#b58a18}.hero p{font-size:1.08rem;color:#64596d;max-width:600px}.hero-actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:24px}.btn.secondary{background:#fff;color:var(--purple);border:1px solid #dfd3ec}.hero-seal{background:linear-gradient(145deg,#3b126a,#230844);border-radius:28px;padding:28px;box-shadow:0 22px 50px #32105f30;position:relative;overflow:hidden;color:#fff;text-align:center}.hero-seal:before{content:"";position:absolute;inset:10px;border:1px solid #d7a92880;border-radius:20px;pointer-events:none}.hero-seal img{position:relative;width:min(100%,290px);max-height:300px;object-fit:contain;filter:drop-shadow(0 8px 18px #0004)}.seal-caption{position:relative;margin-top:8px;color:#f6df91;font-size:.86rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800}.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:27px}.quick{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;text-decoration:none;box-shadow:0 5px 18px #32105f08;transition:transform .18s}.quick:hover{transform:translateY(-3px);border-color:#d5c2e8}.quick .ico{font-size:1.45rem}.quick strong{display:block;margin:8px 0 3px;color:var(--purple)}.quick small{color:var(--muted)}section{padding:55px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:23px}.kicker{font-size:.76rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase;color:#a47a12}.section-head h2{margin:5px 0 0;font-size:clamp(1.7rem,3vw,2.45rem);letter-spacing:-.045em;color:var(--purple);line-height:1.12}.section-head p{margin:7px 0 0;color:var(--muted);max-width:620px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 6px 24px #32105f05}.card h3{color:var(--purple);margin:9px 0 6px}.card p{color:var(--muted);margin:0 0 15px;font-size:.94rem}.tag{display:inline-block;background:#f3edf9;color:var(--purple2);font-size:.75rem;font-weight:800;padding:5px 9px;border-radius:8px}.text-link{color:var(--purple2);font-weight:800;text-decoration:none}.text-link:hover{text-decoration:underline}.resources{background:#f4eff9}.resource-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.resource{display:flex;align-items:flex-start;gap:15px;background:#fff;border:1px solid #e8dff0;padding:20px;border-radius:16px}.resource-icon{font-size:1.5rem;background:#f2e9fb;border-radius:12px;padding:10px}.resource h3{margin:0 0 4px;color:var(--purple)}.resource p{margin:0 0 12px;color:var(--muted);font-size:.92rem}.notice{background:#fff8e5;border:1px solid #f0d98b;color:#59471a;border-radius:14px;padding:14px 16px;font-size:.88rem;margin-top:18px}.searchbar{display:flex;gap:10px;margin:18px 0 15px}.searchbar input{flex:1;min-width:0;padding:12px 14px;border:1px solid #ded4e8;border-radius:12px;background:#fff;outline-color:var(--purple2)}.table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:16px}.price-table{width:100%;border-collapse:collapse;min-width:440px}.price-table th,.price-table td{text-align:left;padding:14px 16px;border-bottom:1px solid #f0ebf4}.price-table th{background:#f7f2fb;color:var(--purple);font-size:.85rem}.price-table td:last-child{font-weight:850;color:var(--green);white-space:nowrap}.price-table tr:last-child td{border-bottom:0}.no-results{text-align:center;color:var(--muted);padding:24px;display:none}.community-box{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}.community-panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.community-panel h3{color:var(--purple);margin-top:0}.community-panel input,.community-panel textarea,.community-panel select{width:100%;padding:11px 12px;border:1px solid #ded4e8;border-radius:10px;margin:5px 0 12px;background:#fff}.community-panel textarea{min-height:90px;resize:vertical}.feed{display:grid;gap:12px}.post{background:#fff;border:1px solid var(--line);border-radius:15px;padding:17px}.post-top{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:.78rem}.post h4{margin:8px 0 5px;color:var(--purple)}.post p{margin:0;white-space:pre-wrap}.empty{color:var(--muted);border:1px dashed #d8c9e6;border-radius:14px;padding:20px;text-align:center}.safety{background:linear-gradient(130deg,#2a0d4e,#4c176d);color:#fff}.safety .section-head h2{color:#fff}.safety .section-head p{color:#e0d4eb}.safety-grid{display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:center}.safety-box{border:1px solid #ffffff35;background:#ffffff0d;padding:22px;border-radius:18px}.safety-box h3{color:#f7df8b;margin-top:0}.safety-box p,.safety-box li{color:#eee5f6}.safety-box ul{padding-left:20px}.safety-box a{color:#f7df8b}.footer{background:#1c092f;color:#e7dff0;padding:32px 0}.footer-inner{display:flex;align-items:center;justify-content:space-between;gap:20px}.footer strong{color:#f4d978}.footer small{color:#bdb0ca}.footer-links{display:flex;gap:15px;flex-wrap:wrap}.footer a{font-size:.86rem;color:#eee5f6}.disclaimer{font-size:.78rem;color:#a89bb7;margin-top:14px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#241039;color:#fff;padding:12px 17px;border-radius:12px;box-shadow:var(--shadow);display:none;z-index:30;max-width:90vw}.hidden{display:none!important}
+
+/* Memoria estudiantil: galería compacta y adaptable */
+.memory-section{background:linear-gradient(180deg,#fff 0%,#f7f2fb 100%)}
+.memory-intro{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:center}
+.memory-copy{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 6px 24px #32105f08}
+.memory-copy p{color:var(--muted);margin:0 0 12px}
+.memory-copy p:last-child{margin-bottom:0}
+.memory-note{display:flex;gap:10px;align-items:flex-start;border-left:3px solid var(--gold);padding:10px 0 10px 13px;color:var(--muted);font-size:.9rem}
+.memory-gallery-wrap{min-width:0}
+.memory-gallery{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:4px 2px 14px;scrollbar-color:#c7b3dc #eee7f5;scrollbar-width:thin}
+.memory-slide{flex:0 0 min(76%,300px);scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 6px 22px #32105f0c}
+.memory-slide button{display:block;width:100%;padding:0;border:0;background:#f0eaf6;cursor:zoom-in}
+.memory-slide img{display:block;width:100%;height:220px;object-fit:cover;transition:transform .25s}
+.memory-slide button:hover img{transform:scale(1.025)}
+.memory-caption{padding:12px 14px;color:var(--muted);font-size:.84rem}
+.memory-controls{display:flex;justify-content:flex-end;gap:8px;margin:0 0 8px}
+.memory-controls button{border:1px solid #dfd3ec;background:#fff;color:var(--purple);border-radius:10px;padding:8px 12px;font-weight:800;cursor:pointer}
+.memory-controls button:hover{background:#f3edf9}
+.memory-lightbox{position:fixed;inset:0;z-index:100;background:#160a22eF;display:none;align-items:center;justify-content:center;padding:24px}
+.memory-lightbox.open{display:flex}
+.memory-lightbox img{max-width:min(94vw,1100px);max-height:84vh;object-fit:contain;border-radius:12px}
+.memory-lightbox-close{position:absolute;right:18px;top:18px;border:1px solid #ffffff55;background:#32105f;color:#fff;border-radius:99px;padding:10px 14px;cursor:pointer}
+@media(max-width:850px){.memory-intro{grid-template-columns:1fr}.memory-slide{flex-basis:min(78%,290px)}}
+@media(max-width:480px){.memory-copy{padding:18px}.memory-slide img{height:190px}.memory-slide{flex-basis:84%}}
+
 @media(max-width:850px){.navlinks{display:none;position:absolute;left:12px;right:12px;top:68px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:15px;padding:10px;flex-direction:column;align-items:stretch}.navlinks.open{display:flex}.navlinks a{padding:12px}.menu-btn{display:block;margin-left:auto}.nav-cta{display:none}.hero-grid{grid-template-columns:1fr}.hero-seal{max-width:440px;margin:auto;width:100%}.quick-grid{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr}.resource-grid{grid-template-columns:1fr}.community-box,.safety-grid{grid-template-columns:1fr}.section-head{align-items:start;flex-direction:column}.footer-inner{align-items:flex-start;flex-direction:column}}
 @media(max-width:480px){.container{padding:0 16px}.nav{padding:10px 16px}.hero{padding-top:35px}.hero-seal{padding:20px}.quick{padding:14px}.quick small{font-size:.78rem}.hero-actions .btn{flex:1}.resource{padding:15px}.section-head h2{font-size:1.85rem}}
 </style>
@@ -118,9 +143,11 @@
    <h3>Acceso de estudiantes</h3>
    <div id="authStatus" role="status" style="margin-bottom:12px;color:#64596d">No has iniciado sesión.</div>
    <form id="authForm">
-    <label for="authName">Nombre o alias (para crear cuenta)</label><input id="authName" maxlength="60" placeholder="Ej. Estudiante de Odontología">
-    <label for="authEmail">Correo electrónico</label><input id="authEmail" type="email" autocomplete="email" placeholder="tu-correo@ejemplo.com" required>
-    <label for="authPassword">Contraseña (mínimo 6 caracteres)</label><input id="authPassword" type="password" minlength="6" autocomplete="current-password" placeholder="Tu contraseña" required>
+    <div id="authFields">
+     <label for="authName">Nombre o alias (para crear cuenta)</label><input id="authName" maxlength="60" placeholder="Ej. Estudiante de Odontología">
+     <label for="authEmail">Correo electrónico</label><input id="authEmail" type="email" autocomplete="email" placeholder="tu-correo@ejemplo.com" required>
+     <label for="authPassword">Contraseña (mínimo 6 caracteres)</label><input id="authPassword" type="password" minlength="6" autocomplete="current-password" placeholder="Tu contraseña" required>
+    </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" id="signInBtn" type="button">Iniciar sesión</button><button class="btn secondary" id="signUpBtn" type="button">Crear cuenta</button><button class="btn secondary hidden" id="signOutBtn" type="button">Cerrar sesión</button></div>
    </form>
    <p class="disclaimer">Usa un correo al que tengas acceso. Si Supabase solicita confirmar el correo, revisa tu bandeja de entrada. No uses esta comunidad para compartir datos identificables de pacientes.</p>
@@ -140,6 +167,36 @@
   </div>
  </div>
 </section>
+
+<section id="memoria-estudiantil" class="memory-section">
+ <div class="container">
+  <div class="section-head"><div><span class="kicker">Nuestra memoria</span><h2>Cuando decidimos alzar la voz</h2><p>Un momento de participación estudiantil que abrió conversaciones necesarias y sigue impulsando cambios.</p></div></div>
+  <div class="memory-intro">
+   <div class="memory-copy">
+    <p>En nuestra comunidad universitaria, escuchar, acompañar y actuar también hace parte de nuestra formación. Esta movilización representó un paso importante para visibilizar situaciones que durante mucho tiempo permanecieron en silencio y promover cambios en favor del respeto, la convivencia y la seguridad de los estudiantes.</p>
+    <p>Hoy recordamos este momento como una muestra de unión, valentía y compromiso colectivo. El camino continúa: seguimos trabajando por una universidad donde cada persona pueda expresarse, ser escuchada y desarrollarse sin miedo.</p>
+    <div class="memory-note">Esta reseña busca conservar la memoria colectiva con respeto por la privacidad y la dignidad de todas las personas.</div>
+   </div>
+   <div class="memory-gallery-wrap">
+    <div class="memory-controls"><button type="button" id="memoryPrev" aria-label="Fotografías anteriores">←</button><button type="button" id="memoryNext" aria-label="Fotografías siguientes">→</button></div>
+    <div class="memory-gallery" id="memoryGallery" aria-label="Galería de fotografías de la movilización"><article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/MyjWbcgT/IMG-3129.jpg" aria-label="Ampliar fotografía 1"><img src="https://i.ibb.co/MyjWbcgT/IMG-3129.jpg" alt="Registro fotográfico de la movilización estudiantil" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 01 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/hxp8qW1p/IMG-3110.jpg" aria-label="Ampliar fotografía 2"><img src="https://i.ibb.co/hxp8qW1p/IMG-3110.jpg" alt="Memoria de una jornada de participación estudiantil" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 02 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/1tWMCKqQ/IMG-3109.jpg" aria-label="Ampliar fotografía 3"><img src="https://i.ibb.co/1tWMCKqQ/IMG-3109.jpg" alt="Estudiantes reunidos durante la movilización" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 03 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/NddM5P5L/IMG-3108.jpg" aria-label="Ampliar fotografía 4"><img src="https://i.ibb.co/NddM5P5L/IMG-3108.jpg" alt="Registro de la jornada universitaria" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 04 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/YCPMwZ3/IMG-3107.jpg" aria-label="Ampliar fotografía 5"><img src="https://i.ibb.co/YCPMwZ3/IMG-3107.jpg" alt="Una imagen de la movilización" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 05 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/hJSxz1jj/IMG-3106.jpg" aria-label="Ampliar fotografía 6"><img src="https://i.ibb.co/hJSxz1jj/IMG-3106.jpg" alt="Participación de la comunidad estudiantil" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 06 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/WhjqtDT/IMG-3105.jpg" aria-label="Ampliar fotografía 7"><img src="https://i.ibb.co/WhjqtDT/IMG-3105.jpg" alt="Memoria visual de la jornada" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 07 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/j9wrpFFG/IMG-3103.jpg" aria-label="Ampliar fotografía 8"><img src="https://i.ibb.co/j9wrpFFG/IMG-3103.jpg" alt="Registro de la movilización" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 08 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/pjb8XyWf/IMG-3096.jpg" aria-label="Ampliar fotografía 9"><img src="https://i.ibb.co/pjb8XyWf/IMG-3096.jpg" alt="Una escena de la jornada estudiantil" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 09 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/sdKkgpCj/IMG-3095.jpg" aria-label="Ampliar fotografía 10"><img src="https://i.ibb.co/sdKkgpCj/IMG-3095.jpg" alt="Participación y expresión colectiva" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 10 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/PGWZxnQJ/IMG-3089.jpg" aria-label="Ampliar fotografía 11"><img src="https://i.ibb.co/PGWZxnQJ/IMG-3089.jpg" alt="Registro de la comunidad reunida" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 11 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/ynj1Mfq7/IMG-3088.jpg" aria-label="Ampliar fotografía 12"><img src="https://i.ibb.co/ynj1Mfq7/IMG-3088.jpg" alt="Memoria estudiantil" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 12 / 13</div></article>
+<article class="memory-slide"><button type="button" class="memory-photo" data-full="https://i.ibb.co/JFsbN2Ts/IMG-3086.jpg" aria-label="Ampliar fotografía 13"><img src="https://i.ibb.co/JFsbN2Ts/IMG-3086.jpg" alt="Cierre del registro fotográfico" loading="lazy" decoding="async"></button><div class="memory-caption">Memoria estudiantil · 13 / 13</div></article></div>
+   </div>
+  </div>
+ </div>
+</section>
+<div class="memory-lightbox" id="memoryLightbox" role="dialog" aria-modal="true" aria-label="Fotografía ampliada"><button type="button" class="memory-lightbox-close" id="memoryLightboxClose">Cerrar ✕</button><img id="memoryLightboxImage" alt="Fotografía ampliada de la memoria estudiantil"></div>
 
 <section class="safety" id="convivencia">
  <div class="container">
@@ -172,6 +229,7 @@ function safe(s){return String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 function setAuthUI(){
  const logged=!!currentUser;
  authStatus.textContent=logged?`Sesión iniciada como ${currentUser.email}`:'No has iniciado sesión.';
+ document.getElementById('authFields').classList.toggle('hidden',logged);
  document.getElementById('signInBtn').classList.toggle('hidden',logged);
  document.getElementById('signUpBtn').classList.toggle('hidden',logged);
  document.getElementById('signOutBtn').classList.toggle('hidden',!logged);
@@ -183,15 +241,20 @@ async function ensureProfile(user){
  if(error) throw error;
  if(!data){const {error:insertError}=await supabaseClient.from('profiles').insert({id:user.id,display_name:displayName});if(insertError) throw insertError;}
 }
+let postsLoadVersion=0;
 async function loadPosts(){
+ const version=++postsLoadVersion;
  const {data,error}=await supabaseClient.from('posts').select('id,author_id,title,content,category,created_at').order('created_at',{ascending:false}).limit(50);
+ if(version!==postsLoadVersion)return;
  if(error){notify('No pudimos cargar las publicaciones: '+error.message);return;}
- feed.innerHTML='';
  if(!data || data.length===0){feed.innerHTML='<article class="empty">Todavía no hay publicaciones. ¡Puedes iniciar la conversación!</article>';return;}
  const ids=[...new Set(data.map(p=>p.author_id))];
  const {data:profiles}=await supabaseClient.from('profiles').select('id,display_name').in('id',ids);
+ if(version!==postsLoadVersion)return;
  const names=new Map((profiles||[]).map(p=>[p.id,p.display_name]));
- data.forEach(post=>{const article=document.createElement('article');article.className='post';const date=new Date(post.created_at).toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});article.innerHTML='<div class="post-top"><span>'+safe(names.get(post.author_id)||'Estudiante')+'</span><span>'+safe(post.category)+' · '+safe(date)+'</span></div><h4>'+safe(post.title)+'</h4><p>'+safe(post.content)+'</p>';feed.appendChild(article);});
+ const fragment=document.createDocumentFragment();
+ data.forEach(post=>{const article=document.createElement('article');article.className='post';article.dataset.postId=post.id;const date=new Date(post.created_at).toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});article.innerHTML='<div class="post-top"><span>'+safe(names.get(post.author_id)||'Estudiante')+'</span><span>'+safe(post.category)+' · '+safe(date)+'</span></div><h4>'+safe(post.title)+'</h4><p>'+safe(post.content)+'</p>';fragment.appendChild(article);});
+ if(version===postsLoadVersion){feed.replaceChildren(fragment);}
 }
 async function handleAuth(mode){
  const email=document.getElementById('authEmail').value.trim();
@@ -212,9 +275,28 @@ document.getElementById('signInBtn').addEventListener('click',()=>handleAuth('si
 document.getElementById('signUpBtn').addEventListener('click',()=>handleAuth('signup').catch(e=>notify(e.message)));
 document.getElementById('signOutBtn').addEventListener('click',async()=>{const {error}=await supabaseClient.auth.signOut();if(error){notify(error.message);return;}currentUser=null;setAuthUI();notify('Sesión cerrada.');});
 form.addEventListener('submit',async e=>{e.preventDefault();if(!currentUser){notify('Inicia sesión para publicar.');return;}const category=document.getElementById('postCategory').value,title=document.getElementById('postTitle').value.trim(),content=document.getElementById('postBody').value.trim();if(!title||!content)return;const {error}=await supabaseClient.from('posts').insert({author_id:currentUser.id,title,content,category});if(error){notify('No se pudo publicar: '+error.message);return;}form.reset();await loadPosts();notify('¡Publicación compartida con la comunidad!');});
-// Mantener los cambios de sesión sincronizados y cargar publicaciones públicas.
-supabaseClient.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;setAuthUI();loadPosts();});
+// Mantener los cambios de sesión sincronizados. El control de versión impide que
+// consultas concurrentes vuelvan a pintar la misma lista y creen duplicados visuales.
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+ currentUser=session?.user||null;
+ setAuthUI();
+ if(event!=='INITIAL_SESSION') loadPosts();
+});
 (async()=>{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;setAuthUI();await loadPosts();})();
+// Galería de memoria estudiantil: desplazamiento horizontal y ampliación accesible.
+const memoryGallery=document.getElementById('memoryGallery');
+document.getElementById('memoryPrev').addEventListener('click',()=>memoryGallery.scrollBy({left:-320,behavior:'smooth'}));
+document.getElementById('memoryNext').addEventListener('click',()=>memoryGallery.scrollBy({left:320,behavior:'smooth'}));
+const memoryLightbox=document.getElementById('memoryLightbox'),memoryLightboxImage=document.getElementById('memoryLightboxImage');
+document.querySelectorAll('.memory-photo').forEach(button=>button.addEventListener('click',()=>{
+ memoryLightboxImage.src=button.dataset.full;
+ memoryLightbox.classList.add('open');
+ document.getElementById('memoryLightboxClose').focus();
+}));
+function closeMemoryLightbox(){memoryLightbox.classList.remove('open');memoryLightboxImage.removeAttribute('src');}
+document.getElementById('memoryLightboxClose').addEventListener('click',closeMemoryLightbox);
+memoryLightbox.addEventListener('click',event=>{if(event.target===memoryLightbox)closeMemoryLightbox();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeMemoryLightbox();});
 document.getElementById('clearPosts').classList.add('hidden');
 </script>
 </body>
