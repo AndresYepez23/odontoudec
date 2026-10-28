@@ -302,10 +302,13 @@
    <div><div class="feed" id="feed"><article class="post"><div class="post-top"><span>OdontoUdeC</span><span>Bienvenida</span></div><h4>Construyamos este espacio entre todos</h4><p>¿Qué recurso, enlace o información te gustaría encontrar aquí? Comparte ideas sin publicar datos privados ni información clínica identificable.</p></article></div><button class="btn secondary" id="clearPosts" style="margin-top:12px">Borrar publicaciones de prueba</button></div>
   <div id="adminPanel" class="community-panel hidden" style="margin-top:22px;border:2px solid var(--gold)">
    <h3>Panel de administrador</h3>
-   <p>Desde aquí puedes revisar reportes y moderar publicaciones de la comunidad.</p>
+   <p>Administra publicaciones y revisa reportes de la comunidad.</p>
    <p id="adminStatus" role="status">Comprobando permisos…</p>
+   <h4>Publicaciones de la comunidad</h4>
+   <div id="adminPosts"></div>
+   <h4 style="margin-top:22px">Reportes recibidos</h4>
    <div id="adminReports"></div>
-   <button type="button" class="btn secondary" id="refreshAdmin">Actualizar reportes</button>
+   <button type="button" class="btn secondary" id="refreshAdmin">Actualizar panel</button>
   </div>
   </div>
  </div>
@@ -393,35 +396,39 @@ async function checkAdmin(){
  if(error){panel.classList.add('hidden');console.info('No se pudo comprobar admin:',error.message);return;}
  panel.classList.toggle('hidden',data!==true);
  status.textContent=data===true?'Administrador activo.':'Esta cuenta no tiene rol de administrador.';
- if(data===true) await loadAdminReports();
+ if(data===true) await loadAdminPanel();
 }
-async function loadAdminReports(){
- const status=document.getElementById('adminStatus'),box=document.getElementById('adminReports');
- status.textContent='Cargando reportes…';box.innerHTML='';
- const {data:reports,error}=await supabaseClient.from('content_reports').select('id,post_id,reporter_id,reason,created_at').order('created_at',{ascending:false}).limit(100);
- if(error){status.textContent='No se pudieron cargar los reportes. Comprueba que ejecutaste el SQL de moderación. Detalle: '+error.message;return;}
- if(!reports||reports.length===0){status.textContent='Administrador activo. No hay reportes por revisar.';return;}
- status.textContent='Administrador activo. Reportes por revisar: '+reports.length;
- for(const report of reports){
-  const {data:post,error:postError}=await supabaseClient.from('posts').select('id,title,content,author_id').eq('id',report.post_id).maybeSingle();
-  const card=document.createElement('article');card.className='post';card.style.marginTop='12px';
-  card.innerHTML='<div class="post-top"><span>Reporte #'+safe(report.id)+'</span><span>'+safe(new Date(report.created_at).toLocaleString('es-CO'))+'</span></div><p><strong>Motivo:</strong> '+safe(report.reason)+'</p><p><strong>ID de publicación:</strong> '+safe(report.post_id)+'</p><p><strong>Contenido:</strong> '+safe(post?(post.title+' — '+post.content).slice(0,700):'(la publicación ya no existe o no se pudo consultar)')+'</p>';
-  if(post&&!postError){
-   const remove=document.createElement('button');remove.className='btn secondary';remove.type='button';remove.textContent='Eliminar publicación';remove.addEventListener('click',async()=>{
-    if(!confirm('¿Seguro que quieres eliminar esta publicación? Esta acción no se puede deshacer.'))return;
-    const {error:delError}=await supabaseClient.from('posts').delete().eq('id',post.id);
-    if(delError){notify('No se pudo eliminar. Revisa la política de administradores en Supabase: '+delError.message);return;}
-    notify('Publicación eliminada.');await loadAdminReports();await loadPosts();
-   });card.appendChild(remove);
-  }
-  const close=document.createElement('button');close.className='btn secondary';close.type='button';close.style.marginLeft='8px';close.textContent='Cerrar reporte';close.addEventListener('click',async()=>{
-   const {error:closeError}=await supabaseClient.from('content_reports').delete().eq('id',report.id);
-   if(closeError){notify('No se pudo cerrar el reporte. Revisa la política en Supabase: '+closeError.message);return;}
-   notify('Reporte cerrado.');await loadAdminReports();
-  });card.appendChild(close);box.appendChild(card);
+async function loadAdminPanel(){
+ const status=document.getElementById('adminStatus'),postsBox=document.getElementById('adminPosts'),reportsBox=document.getElementById('adminReports');
+ status.textContent='Cargando publicaciones y reportes…';postsBox.innerHTML='';reportsBox.innerHTML='';
+ const {data:posts,error:postsError}=await supabaseClient.from('posts').select('id,title,content,category,author_id,created_at').order('created_at',{ascending:false}).limit(100);
+ if(postsError){status.textContent='No se pudieron cargar publicaciones: '+postsError.message;return;}
+ if(!posts||!posts.length)postsBox.innerHTML='<p>No hay publicaciones para administrar.</p>';
+ for(const post of (posts||[])){
+  const card=document.createElement('article');card.className='post';card.style.marginTop='10px';
+  card.innerHTML='<div class="post-top"><span>'+safe(post.category||'Publicación')+'</span><span>'+safe(new Date(post.created_at).toLocaleString('es-CO'))+'</span></div><h4>'+safe(post.title||'Sin título')+'</h4><p>'+safe((post.content||'').slice(0,700))+'</p><small>ID: '+safe(post.id)+'</small>';
+  const del=document.createElement('button');del.type='button';del.className='btn secondary';del.style.marginTop='10px';del.textContent='Eliminar publicación';del.addEventListener('click',async()=>{
+   if(!confirm('¿Eliminar esta publicación de forma permanente?'))return;
+   const {error}=await supabaseClient.from('posts').delete().eq('id',post.id);
+   if(error){notify('No se pudo eliminar. Verifica la política Admins delete posts en Supabase. '+error.message);return;}
+   notify('Publicación eliminada.');await loadAdminPanel();await loadPosts();
+  });card.appendChild(del);postsBox.appendChild(card);
  }
+ const {data:reports,error:reportsError}=await supabaseClient.from('content_reports').select('id,post_id,reporter_id,reason,created_at').order('created_at',{ascending:false}).limit(100);
+ if(reportsError){reportsBox.innerHTML='<p>No se pudieron cargar reportes. Verifica las políticas de content_reports en Supabase. '+safe(reportsError.message)+'</p>';status.textContent='Administrador activo; revisa la configuración de reportes.';return;}
+ if(!reports||!reports.length)reportsBox.innerHTML='<p>No hay reportes pendientes.</p>';
+ for(const report of (reports||[])){
+  const card=document.createElement('article');card.className='post';card.style.marginTop='10px';
+  card.innerHTML='<div class="post-top"><span>Reporte #'+safe(report.id)+'</span><span>'+safe(new Date(report.created_at).toLocaleString('es-CO'))+'</span></div><p><strong>Motivo:</strong> '+safe(report.reason)+'</p><p><strong>ID publicación:</strong> '+safe(report.post_id)+'</p>';
+  const close=document.createElement('button');close.type='button';close.className='btn secondary';close.textContent='Cerrar reporte';close.addEventListener('click',async()=>{
+   const {error}=await supabaseClient.from('content_reports').delete().eq('id',report.id);
+   if(error){notify('No se pudo cerrar el reporte. Verifica la política Admins close reports en Supabase. '+error.message);return;}
+   notify('Reporte cerrado.');await loadAdminPanel();
+  });card.appendChild(close);reportsBox.appendChild(card);
+ }
+ status.textContent='Administrador activo. Publicaciones: '+(posts||[]).length+' · Reportes: '+(reports||[]).length+'.';
 }
-document.getElementById('refreshAdmin').addEventListener('click',loadAdminReports);
+document.getElementById('refreshAdmin').addEventListener('click',loadAdminPanel);
 
 let postsLoadVersion=0;
 async function loadPosts(){
