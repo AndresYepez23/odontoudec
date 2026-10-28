@@ -56,6 +56,18 @@
 .empty-state{padding:22px;border:1px dashed #d6c9e4;border-radius:14px;color:var(--muted);text-align:center;grid-column:1/-1}
 @media(max-width:700px){.planner-toolbar,.library-toolbar,.planner-form{grid-template-columns:1fr}.planner-list,.library-list{grid-template-columns:1fr}.planner-form .field-full{grid-column:auto}.planner-panel{padding:15px}}
 
+
+/* Carpetas visuales de la biblioteca por semestre */
+.semester-folders{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:20px 0}
+.semester-folder{display:flex;flex-direction:column;align-items:flex-start;gap:8px;width:100%;min-height:112px;padding:16px 14px;border:1px solid #e5d9ef;border-radius:14px;background:linear-gradient(145deg,#fff 15%,#f8f2fc 100%);color:var(--ink);text-align:left;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s}
+.semester-folder:hover{transform:translateY(-2px);border-color:var(--purple);box-shadow:0 8px 22px rgba(71,37,105,.10)}
+.semester-folder.active{border:2px solid var(--purple);background:#f0e6f8;box-shadow:0 0 0 3px rgba(103,61,145,.08)}
+.semester-folder .folder-icon{font-size:1.7rem;line-height:1}
+.semester-folder strong{font-size:.94rem}
+.semester-folder small{font-size:.78rem;color:var(--muted)}
+@media(max-width:800px){.semester-folders{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:480px){.semester-folders{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.semester-folder{min-height:100px;padding:13px 11px}}
+
 </style>
 </head>
 <body>
@@ -127,6 +139,20 @@
   <div class="section-head"><div><span class="kicker">Estudia en comunidad</span><h2>Biblioteca por semestres</h2><p>Encuentra apuntes, guías, videos y fuentes académicas organizadas por semestre y asignatura.</p></div></div>
   <div class="planner-panel">
    <div class="feature-note">Comparte enlaces a materiales que tengas autorización para distribuir. Evita subir historias clínicas, datos personales o material protegido que no puedas compartir.</div>
+   <h3 style="margin:22px 0 4px">Explora por semestre</h3>
+   <p class="event-meta">Selecciona una carpeta para ver los materiales de ese semestre.</p>
+   <div class="semester-folders" id="semesterFolders" aria-label="Carpetas de biblioteca por semestre">
+    <button type="button" class="semester-folder" data-semester="1" aria-pressed="false"><span class="folder-icon" aria-hidden="true">📁</span><strong>1.º semestre</strong><small>Ver recursos</small></button>
+    <button type="button" class="semester-folder" data-semester="2" aria-pressed="false"><span class="folder-icon" aria-hidden="true">📁</span><strong>2.º semestre</strong><small>Ver recursos</small></button>
+    <button type="button" class="semester-folder" data-semester="3" aria-pressed="false"><span class="folder-icon" aria-hidden="true">📁</span><strong>3.º semestre</strong><small>Ver recursos</small></button>
+    <button type="button" class="semester-folder" data-semester="4" aria-pressed="false"><span class="folder-icon" aria-hidden="true">📁</span><strong>4.º semestre</strong><small>Ver recursos</small></button>
+    <button type="button" class="semester-folder" data-semester="5" aria-pressed="false"><span class="folder-icon" aria-hidden="true">📁</span><strong>5.º semestre</strong><small>Ver recursos</small></button>
+    <button type="button" class="semester-folder" data-semester="6" aria-pressed="false"><span class="folder-icon" aria-hidden="true">📁</span><strong>6.º semestre</strong><small>Ver recursos</small></button>
+    <button type="button" class="semester-folder" data-semester="7" aria-pressed="false"><span class="folder-icon" aria-hidden="true">📁</span><strong>7.º semestre</strong><small>Ver recursos</small></button>
+    <button type="button" class="semester-folder" data-semester="8" aria-pressed="false"><span class="folder-icon" aria-hidden="true">📁</span><strong>8.º semestre</strong><small>Ver recursos</small></button>
+    <button type="button" class="semester-folder" data-semester="9" aria-pressed="false"><span class="folder-icon" aria-hidden="true">📁</span><strong>9.º semestre</strong><small>Ver recursos</small></button>
+    <button type="button" class="semester-folder" data-semester="10" aria-pressed="false"><span class="folder-icon" aria-hidden="true">📁</span><strong>10.º semestre</strong><small>Ver recursos</small></button>
+   </div>
    <div class="library-toolbar">
     <input id="resourceSearch" type="search" placeholder="Buscar materia o recurso" aria-label="Buscar recursos académicos">
     <select id="resourceSemester" aria-label="Filtrar recursos por semestre"><option value="">Todos los semestres</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option value="General">General</option></select>
@@ -385,6 +411,18 @@ function renderAcademicResources(){
  resourceList.innerHTML=filtered.length?filtered.map(r=>'<article class="library-item"><div class="library-meta">📚 '+escapeText(r.semester==='General'?'Recurso general':'Semestre '+r.semester)+' · '+escapeText(r.resource_type||'Material')+'</div><h3>'+escapeText(r.title)+'</h3><div class="event-meta">'+escapeText(r.subject)+'</div><p>'+escapeText(r.description||'Recurso compartido por la comunidad.')+'</p><a class="text-link" href="'+escapeText(r.url)+'" target="_blank" rel="noopener noreferrer">Abrir recurso ↗</a></article>').join(''):'<div class="empty-state">Todavía no hay recursos que coincidan con esos filtros. ¡Puedes compartir el primero!</div>';
 }
 ['resourceSearch','resourceSemester','resourceType'].forEach(id=>document.getElementById(id).addEventListener(id==='resourceSearch'?'input':'change',renderAcademicResources));
+document.querySelectorAll('.semester-folder').forEach(folder=>folder.addEventListener('click',()=>{
+ const selected=folder.dataset.semester;
+ document.getElementById('resourceSemester').value=selected;
+ document.querySelectorAll('.semester-folder').forEach(item=>{
+  const active=item===folder;
+  item.classList.toggle('active',active);
+  item.setAttribute('aria-pressed',String(active));
+ });
+ renderAcademicResources();
+ document.getElementById('resourceList').scrollIntoView({behavior:'smooth',block:'nearest'});
+}));
+
 document.getElementById('resourceForm').addEventListener('submit',async e=>{
  e.preventDefault();if(!currentUser){notify('Inicia sesión para compartir un recurso.');return;}
  const title=document.getElementById('resourceTitle').value.trim(),subject=document.getElementById('resourceSubject').value.trim(),semester=document.getElementById('resourceSemForm').value,resource_type=document.getElementById('resourceCategory').value,url=document.getElementById('resourceUrl').value.trim(),description=document.getElementById('resourceDescription').value.trim();
