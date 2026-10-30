@@ -6,7 +6,7 @@ Esta mejora se prepara en una rama separada. Antes de publicarla, completa estos
 
 1. Abre el proyecto de Supabase de OdontoUdeC.
 2. Entra en **SQL Editor**.
-3. Abre el archivo \`supabase/migrations/20261030000000_usernames_private_messaging.sql\` de esta rama.
+3. Abre el archivo `supabase/migrations/20261030000000_usernames_private_messaging.sql` de esta rama.
 4. Copia y ejecuta el SQL completo.
 
 La migración:
@@ -20,17 +20,17 @@ La migración:
 
 En **Site configuration → Environment variables**, agrega:
 
-- \`SUPABASE_URL\`: URL del proyecto Supabase.
-- \`SUPABASE_ANON_KEY\`: la clave pública/publishable del proyecto (la misma que usa el frontend).
-- \`SUPABASE_SERVICE_ROLE_KEY\`: clave secreta service_role del proyecto.
+- `SUPABASE_URL`: URL del proyecto Supabase.
+- `SUPABASE_ANON_KEY`: la clave pública/publishable del proyecto (la misma que usa el frontend).
+- `SUPABASE_SERVICE_ROLE_KEY`: clave secreta service_role del proyecto.
 
 **Importante:** la clave service_role es privada. Solo se configura en Netlify y nunca debe agregarse al HTML, al repositorio ni compartirse públicamente.
 
 ## 3. Publicar
 
 Después de ejecutar el SQL y guardar las variables:
-1. Revisa el pull request de la rama \`feat/auth-private-messaging\`.
-2. Combina el PR con \`main\` cuando estés conforme.
+1. Revisa el pull request de la rama `feat/auth-private-messaging`.
+2. Combina el PR con `main` cuando estés conforme.
 3. Netlify desplegará la versión nueva si está conectado a la rama principal.
 
 ## 4. Cuentas existentes
