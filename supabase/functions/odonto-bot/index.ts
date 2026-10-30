@@ -23,8 +23,8 @@ Deno.serve(async (req) => {
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  const openAiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!supabaseUrl || !anonKey || !openAiKey) {
+  const groqApiKey = Deno.env.get("GROQ_API_KEY");
+  if (!supabaseUrl || !anonKey || !groqApiKey) {
     return json({ error: "OdontoBot aún no está configurado en el servidor." }, 503);
   }
 
@@ -63,14 +63,14 @@ No solicites nombres, documentos, fotografías identificables ni otros datos per
 Para casos clínicos simulados, aclara que son educativos y razona con prudencia. No indiques tratamientos invasivos para ejecutar sin supervisión profesional.`;
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${openAiKey}`,
+        "Authorization": `Bearer ${groqApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "openai/gpt-oss-120b",
         temperature: 0.35,
         max_tokens: 900,
         messages: [{ role: "system", content: systemPrompt }, ...cleanMessages],
@@ -79,7 +79,7 @@ Para casos clínicos simulados, aclara que son educativos y razona con prudencia
 
     const data = await response.json();
     if (!response.ok) {
-      console.error("OpenAI request failed", response.status, data?.error?.type);
+      console.error("Groq request failed", response.status, data?.error?.type);
       return json({ error: "No pude generar una respuesta en este momento. Inténtalo de nuevo." }, 502);
     }
 
