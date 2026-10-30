@@ -139,7 +139,7 @@ $$;
 
 create or replace function public.get_trivia_leaderboard(limit_count integer default 20)
 returns table (
-  position bigint,
+  rank_position bigint,
   user_id uuid,
   display_name text,
   username text,
@@ -152,7 +152,7 @@ security definer
 set search_path = public
 as $$
   select
-    row_number() over (order by sum(a.score) desc, max(a.score) desc, min(a.created_at) asc) as position,
+    row_number() over (order by sum(a.score) desc, max(a.score) desc, min(a.created_at) asc) as rank_position,
     p.id as user_id,
     coalesce(nullif(p.display_name, ''), 'Estudiante') as display_name,
     p.username,
