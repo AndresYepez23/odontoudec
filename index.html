@@ -98,6 +98,7 @@ async function handleAuth(mode){
  if(!identifier||!password){notify('Escribe tu correo o usuario y contraseña.');return;}
  let result;
  if(mode==='signup'){
+  if(password.length<6){notify('La contraseña debe tener al menos 6 caracteres.');return;}
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){notify('Escribe un correo electrónico válido.');return;}
   if(displayName.length<2){notify('Escribe un nombre o alias de al menos 2 caracteres.');return;}
   if(!/^[a-z0-9._-]{3,24}$/.test(username)){notify('El nombre de usuario debe tener entre 3 y 24 caracteres: letras, números, punto, guion o guion bajo.');return;}
@@ -112,6 +113,7 @@ async function handleAuth(mode){
    result=await supabaseClient.auth.setSession(payload.session);
   }catch(error){notify(error.message||'No se pudo iniciar sesión.');return;}
  }
+ if(mode==='signup' && result.data?.user && Array.isArray(result.data.user.identities) && result.data.user.identities.length===0){notify('Ese correo ya tiene una cuenta. Inicia sesión en lugar de registrarte de nuevo.');return;}
  if(result.error){
   const message=result.error.message||'';
   if(mode==='signup' && /already registered|already been registered|user already registered|email.*exists|duplicate key/i.test(message))notify('Ese correo ya tiene una cuenta. Inicia sesión en lugar de registrarte de nuevo.');
