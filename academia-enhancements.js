@@ -172,7 +172,7 @@
     list.querySelectorAll(".history-row").forEach((el,i)=>{const r=rows[i];el.querySelector("strong").textContent=(r.category||"Trivia mixta")+" · "+r.correct_answers+"/"+r.total_questions+" correctas";el.querySelector(".history-date").textContent=new Date(r.created_at).toLocaleString("es-CO",{dateStyle:"medium",timeStyle:"short"});el.querySelector(".history-score").textContent=r.score+" pts";});
   }
   $("refreshHistory")?.addEventListener("click",loadAcademicHistory);
-  db.auth.onAuthStateChange(()=>{loadAcademicHistory();});
+  db.auth.onAuthStateChange(()=>{queueMicrotask(()=>loadAcademicHistory());});
   loadAcademicHistory();
   let round=[],index=0,chosen=[],locked=false;
   async function leaderboard(){
@@ -196,7 +196,7 @@
     if(error){$("triviaStatus").textContent="No se pudo guardar la ronda: "+error.message;return;}
     $("qProgress").textContent="Ronda completada";$("qScore").textContent=data.score+" / 100 puntos";$("qText").textContent="¡Terminaste!";$("answers").innerHTML="";
     $("feedback").innerHTML="<strong>"+data.correct_answers+" de 10 respuestas correctas.</strong><ol>"+data.details.map(d=>"<li>"+(d.correct?"Correcta. ":"Incorrecta. ")+d.explanation+"</li>").join("")+"</ol>";
-    $("nextQuestion").hidden=true;$("restartQuiz").hidden=false;$("triviaStatus").textContent="Puntuación guardada en tu cuenta.";await leaderboard();
+    $("nextQuestion").hidden=true;$("restartQuiz").hidden=false;$("triviaStatus").textContent="Puntuación guardada en tu cuenta.";await leaderboard();await loadAcademicHistory();
   }
   async function start(){
     $("triviaStatus").textContent="Cargando ronda aleatoria...";const {data:{session}}=await db.auth.getSession();
