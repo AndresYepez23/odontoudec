@@ -77,7 +77,10 @@ begin
   if auth.uid() is null then
     raise exception 'Debes iniciar sesión para guardar tu puntuación.';
   end if;
-  if jsonb_typeof(p_answers) <> 'array' or jsonb_array_length(p_answers) <> 10 then
+  if p_answers is null or jsonb_typeof(p_answers) is distinct from 'array' then
+    raise exception 'Formato de ronda inválido.';
+  end if;
+  if jsonb_array_length(p_answers) <> 10 then
     raise exception 'La ronda debe contener exactamente diez respuestas.';
   end if;
 
@@ -88,7 +91,7 @@ begin
       raise exception 'Formato de respuesta inválido.';
     end if;
     selected_index := (answer_item->>'selected_index')::integer;
-    if selected_index < 0 or selected_index > 3 then
+    if selected_index is null or selected_index < 0 or selected_index > 3 then
       raise exception 'Opción inválida.';
     end if;
 
@@ -101,9 +104,9 @@ begin
     end if;
 
     if exists (
-      select 1 from jsonb_array_elements(p_answers) x
-      where x->>'id' = answer_item->>'id'
-      group by x->>'id' having count(*) > 1
+      select 1 from jsonb_array_elements(p_answers) as items(value)
+      where value->>'id' = answer_item->>'id'
+      having count(*) > 1
     ) then
       raise exception 'No se permiten respuestas duplicadas.';
     end if;
