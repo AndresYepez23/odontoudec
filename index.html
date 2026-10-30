@@ -95,7 +95,7 @@ async function handleAuth(mode){
  if(!email||!password){notify('Escribe tu correo y contraseña.');return;}
  if(mode==='signup' && displayName.length<2){notify('Escribe un nombre o alias de al menos 2 caracteres.');return;}
  let result;
- if(mode==='signup') result=await supabaseClient.auth.signUp({email,password,options:{data:{display_name:displayName}}});
+ if(mode==='signup') result=await supabaseClient.auth.signUp({email,password,options:{data:{display_name:displayName},emailRedirectTo:`${window.location.origin}/verificacion.html`}});
  else result=await supabaseClient.auth.signInWithPassword({email,password});
  if(result.error){notify(result.error.message);return;}
  if(mode==='signup' && !result.data.session){notify('Cuenta creada. Revisa tu correo para confirmar la cuenta y luego inicia sesión.');return;}
