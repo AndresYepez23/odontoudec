@@ -6,6 +6,42 @@
     oclusion:[["incisor","Guía anterior","Participación de los dientes anteriores en determinados movimientos excursivos mandibulares.","Explícame la guía anterior"],["molar","Relación céntrica","Relación maxilomandibular de referencia definida por la posición articular, independiente del contacto dentario.","Explícame la relación céntrica"],["premolar","Máxima intercuspidación","Posición de máximo engranaje entre dientes antagonistas, determinada por los contactos dentarios.","Explícame la máxima intercuspidación"],["canine","Guía canina","Esquema en el que el contacto de caninos guía la lateralidad y puede desocluir dientes posteriores.","Explícame la guía canina"],["occlusal","Dimensión vertical","Relación de distancia entre dos puntos anatómicos seleccionados en sentido vertical.","Explícame la dimensión vertical"]],
     histologia:[["enamel","Unión amelodentinaria","Interfaz ondulada entre esmalte y dentina que contribuye a su unión mecánica.","Explícame la unión amelodentinaria"],["dentin","Predentina","Matriz dentinaria orgánica recién secretada, todavía no mineralizada, situada junto a los odontoblastos.","Explícame la predentina"],["pulp","Complejo dentinopulpar","Unidad funcional formada por dentina y pulpa, relacionadas estructural y fisiológicamente.","Explícame el complejo dentinopulpar"],["gum","Epitelio de unión","Epitelio especializado que establece la unión entre la encía y la superficie dentaria.","Explícame el epitelio de unión"],["cementum","Cemento acelular","Tipo de cemento radicular que suele predominar en regiones cervicales y carece de cementocitos.","Explícame el cemento acelular"],["bone","Hueso alveolar propio","Porción del proceso alveolar que reviste el alveolo y recibe fibras de inserción periodontal.","Explícame el hueso alveolar propio"]]
   };
+
+  const regionalAtlas = {
+    neuro:[[ "nerve","Nervio trigémino (V)","Principal vía sensitiva somática de la cara y motor para los músculos de la masticación. Se divide en V1, V2 y V3.","Explícame el nervio trigémino y sus ramas" ],
+      ["nerve","Nervio maxilar (V2)","Rama sensitiva del trigémino. Sus ramas alveolares superiores participan en la sensibilidad de dientes y tejidos del maxilar.","Explícame el nervio maxilar V2" ],
+      ["nerve","Nervio mandibular (V3)","Rama mixta del trigémino. El nervio alveolar inferior conduce sensibilidad de dientes mandibulares; el mentoniano, de labio inferior y mentón.","Explícame el nervio mandibular V3" ],
+      ["nerve","Nervio lingual","Rama de V3 que lleva sensibilidad general de los dos tercios anteriores de la lengua y suelo de boca; recibe fibras gustativas y parasimpáticas por la cuerda del tímpano.","Explícame el nervio lingual" ],
+      ["nerve","Nervio bucal","Rama sensitiva de V3 que aporta sensibilidad a la mucosa y piel de la región bucal; no debe confundirse con el nervio facial motor.","Explícame el nervio bucal" ],
+      ["nerve","Nervio infraorbitario","Continuación de V2; emerge por el foramen infraorbitario e inerva piel del párpado inferior, ala nasal y labio superior.","Explícame el nervio infraorbitario" ]],
+    musculos:[[ "muscle","Masetero","Músculo potente de la masticación, situado en la cara lateral de la rama mandibular. Eleva la mandíbula; recibe inervación de V3.","Explícame el músculo masetero" ],
+      ["muscle","Temporal","Músculo en abanico de la fosa temporal. Eleva la mandíbula y sus fibras posteriores contribuyen a la retrusión; inervado por V3.","Explícame el músculo temporal" ],
+      ["muscle","Pterigoideo medial","Se ubica en la cara medial de la rama mandibular. Eleva y ayuda a protruir la mandíbula; participa en movimientos laterales.","Explícame el pterigoideo medial" ],
+      ["muscle","Pterigoideo lateral","Participa en protrusión y movimientos de lateralidad; sus fibras inferiores contribuyen a la traslación del cóndilo y disco durante la apertura.","Explícame el pterigoideo lateral" ],
+      ["muscle","Buccinador","Forma parte de la pared muscular de la mejilla; mantiene el alimento entre las superficies oclusales. Está inervado por el nervio facial (VII), no por V3.","Explícame el músculo buccinador" ],
+      ["muscle","Orbicular de la boca","Músculo esfinteriano de los labios, importante para cierre y movimientos labiales. Su inervación motora procede del nervio facial (VII).","Explícame el orbicular de la boca" ]],
+    huesos:[[ "bone","Maxilar","Hueso par que forma parte del esqueleto facial; contiene el proceso alveolar superior y contribuye al paladar duro, cavidad nasal y órbita.","Explícame el hueso maxilar" ],
+      ["bone","Mandíbula","Hueso móvil del macizo facial. Presenta cuerpo, ramas, procesos coronoides y condilares; aloja los dientes inferiores.","Explícame la mandíbula" ],
+      ["bone","Hueso temporal","Aloja la fosa mandibular y el tubérculo articular, componentes óseos de la articulación temporomandibular.","Explícame el hueso temporal y la ATM" ],
+      ["bone","Hueso esfenoides","Hueso de la base del cráneo. Sus láminas pterigoideas sirven de referencia anatómica para músculos pterigoideos.","Explícame el esfenoides" ],
+      ["bone","Hueso palatino","Hueso par que forma la porción posterior del paladar duro y contribuye a las paredes de las cavidades nasal y oral.","Explícame el hueso palatino" ]],
+    cavidad:[[ "oral","Vestíbulo oral","Espacio entre labios y mejillas por fuera, y dientes y encías por dentro.","Explícame el vestíbulo oral" ],
+      ["oral","Cavidad oral propiamente dicha","Espacio interno a las arcadas dentarias; se comunica con la orofaringe a través del istmo de las fauces.","Explícame la cavidad oral propiamente dicha" ],
+      ["oral","Paladar duro","Techo óseo anterior de la cavidad oral, formado principalmente por procesos palatinos del maxilar y láminas horizontales del palatino.","Explícame el paladar duro" ],
+      ["oral","Paladar blando","Pliegue musculomembranoso posterior que participa en la deglución y separación funcional de nasofaringe y orofaringe.","Explícame el paladar blando" ],
+      ["oral","Lengua","Órgano muscular relacionado con gusto, manipulación del alimento, deglución y articulación del habla; sus dos tercios anteriores y tercio posterior tienen inervaciones distintas.","Explícame la anatomía e inervación de la lengua" ],
+      ["oral","Glándulas salivales mayores","Parótida, submandibular y sublingual. Producen saliva y tienen trayectos de drenaje e inervación parasimpática diferentes.","Explícame las glándulas salivales mayores" ]]
+  };
+  if (typeof atlasTopics !== "undefined") Object.assign(atlasTopics,regionalAtlas);
+  const extraTabs = [["neuro","Nervios"],["musculos","Músculos"],["huesos","Huesos"],["cavidad","Cavidad oral"]];
+  const atlasTabHost=document.querySelector(".atlas-tabs");
+  if(atlasTabHost) extraTabs.forEach(([key,label])=>{
+    if(atlasTabHost.querySelector('[data-atlas="'+key+'"]')) return;
+    const b=document.createElement("button");b.className="atlas-tab";b.dataset.atlas=key;b.textContent=label;
+    b.addEventListener("click",()=>{atlasTabHost.querySelectorAll(".atlas-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderAtlas(key);});
+    atlasTabHost.appendChild(b);
+  });
+
   if (typeof atlasTopics !== "undefined") Object.assign(atlasTopics,extraAtlas);
   const tabHost=document.querySelector(".atlas-tabs");
   if(tabHost)[["desarrollo","Desarrollo dental"],["oclusion","Oclusión"],["histologia","Histología oral"]].forEach(([key,label])=>{
