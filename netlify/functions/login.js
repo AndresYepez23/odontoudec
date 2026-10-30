@@ -13,7 +13,7 @@ exports.handler=async(event)=>{
   if(!lookup.ok)return respond(503,{error:"No pudimos validar el acceso. Inténtalo más tarde."});
   const rows=await lookup.json(),email=rows?.[0]?.email;
   if(!email)return respond(401,{error:"Usuario o contraseña incorrectos."});
-  const auth=await fetch(base.replace(/\\/$/,"")+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:anon,"Content-Type":"application/json"},body:JSON.stringify({email,password})});
+  const auth=await fetch(base.replace(/\/$/,"")+"/auth/v1/token?grant_type=password",{method:"POST",headers:{apikey:anon,"Content-Type":"application/json"},body:JSON.stringify({email,password})});
   const session=await auth.json();
   if(!auth.ok)return respond(401,{error:"Usuario o contraseña incorrectos."});
   return respond(200,{session:{access_token:session.access_token,refresh_token:session.refresh_token}});
