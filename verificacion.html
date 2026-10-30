@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#32105f">
+  <title>Verificación de cuenta | OdontoUdeC</title>
+  <style>
+    :root{--purple:#32105f;--purple2:#6531a0;--gold:#d7a928;--ink:#211a2b;--muted:#706879;--line:#ece6f2}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 15% 5%,#eadcff,transparent 38%),linear-gradient(135deg,#fff,#faf6ff);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+    main{width:min(100%,560px);background:#fff;border:1px solid var(--line);border-radius:24px;padding:clamp(24px,5vw,42px);box-shadow:0 20px 60px #32105f16;text-align:center}
+    .seal{width:76px;height:76px;margin:0 auto 18px;border-radius:24px;display:grid;place-items:center;background:#f2eafb;color:var(--purple);font-size:36px}
+    h1{color:var(--purple);line-height:1.15;margin:8px 0 12px;font-size:clamp(1.8rem,5vw,2.4rem)}
+    p{color:var(--muted)}.status{margin:22px 0;padding:15px;border-radius:14px;background:#f8f5fb;border:1px solid var(--line);font-weight:650}
+    .status.success{background:#edf8f1;border-color:#ccebd7;color:#236b4c}.status.error{background:#fff5f2;border-color:#f2d6cc;color:#91432e}
+    a,button{display:inline-flex;justify-content:center;align-items:center;border:0;border-radius:12px;padding:12px 18px;background:var(--purple);color:#fff;text-decoration:none;font:inherit;font-weight:750;cursor:pointer}
+    button:disabled{opacity:.55;cursor:wait}.secondary{background:#f2eafb;color:var(--purple);margin-left:8px}
+    @media(max-width:480px){.secondary{margin:10px 0 0}}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="seal" aria-hidden="true">✉️</div>
+    <p style="letter-spacing:.12em;text-transform:uppercase;font-size:.76rem;font-weight:800;color:#8a6bb0">OdontoUdeC · Comunidad estudiantil</p>
+    <h1>Verificación de tu cuenta</h1>
+    <p>Estamos comprobando el enlace de confirmación de tu correo electrónico.</p>
+    <div id="status" class="status" role="status" aria-live="polite">Verificando…</div>
+    <div>
+      <a id="continue" href="/">Ir a OdontoUdeC</a>
+      <button id="retry" class="secondary" type="button">Comprobar de nuevo</button>
+    </div>
+    <p style="font-size:.85rem;margin-top:24px">Si el enlace expiró o ya fue utilizado, vuelve a la página principal e inicia sesión o solicita una nueva confirmación.</p>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://jqbrheonqqsiijrprsqs.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const statusEl = document.getElementById('status');
+    async function verify(){
+      statusEl.className = 'status';
+      statusEl.textContent = 'Verificando…';
+      const {data,error} = await client.auth.getSession();
+      if(error){
+        statusEl.className = 'status error';
+        statusEl.textContent = 'No pudimos comprobar el enlace: ' + error.message;
+        return;
+      }
+      const user = data.session?.user;
+      if(user?.email_confirmed_at){
+        statusEl.className = 'status success';
+        statusEl.textContent = '✓ Correo verificado. Tu cuenta está confirmada.';
+        document.getElementById('continue').textContent = 'Entrar a la comunidad';
+      } else if(user){
+        statusEl.textContent = 'Tu sesión está activa, pero el correo todavía no aparece como confirmado. Abre el enlace más reciente que recibiste.';
+      } else {
+        statusEl.className = 'status error';
+        statusEl.textContent = 'No encontramos una sesión verificada. Abre el enlace desde el mismo navegador o solicita una nueva confirmación.';
+      }
+    }
+    document.getElementById('retry').addEventListener('click',verify);
+    client.auth.onAuthStateChange(()=>verify());
+    verify();
+  </script>
+</body>
+</html>
