@@ -42,7 +42,7 @@
     const box=$("leaderboard"),{data,error}=await db.rpc("get_trivia_leaderboard",{limit_count:20});
     if(error){box.textContent="El ranking estará disponible cuando se configure Trivia en Supabase.";return;}
     if(!data?.length){box.textContent="Todavía no hay puntuaciones. ¡Sé el primero!";return;}
-    box.className="leaderboard";box.innerHTML=data.map(r=>'<div class="leader-row"><span class="leader-rank">#'+r.position+'</span><div><div class="leader-name"></div><div class="leader-meta">'+r.rounds_played+' rondas · mejor '+r.best_score+'</div></div><span class="leader-points">'+r.total_points+' pts</span></div>').join("");
+    box.className="leaderboard";box.innerHTML=data.map(r=>'<div class="leader-row"><span class="leader-rank">#'+r.rank_position+'</span><div><div class="leader-name"></div><div class="leader-meta">'+r.rounds_played+' rondas · mejor '+r.best_score+'</div></div><span class="leader-points">'+r.total_points+' pts</span></div>').join("");
     box.querySelectorAll(".leader-name").forEach((el,i)=>el.textContent=data[i].display_name+(data[i].username?" · @"+data[i].username:""));
   }
   function render(){
