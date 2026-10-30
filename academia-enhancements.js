@@ -142,10 +142,39 @@
     },true);
   }
 
+  const triviaSection=document.getElementById("trivia");
+  if(triviaSection){
+    const history=document.createElement("section");history.id="academic-history";history.style.background="#fbf9fd";
+    history.innerHTML='<div class="wrap"><div class="head"><span class="kicker">Tu progreso</span><h2>Mi actividad académica</h2><p>Consulta tus rondas de OdontoTrivia y el puntaje que has acumulado.</p></div><div class="history-summary" id="historySummary"><article><strong id="historyRounds">—</strong><span>Rondas completadas</span></article><article><strong id="historyPoints">—</strong><span>Puntos acumulados</span></article><article><strong id="historyBest">—</strong><span>Mejor resultado</span></article></div><div class="question"><div class="history-heading"><h3>Historial de rondas</h3><button class="mini-link" id="refreshHistory" type="button">Actualizar ↻</button></div><p class="muted" id="historyStatus" aria-live="polite">Inicia sesión para consultar tu historial.</p><div id="historyList"></div></div></div>';
+    triviaSection.insertAdjacentElement("beforebegin",history);
+    const historyStyle=document.createElement("style");historyStyle.textContent="#academic-history .history-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 18px}#academic-history .history-summary article{display:flex;flex-direction:column;gap:4px;padding:17px;background:#fff;border:1px solid var(--line);border-radius:14px}#academic-history .history-summary strong{font-size:1.6rem;color:var(--p)}#academic-history .history-summary span,.history-date{font-size:.84rem;color:var(--muted)}#academic-history .history-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}#academic-history .history-heading h3{margin:0;color:var(--p)}#academic-history .history-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:13px 0;border-top:1px solid var(--line)}#academic-history .history-score{font-weight:900;color:var(--p)}#academic-history .history-empty{padding:16px;background:#faf7fd;border-radius:12px;color:var(--muted)}@media(max-width:520px){#academic-history .history-summary{grid-template-columns:1fr 1fr}#academic-history .history-summary article:last-child{grid-column:span 2}}";document.head.appendChild(historyStyle);
+  }
   const section=document.getElementById("trivia");if(!section)return;
   section.innerHTML='<div class="wrap"><div class="head"><span class="kicker">Aprendizaje activo · Competencia académica</span><h2>OdontoTrivia</h2><p>Entrena tus conocimientos, acumula puntos permanentes y compite con otros estudiantes de OdontoUdeC.</p></div><div class="trivia-layout"><div class="quiz"><div class="question"><div class="trivia-top"><span class="tag" id="qProgress">Preparando ronda...</span><span class="score" id="qScore">— / 100 puntos</span></div><div id="qMeta" class="muted"></div><h3 id="qText">Cargando preguntas...</h3><div id="answers" class="answers"></div><div id="feedback" class="feedback" aria-live="polite"></div><button id="nextQuestion" class="btn" style="margin-top:14px" hidden>Siguiente pregunta</button><button id="restartQuiz" class="btn alt" style="margin:14px 0 0" hidden>Jugar otra ronda</button></div><p id="triviaStatus" class="muted" aria-live="polite">Inicia sesión para registrar tus puntos.</p></div><aside class="question trivia-board"><span class="kicker">Clasificación global</span><h3>🏆 Ranking OdontoUdeC</h3><p class="muted">Puntos acumulados en tus rondas registradas.</p><div id="leaderboard"><p class="muted">Cargando ranking...</p></div><div class="note"><strong>Cómo se puntúa:</strong> 10 preguntas por ronda, 10 puntos por respuesta correcta. La calificación se valida en Supabase.</div></aside></div></div>';
   const style=document.createElement("style");style.textContent=".trivia-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(280px,.8fr);gap:18px;align-items:start}.trivia-board{position:sticky;top:90px}.trivia-board h3{color:var(--p);margin:8px 0}.trivia-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}.leaderboard{display:grid;gap:8px}.leader-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff}.leader-rank,.leader-points{font-weight:900;color:var(--p)}.leader-name{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.leader-meta{font-size:.76rem;color:var(--muted)}@media(max-width:850px){.trivia-layout{grid-template-columns:1fr}.trivia-board{position:static}}";document.head.appendChild(style);
-  const $=id=>document.getElementById(id);let round=[],index=0,chosen=[],locked=false;
+  const $=id=>document.getElementById(id);
+  async function loadAcademicHistory(){
+    const status=$("historyStatus"),list=$("historyList");if(!status||!list)return;
+    const {data:{session}}=await db.auth.getSession();
+    if(!session){status.textContent="Inicia sesión para consultar tus resultados personales.";list.innerHTML="";$("historyRounds").textContent="—";$("historyPoints").textContent="—";$("historyBest").textContent="—";return;}
+    status.textContent="Consultando tu historial...";
+    const {data,error}=await db.rpc("get_my_trivia_history",{limit_count:30});
+    if(error){status.textContent="No se pudo cargar el historial. Verifica que la migración de historial esté aplicada en Supabase.";list.textContent="";return;}
+    const rows=Array.isArray(data)?data:[];
+    const {data:allData,error:allError}=await db.from("trivia_attempts").select("score",{count:"exact",head:true}).eq("user_id",session.user.id);
+    // El historial visible procede del RPC privado; el resumen usa solo los registros devueltos.
+    $("historyRounds").textContent=allError?rows.length:(allData?.length??rows.length);
+    $("historyPoints").textContent=rows.reduce((sum,r)=>sum+Number(r.score||0),0);
+    $("historyBest").textContent=rows.length?Math.max(...rows.map(r=>Number(r.score||0)))+" / 100":"0 / 100";
+    if(!rows.length){status.textContent="Todavía no has completado rondas. ¡Tu primera partida aparecerá aquí!";list.innerHTML="";return;}
+    status.textContent="Mostrando tus últimas "+rows.length+" rondas.";
+    list.innerHTML=rows.map(r=>'<div class="history-row"><div><strong></strong><div class="history-date"></div></div><span class="history-score"></span></div>').join("");
+    list.querySelectorAll(".history-row").forEach((el,i)=>{const r=rows[i];el.querySelector("strong").textContent=(r.category||"Trivia mixta")+" · "+r.correct_answers+"/"+r.total_questions+" correctas";el.querySelector(".history-date").textContent=new Date(r.created_at).toLocaleString("es-CO",{dateStyle:"medium",timeStyle:"short"});el.querySelector(".history-score").textContent=r.score+" pts";});
+  }
+  $("refreshHistory")?.addEventListener("click",loadAcademicHistory);
+  db.auth.onAuthStateChange(()=>{loadAcademicHistory();});
+  loadAcademicHistory();
+  let round=[],index=0,chosen=[],locked=false;
   async function leaderboard(){
     const box=$("leaderboard"),{data,error}=await db.rpc("get_trivia_leaderboard",{limit_count:20});
     if(error){box.textContent="El ranking estará disponible cuando se configure Trivia en Supabase.";return;}
