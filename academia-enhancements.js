@@ -161,11 +161,11 @@
     const {data,error}=await db.rpc("get_my_trivia_history",{limit_count:30});
     if(error){status.textContent="No se pudo cargar el historial. Verifica que la migración de historial esté aplicada en Supabase.";list.textContent="";return;}
     const rows=Array.isArray(data)?data:[];
-    const {data:allData,error:allError}=await db.from("trivia_attempts").select("score",{count:"exact",head:true}).eq("user_id",session.user.id);
-    // El historial visible procede del RPC privado; el resumen usa solo los registros devueltos.
-    $("historyRounds").textContent=allError?rows.length:(allData?.length??rows.length);
-    $("historyPoints").textContent=rows.reduce((sum,r)=>sum+Number(r.score||0),0);
-    $("historyBest").textContent=rows.length?Math.max(...rows.map(r=>Number(r.score||0)))+" / 100":"0 / 100";
+    // El RPC calcula los totales sobre todo el historial, aunque la lista esté limitada a 30 rondas.
+    const summary=rows[0];
+    $("historyRounds").textContent=summary?.total_rounds??0;
+    $("historyPoints").textContent=summary?.total_points??0;
+    $("historyBest").textContent=(summary?.best_score??0)+" / 100";
     if(!rows.length){status.textContent="Todavía no has completado rondas. ¡Tu primera partida aparecerá aquí!";list.innerHTML="";return;}
     status.textContent="Mostrando tus últimas "+rows.length+" rondas.";
     list.innerHTML=rows.map(r=>'<div class="history-row"><div><strong></strong><div class="history-date"></div></div><span class="history-score"></span></div>').join("");
