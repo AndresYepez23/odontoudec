@@ -1,42 +1,33 @@
-# Configuración: nombres de usuario y mensajes privados
+# Configuración: acceso por correo y mensajes privados
 
-Esta mejora se prepara en una rama separada. Antes de publicarla, completa estos pasos:
+Esta mejora se prepara en una rama separada. El acceso usa únicamente nombre visible, correo electrónico y contraseña. No se pide ni se utiliza un nombre de usuario.
 
-## 1. Ejecutar la migración de Supabase
+## 1. Ejecutar la migración de búsqueda por nombre
 
-1. Abre el proyecto de Supabase de OdontoUdeC.
-2. Entra en **SQL Editor**.
-3. Abre el archivo `supabase/migrations/20261030000000_usernames_private_messaging.sql` de esta rama.
-4. Copia y ejecuta el SQL completo.
+La migración inicial de mensajes privados ya fue ejecutada. Ahora, en Supabase → SQL Editor, abre y ejecuta una sola vez:
 
-La migración:
-- Agrega un nombre de usuario único, sin distinguir mayúsculas/minúsculas.
-- Mantiene las cuentas y contraseñas existentes.
-- Crea un índice privado para resolver el nombre de usuario a correo sin exponer correos en la tabla pública de perfiles.
-- Crea las tablas de conversaciones y mensajes privados con políticas RLS para que solo los participantes puedan leer o enviar mensajes.
-- Permite que los usuarios antiguos elijan su nombre de usuario desde la pantalla de mensajes privados.
+`supabase/migrations/20261030010000_search_students_legacy_accounts.sql`
 
-## 2. Configurar variables en Netlify
+Esta actualización completa los perfiles de cuentas existentes que no tengan nombre visible y permite buscar compañeros por su nombre. No modifica correos ni contraseñas.
 
-En **Site configuration → Environment variables**, agrega:
+## 2. Variables de Netlify
 
+El frontend utiliza:
 - `SUPABASE_URL`: URL del proyecto Supabase.
-- `SUPABASE_ANON_KEY`: la clave pública/publishable del proyecto (la misma que usa el frontend).
-- `SUPABASE_SERVICE_ROLE_KEY`: clave secreta service_role del proyecto.
+- `SUPABASE_ANON_KEY`: clave pública/publishable del proyecto.
 
-**Importante:** la clave service_role es privada. Solo se configura en Netlify y nunca debe agregarse al HTML, al repositorio ni compartirse públicamente.
+La función de acceso con nombre de usuario ya no se utiliza. La clave service_role no debe ponerse en el frontend ni compartirse públicamente.
 
-## 3. Publicar
+## 3. Pruebas antes de publicar
 
-Después de ejecutar el SQL y guardar las variables:
-1. Revisa el pull request de la rama `feat/auth-private-messaging`.
-2. Combina el PR con `main` cuando estés conforme.
-3. Netlify desplegará la versión nueva si está conectado a la rama principal.
+1. Comprueba el registro con nombre, correo y contraseña.
+2. Comprueba el inicio de sesión con correo y contraseña.
+3. Busca un compañero por su nombre.
+4. Abre una conversación y prueba el envío y recepción de mensajes.
+5. Verifica que la comunidad y el chat grupal sigan funcionando.
 
-## 4. Cuentas existentes
+No combines el PR con `main` hasta completar estas pruebas.
 
-Las cuentas actuales siguen iniciando sesión con su correo y contraseña. Al abrir **Mensajes privados**, cada estudiante que todavía no tenga usuario verá un formulario para elegir uno. A partir de ahí podrá iniciar sesión con correo o nombre de usuario.
-
-## 5. Límite de esta primera versión
+## 4. Alcance de esta primera versión
 
 Los mensajes privados se actualizan automáticamente cada cinco segundos. No se habilitan adjuntos ni envío de información identificable de pacientes.
