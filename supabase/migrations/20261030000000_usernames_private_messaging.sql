@@ -48,6 +48,72 @@ $$;
 revoke all on function public.search_students(text) from public,anon;
 grant execute on function public.search_students(text) to authenticated;
 
+create or replace function public.claim_my_username(new_username text)
+returns void
+language plpgsql
+security definer
+set search_path=public,auth
+as $
+declare username_value text; email_value text; display_value text;
+begin
+ if auth.uid() is null then raise exception 'Debes iniciar sesión.'; end if;
+ username_value:=lower(btrim(coalesce(new_username,'')));
+ if username_value !~ '^[a-z0-9._-]{3,24}
+
+create table if not exists public.private_conversations(
+ id uuid primary key default gen_random_uuid(),
+ user_one uuid not null references auth.users(id) on delete cascade,
+ user_two uuid not null references auth.users(id) on delete cascade,
+ created_at timestamptz not null default now(),
+ last_message_at timestamptz not null default now(),
+ constraint private_conversations_distinct check(user_one<>user_two),
+ constraint private_conversations_sorted check(user_one<user_two),
+ constraint private_conversations_pair unique(user_one,user_two)
+);
+create table if not exists public.private_messages(
+ id uuid primary key default gen_random_uuid(),
+ conversation_id uuid not null references public.private_conversations(id) on delete cascade,
+ sender_id uuid not null references auth.users(id) on delete cascade,
+ content text not null check(char_length(btrim(content)) between 1 and 2000),
+ created_at timestamptz not null default now()
+);
+create index if not exists private_messages_conversation_created_idx on public.private_messages(conversation_id,created_at);
+alter table public.private_conversations enable row level security;
+alter table public.private_messages enable row level security;
+
+drop policy if exists "Participants can view private conversations" on public.private_conversations;
+create policy "Participants can view private conversations" on public.private_conversations for select to authenticated using(auth.uid()=user_one or auth.uid()=user_two);
+drop policy if exists "Participants can create private conversations" on public.private_conversations;
+create policy "Participants can create private conversations" on public.private_conversations for insert to authenticated with check((auth.uid()=user_one or auth.uid()=user_two) and user_one<>user_two);
+
+drop policy if exists "Participants can read private messages" on public.private_messages;
+create policy "Participants can read private messages" on public.private_messages for select to authenticated using(exists(select 1 from public.private_conversations c where c.id=conversation_id and (auth.uid()=c.user_one or auth.uid()=c.user_two)));
+drop policy if exists "Participants can send private messages" on public.private_messages;
+create policy "Participants can send private messages" on public.private_messages for insert to authenticated with check(sender_id=auth.uid() and exists(select 1 from public.private_conversations c where c.id=conversation_id and (auth.uid()=c.user_one or auth.uid()=c.user_two)));
+
+create or replace function public.touch_private_conversation() returns trigger language plpgsql security definer set search_path=public as $$
+begin update public.private_conversations set last_message_at=new.created_at where id=new.conversation_id; return new; end $$;
+drop trigger if exists private_message_touch_conversation on public.private_messages;
+create trigger private_message_touch_conversation after insert on public.private_messages for each row execute function public.touch_private_conversation();
+grant select,insert on public.private_conversations to authenticated;
+grant select,insert on public.private_messages to authenticated;
+ then raise exception 'El usuario debe tener entre 3 y 24 caracteres válidos.'; end if;
+ select u.email into email_value from auth.users u where u.id=auth.uid();
+ select p.display_name into display_value from public.profiles p where p.id=auth.uid();
+ insert into public.profiles(id,display_name,username)
+ values(auth.uid(),coalesce(display_value,split_part(coalesce(email_value,''),'@',1),'Estudiante'),username_value)
+ on conflict(id) do update set username=excluded.username;
+ if email_value is not null then
+  insert into public.private_login_index(user_id,email,username)
+  values(auth.uid(),lower(email_value),username_value)
+  on conflict(user_id) do update set username=excluded.username,email=excluded.email;
+ end if;
+end;
+$;
+revoke all on function public.claim_my_username(text) from public,anon;
+grant execute on function public.claim_my_username(text) to authenticated;
+
+
 create table if not exists public.private_conversations(
  id uuid primary key default gen_random_uuid(),
  user_one uuid not null references auth.users(id) on delete cascade,
