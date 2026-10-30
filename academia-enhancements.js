@@ -123,12 +123,23 @@
       const pending=document.createElement("div");pending.className="bubble bot";pending.textContent="OdontoBot está pensando...";log.appendChild(pending);
       history.push({role:"user",content:question});input.value="";ask.disabled=true;status.textContent="Consultando la IA...";
       try{const {data,error}=await db.functions.invoke("odonto-bot",{body:{messages:history}});if(error)throw error;if(!data?.reply)throw new Error(data?.error||"No llegó una respuesta.");pending.textContent=data.reply;history.push({role:"assistant",content:data.reply});status.textContent="Respuesta generada con IA.";}
-      catch(e){pending.textContent="No pude conectar con OdontoBot: "+(e.message||"inténtalo de nuevo.");history.pop();status.textContent="Comprueba que la función y la clave de OpenAI estén configuradas.";}
+      catch(e){pending.textContent="No pude conectar con OdontoBot: "+(e.message||"inténtalo de nuevo.");history.pop();status.textContent="Comprueba que la función de Supabase y GROQ_API_KEY estén configuradas.";}
       finally{ask.disabled=false;log.scrollTop=log.scrollHeight;}
     }
     ask.addEventListener("click",()=>send(input.value));input.addEventListener("keydown",e=>{if(e.key==="Enter")send(input.value);});
     document.querySelectorAll(".bot-topic").forEach(old=>{const b=old.cloneNode(true);old.replaceWith(b);b.addEventListener("click",()=>send(b.textContent));});
     status.textContent="Asistente con IA. Inicia sesión para comenzar.";
+    // Los botones del Atlas deben usar el envío autenticado de Groq, no la respuesta local antigua.
+    const atlasContent=document.getElementById("atlasContent");
+    if(atlasContent) atlasContent.addEventListener("click",event=>{
+      const trigger=event.target.closest(".atlas-ask");
+      if(!trigger)return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      input.value=trigger.dataset.question||"";
+      ask.click();
+      document.getElementById("odonto-bot")?.scrollIntoView({behavior:"smooth"});
+    },true);
   }
 
   const section=document.getElementById("trivia");if(!section)return;
