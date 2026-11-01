@@ -2,30 +2,30 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#087f80"><title>Grupos de estudio | OdontoUdeC</title>
+<meta name="theme-color" content="#32105f"><title>Grupos de estudio | OdontoUdeC</title>
 <style>
-:root{--teal:#087f80;--deep:#123f4b;--mint:#eaf8f5;--ink:#20383d;--muted:#6c8588;--line:#dcebe8;--paper:#f5faf9}
+:root{--teal:#32105f;--deep:#32105f;--mint:#f3edf9;--ink:#211a2b;--muted:#706879;--line:#ece6f2;--paper:#fbfafc}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
 header{background:#fff;border-bottom:1px solid var(--line);padding:14px max(18px,calc((100% - 1120px)/2));display:flex;justify-content:space-between;align-items:center;gap:12px}
-a{color:var(--teal)}header a{text-decoration:none;font-weight:750}.brand{color:var(--deep);font-size:1.1rem}
-main{max-width:1120px;margin:28px auto;padding:0 18px}.hero{background:linear-gradient(120deg,#e5f7f3,#f0f8fb);border:1px solid var(--line);border-radius:22px;padding:26px;margin-bottom:18px}
-.eyebrow{color:var(--teal);font-weight:800;letter-spacing:.09em;font-size:.76rem}.hero h1{margin:5px 0;color:var(--deep);font-size:clamp(1.8rem,4vw,2.5rem)}.hero p{margin:0;color:#557378}
-.grid{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(0,1.2fr);gap:16px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:19px;box-shadow:0 10px 28px #0c55500a;min-width:0}
+a{color:var(--teal)}header a{text-decoration:none;font-weight:750}.brand{color:var(--deep);font-size:1.1rem;text-decoration:none;font-weight:900}.brand span{color:#b88912}
+main{max-width:1120px;margin:28px auto;padding:0 18px}.hero{background:radial-gradient(ellipse at 85% 10%,#d7a92830,transparent 33%),linear-gradient(135deg,#fff,#f7f1ff 65%,#fffaf0);border:1px solid var(--line);border-radius:22px;padding:26px;margin-bottom:18px}
+.eyebrow{color:var(--teal);font-weight:800;letter-spacing:.09em;font-size:.76rem}.hero h1{margin:5px 0;color:var(--deep);font-size:clamp(1.8rem,4vw,2.5rem)}.hero p{margin:0;color:#64596d}
+.grid{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(0,1.2fr);gap:16px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:19px;box-shadow:0 10px 28px #32105f0a;min-width:0}
 .panel h2,.panel h3{margin:0 0 7px;color:var(--deep)}.muted{color:var(--muted);font-size:.9rem}
-.field{display:grid;gap:5px;margin:11px 0}.field label{font-size:.84rem;font-weight:750;color:#45666b}
-input,textarea,select,button{font:inherit}input,textarea,select{width:100%;border:1px solid #d4e5e2;border-radius:10px;padding:11px 12px;outline-color:#54aaa2;background:white;color:var(--ink)}
+.field{display:grid;gap:5px;margin:11px 0}.field label{font-size:.84rem;font-weight:750;color:#554b61}
+input,textarea,select,button{font:inherit}input,textarea,select{width:100%;border:1px solid #ded4e8;border-radius:10px;padding:11px 12px;outline-color:#54218b;background:white;color:var(--ink)}
 textarea{min-height:88px;resize:vertical}button{cursor:pointer;border:0;border-radius:10px;padding:10px 14px;font-weight:750;background:var(--teal);color:#fff}button:disabled{opacity:.5;cursor:wait}
 button.secondary{background:var(--mint);color:var(--teal)}button.danger{background:#fff1ef;color:#a43b31}
 .row{display:flex;gap:8px;align-items:center}.row>*{flex:1;min-width:0}.status{min-height:24px;color:var(--teal);margin:8px 0}.hidden{display:none!important}
-.group-list{display:grid;gap:10px;margin-top:14px}.group{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}.group h3{margin:0;color:var(--deep)}.group p{margin:5px 0;color:#617b7e}.group-meta{font-size:.8rem;color:var(--muted);margin:7px 0}.group-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.group-actions button{font-size:.82rem;padding:8px 11px}
+.group-list{display:grid;gap:10px;margin-top:14px}.group{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff}.group h3{margin:0;color:var(--deep)}.group p{margin:5px 0;color:#706879}.group-meta{font-size:.8rem;color:var(--muted);margin:7px 0}.group-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.group-actions button{font-size:.82rem;padding:8px 11px}
 .chat-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.chat-log{height:360px;overflow:auto;border:1px solid var(--line);border-radius:13px;padding:12px;background:#fbfefe;margin:12px 0;display:flex;flex-direction:column;gap:9px}
-.message{max-width:85%;padding:10px 12px;border-radius:13px;background:#eaf7f5;align-self:flex-start;overflow-wrap:anywhere}.message.mine{background:#087f80;color:white;align-self:flex-end}.message small{display:block;opacity:.72;font-size:.72rem;margin-bottom:3px}
+.message{max-width:85%;padding:10px 12px;border-radius:13px;background:#eaf7f5;align-self:flex-start;overflow-wrap:anywhere}.message.mine{background:#32105f;color:white;align-self:flex-end}.message small{display:block;opacity:.72;font-size:.72rem;margin-bottom:3px}
 .auth{padding:20px}.empty{padding:22px;text-align:center;color:var(--muted)}.fine{font-size:.78rem;color:var(--muted);margin-top:12px}
-@media(max-width:760px){main{margin:16px auto}.hero{padding:20px}.grid{grid-template-columns:1fr}.chat-log{height:48vh;min-height:300px}header{padding:13px 16px}}
+@media(max-width:760px){header{align-items:flex-start;flex-direction:column}header nav{display:flex;flex-wrap:wrap;gap:7px}header nav a{font-size:.82rem}main{margin:16px auto}.hero{padding:20px}.grid{grid-template-columns:1fr}.chat-log{height:48vh;min-height:300px}header{padding:13px 16px}}
 </style>
 </head>
 <body>
-<header><a class="brand" href="academia.html">🦷 OdontoUdeC · Grupos de estudio</a><a href="mi-espacio.html">← Mi espacio</a></header>
+<header><a class="brand" href="index.html">Odonto<span>UdeC</span></a><nav><a href="index.html#inicio">Inicio</a> · <a href="index.html#agenda">Calendario</a> · <a href="mi-espacio.html">Mi espacio</a> · <a href="grupos-estudio.html">Grupos de estudio</a> · <a href="academia.html">Academia</a> · <a href="perfil-academico.html">Mi perfil</a></nav></header>
 <main>
 <section class="hero"><span class="eyebrow">APRENDIZAJE COLABORATIVO</span><h1>Estudiar en equipo.</h1><p>Crea un grupo por asignatura, encuentra compañeros y comparte preguntas en un espacio académico.</p></section>
 <section id="auth" class="panel auth hidden"><h2>Inicia sesión para participar</h2><p class="muted">Los grupos y sus conversaciones están disponibles para estudiantes autenticados.</p><a href="index.html#acceso"><button>Ir al inicio de sesión</button></a></section>
