@@ -43,12 +43,12 @@ async function load(){
  const fail=(message)=>{loading.textContent=message;loading.classList.remove("hide");$("app").classList.add("hide");};
  loading.textContent="Comprobando tu sesión…";
  try{
- const {data:{session},error}=await db.auth.getSession();if(error||!session){$("loading").textContent="No hay una sesión activa. Inicia sesión desde OdontoUdeC y vuelve a entrar a Mi perfil.";return;}
+ const {data:{session},error}=await db.auth.getSession();if(error||!session){fail("No hay una sesión activa. Inicia sesión desde OdontoUdeC y vuelve a entrar a Mi perfil.");return;}
  user=session.user;
  const {data:p,error:pe}=await db.from("profiles").select("id,display_name,semester,username,public_id").eq("id",user.id).maybeSingle();
  if(pe){fail("No se pudo cargar tu perfil: "+pe.message);return;}
  profile=p;
- if(!profile){const displayName=user.user_metadata?.full_name||user.user_metadata?.name||user.email?.split("@")[0]||"Estudiante";const {data:newP,error:insertError}=await db.from("profiles").insert({id:user.id,display_name:displayName,semester:null}).select().single();if(insertError){$("loading").textContent="No se pudo crear tu perfil: "+insertError.message;return;}profile=newP;}
+ if(!profile){const displayName=user.user_metadata?.full_name||user.user_metadata?.name||user.email?.split("@")[0]||"Estudiante";const {data:newP,error:insertError}=await db.from("profiles").insert({id:user.id,display_name:displayName,semester:null}).select().single();if(insertError){fail("No se pudo crear tu perfil: "+insertError.message);return;}profile=newP;}
  $("displayName").textContent=profile.display_name||"Estudiante";$("email").textContent=user.email||"";$("publicId").textContent=profile.public_id||"Pendiente de asignación";$("avatar").textContent=(profile.display_name||"O").trim().charAt(0).toLocaleUpperCase("es");$("semester").value=profile.semester||"";
  const {data:rows,error:progressError}=await db.from("academic_progress").select("id,user_id,subject_name,curriculum_semester,status,updated_at").eq("user_id",user.id).order("curriculum_semester").order("subject_name");
  if(progressError){fail("No se pudo cargar tu avance: "+progressError.message);return;}
