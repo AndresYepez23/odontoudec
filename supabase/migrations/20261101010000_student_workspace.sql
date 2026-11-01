@@ -77,13 +77,15 @@ create table if not exists public.study_group_messages (
 );
 create index if not exists study_group_messages_group_idx on public.study_group_messages(group_id,created_at desc);
 
-create or replace function public.is_study_group_member(target_group uuid, target_user uuid default auth.uid())
-returns boolean language sql stable security definer set search_path=public as $
-  select exists (
+create or replace function public.is_study_group_member(target_group uuid)
+returns boolean language sql stable security definer set search_path=public as $$
+  select auth.uid() is not null and exists (
     select 1 from public.study_group_members m
-    where m.group_id=target_group and m.user_id=target_user
+    where m.group_id=target_group and m.user_id=auth.uid()
   );
-$;
+$$;
+revoke all on function public.is_study_group_member(uuid) from public, anon;
+grant execute on function public.is_study_group_member(uuid) to authenticated;
 
 alter table public.study_groups enable row level security;
 alter table public.study_group_members enable row level security;
@@ -91,7 +93,7 @@ alter table public.study_group_messages enable row level security;
 
 drop policy if exists "Authenticated users view open groups" on public.study_groups;
 create policy "Authenticated users view open groups" on public.study_groups
-  for select to authenticated using (is_open or created_by = auth.uid() or public.is_study_group_member(id,auth.uid()));
+  for select to authenticated using (is_open or created_by = auth.uid() or public.is_study_group_member(id));
 drop policy if exists "Users create study groups" on public.study_groups;
 create policy "Users create study groups" on public.study_groups
   for insert to authenticated with check (created_by=auth.uid());
@@ -101,7 +103,7 @@ create policy "Owners update groups" on public.study_groups
 drop policy if exists "Members view group membership" on public.study_group_members;
 create policy "Members view group membership" on public.study_group_members
   for select to authenticated using (
-    user_id=auth.uid() or public.is_study_group_member(group_id,auth.uid())
+    user_id=auth.uid() or public.is_study_group_member(group_id)
   );
 drop policy if exists "Join open groups" on public.study_group_members;
 create policy "Join open groups" on public.study_group_members
@@ -115,7 +117,7 @@ create policy "Leave own group membership" on public.study_group_members
   for delete to authenticated using (user_id=auth.uid() and role<>'owner');
 drop policy if exists "Members read group messages" on public.study_group_messages;
 create policy "Members read group messages" on public.study_group_messages
-  for select to authenticated using (public.is_study_group_member(study_group_messages.group_id,auth.uid()));
+  for select to authenticated using (public.is_study_group_member(study_group_messages.group_id));
 drop policy if exists "Members send group messages" on public.study_group_messages;
 create policy "Members send group messages" on public.study_group_messages
   for insert to authenticated with check (sender_id=auth.uid() and exists (
@@ -152,3 +154,23 @@ create policy "Users view own study activity" on public.study_activity
 drop policy if exists "Users log own study sessions" on public.study_activity;
 create policy "Users log own study sessions" on public.study_activity
   for insert to authenticated with check (user_id=auth.uid() and activity_type='study_session');
+
+-- Explicit Data API privileges; RLS remains the row-level security boundary.
+grant select, insert, update, delete on public.student_notes to authenticated;
+grant select, insert, update, delete on public.resource_collections to authenticated;
+grant select, insert, delete on public.saved_resources to authenticated;
+grant select, insert, update on public.study_groups to authenticated;
+grant select, insert, delete on public.study_group_members to authenticated;
+grant select, insert on public.study_group_messages to authenticated;
+grant select, insert on public.study_activity to authenticated;
+
+create or replace function public.touch_student_note_updated_at()
+returns trigger language plpgsql set search_path=public as $$
+begin
+  new.updated_at=now();
+  return new;
+end;
+$$;
+drop trigger if exists student_notes_touch_updated_at on public.student_notes;
+create trigger student_notes_touch_updated_at before update on public.student_notes
+for each row execute function public.touch_student_note_updated_at();
