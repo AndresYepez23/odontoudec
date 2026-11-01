@@ -18,7 +18,7 @@ declare
   candidate text;
 begin
   loop
-    candidate := 'OD-' || upper(substr(encode(gen_random_bytes(5), 'hex'), 1, 8));
+    candidate := 'OD-' || upper(substr(encode(extensions.gen_random_bytes(5), 'hex'), 1, 8));
     exit when not exists (
       select 1 from public.profiles p where p.public_id = candidate
     );
