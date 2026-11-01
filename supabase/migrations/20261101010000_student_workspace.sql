@@ -85,12 +85,12 @@ language sql
 stable
 security definer
 set search_path=''
-as $
+as $$
   select (select auth.uid()) is not null and exists (
     select 1 from public.study_group_members m
     where m.group_id=target_group and m.user_id=(select auth.uid())
   );
-$;
+$$;
 revoke all on function private.is_study_group_member(uuid) from public, anon;
 grant usage on schema private to authenticated;
 grant execute on function private.is_study_group_member(uuid) to authenticated;
