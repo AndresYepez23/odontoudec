@@ -113,7 +113,7 @@ function setAuthUI(){
  document.getElementById('signUpBtn').classList.toggle('hidden',logged||authMode!=='signup');
  document.getElementById('signOutBtn').classList.toggle('hidden',!logged);
  const navAccount=document.getElementById('navAccountLink');
- if(navAccount){navAccount.textContent=logged?'Mi cuenta ↗':'Iniciar sesión ↗';navAccount.href='#acceso';}
+ if(navAccount){navAccount.textContent=logged?'Mi perfil ↗':'Iniciar sesión ↗';navAccount.href=logged?'perfil-academico.html':'#acceso';navAccount.classList.toggle('is-profile-link',logged);}
  const heroAccount=document.getElementById('heroAccountLink');
  if(heroAccount){heroAccount.textContent=logged?'Ver mi cuenta':'Iniciar sesión / registrarme';heroAccount.href='#acceso';}
  [...form.querySelectorAll('input,textarea,select,button')].forEach(el=>el.disabled=!logged);
