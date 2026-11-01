@@ -77,15 +77,23 @@ create table if not exists public.study_group_messages (
 );
 create index if not exists study_group_messages_group_idx on public.study_group_messages(group_id,created_at desc);
 
-create or replace function public.is_study_group_member(target_group uuid)
-returns boolean language sql stable security definer set search_path=public as $$
-  select auth.uid() is not null and exists (
+-- Keep the SECURITY DEFINER membership helper outside the exposed Data API schema.
+create schema if not exists private;
+create or replace function private.is_study_group_member(target_group uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path=''
+as $
+  select (select auth.uid()) is not null and exists (
     select 1 from public.study_group_members m
-    where m.group_id=target_group and m.user_id=auth.uid()
+    where m.group_id=target_group and m.user_id=(select auth.uid())
   );
-$$;
-revoke all on function public.is_study_group_member(uuid) from public, anon;
-grant execute on function public.is_study_group_member(uuid) to authenticated;
+$;
+revoke all on function private.is_study_group_member(uuid) from public, anon;
+grant usage on schema private to authenticated;
+grant execute on function private.is_study_group_member(uuid) to authenticated;
 
 alter table public.study_groups enable row level security;
 alter table public.study_group_members enable row level security;
@@ -93,7 +101,7 @@ alter table public.study_group_messages enable row level security;
 
 drop policy if exists "Authenticated users view open groups" on public.study_groups;
 create policy "Authenticated users view open groups" on public.study_groups
-  for select to authenticated using (is_open or created_by = auth.uid() or public.is_study_group_member(id));
+  for select to authenticated using (is_open or created_by = auth.uid() or private.is_study_group_member(id));
 drop policy if exists "Users create study groups" on public.study_groups;
 create policy "Users create study groups" on public.study_groups
   for insert to authenticated with check (created_by=auth.uid());
@@ -103,7 +111,7 @@ create policy "Owners update groups" on public.study_groups
 drop policy if exists "Members view group membership" on public.study_group_members;
 create policy "Members view group membership" on public.study_group_members
   for select to authenticated using (
-    user_id=auth.uid() or public.is_study_group_member(group_id)
+    user_id=auth.uid() or private.is_study_group_member(group_id)
   );
 drop policy if exists "Join open groups" on public.study_group_members;
 create policy "Join open groups" on public.study_group_members
@@ -117,7 +125,7 @@ create policy "Leave own group membership" on public.study_group_members
   for delete to authenticated using (user_id=auth.uid() and role<>'owner');
 drop policy if exists "Members read group messages" on public.study_group_messages;
 create policy "Members read group messages" on public.study_group_messages
-  for select to authenticated using (public.is_study_group_member(study_group_messages.group_id));
+  for select to authenticated using (private.is_study_group_member(study_group_messages.group_id));
 drop policy if exists "Members send group messages" on public.study_group_messages;
 create policy "Members send group messages" on public.study_group_messages
   for insert to authenticated with check (sender_id=auth.uid() and exists (
@@ -136,6 +144,7 @@ $$;
 drop trigger if exists study_group_owner_membership on public.study_groups;
 create trigger study_group_owner_membership after insert on public.study_groups
 for each row execute function public.add_study_group_owner();
+revoke all on function public.add_study_group_owner() from public, anon, authenticated;
 
 create table if not exists public.study_activity (
   id uuid primary key default gen_random_uuid(),
