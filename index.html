@@ -77,8 +77,10 @@ const SUPABASE_URL = "https://jqbrheonqqsiijrprsqs.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const menuBtn=document.getElementById('menuBtn'),navlinks=document.getElementById('navlinks');
-menuBtn.addEventListener('click',()=>{const open=navlinks.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open));});
-navlinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{navlinks.classList.remove('open');menuBtn.setAttribute('aria-expanded','false')}));
+menuBtn.addEventListener('click',()=>{const open=navlinks.classList.toggle('open');menuBtn.setAttribute('aria-expanded',String(open));menuBtn.setAttribute('aria-label',open?'Cerrar menú':'Abrir menú');});
+navlinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{navlinks.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');menuBtn.setAttribute('aria-label','Abrir menú');navlinks.querySelectorAll('details').forEach(d=>d.open=false);}));
+document.addEventListener('click',e=>{if(!e.target.closest('.nav')){navlinks.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');menuBtn.setAttribute('aria-label','Abrir menú');navlinks.querySelectorAll('details').forEach(d=>d.open=false);}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){navlinks.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');menuBtn.setAttribute('aria-label','Abrir menú');navlinks.querySelectorAll('details').forEach(d=>d.open=false);}});
 const search=document.getElementById('priceSearch'),rows=[...document.querySelectorAll('#priceRows tr')],noResults=document.getElementById('noResults');
 function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
 search.addEventListener('input',()=>{let count=0;rows.forEach(r=>{const show=norm(r.innerText+' '+r.dataset.name).includes(norm(search.value));r.style.display=show?'':'none';if(show)count++});noResults.style.display=count?'none':'block'});
