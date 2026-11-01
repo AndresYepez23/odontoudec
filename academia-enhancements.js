@@ -208,3 +208,30 @@
   $("nextQuestion").addEventListener("click",()=>{if(index<round.length-1){index++;render();}else finish();});$("restartQuiz").addEventListener("click",start);leaderboard();start();
   const atlasStyle=document.createElement("style");atlasStyle.textContent="\n  .interactive-atlas{margin:18px 0 24px;padding:24px;background:linear-gradient(135deg,#fff,#faf6ff);border:1px solid #e8dff0;border-radius:19px}\n  .interactive-atlas-head h3{color:var(--p);font-size:1.45rem;margin:9px 0 5px}\n  .interactive-atlas-head p{margin:0}\n  .interactive-atlas-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(250px,.9fr);gap:22px;align-items:center;margin-top:18px}\n  .interactive-tooth-stage{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}\n  .interactive-tooth-svg{width:100%;height:auto;max-height:390px;display:block;color:#6d5a7c}\n  .tooth-layer{cursor:pointer;stroke:#80622c;stroke-width:2.4;transition:filter .16s,stroke-width .16s;outline:none}\n  .layer-enamel{fill:#fff0c9}.layer-dentin{fill:#e6a84b}.layer-pulp{fill:#d86d69}.layer-cementum{fill:#c89c52}\n  .tooth-layer:hover,.tooth-layer:focus-visible,.tooth-layer.selected{stroke:#4b2670;stroke-width:5;filter:drop-shadow(0 2px 3px #32105f38)}\n  .interactive-legend{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;padding:8px 3px 2px;font-size:.78rem;color:#62576c}\n  .interactive-legend span{display:flex;align-items:center;gap:5px}\n  .legend-dot{width:10px;height:10px;border-radius:50%;display:inline-block}.legend-dot.enamel{background:#fff0c9;border:1px solid #d9b36a}.legend-dot.dentin{background:#e6a84b}.legend-dot.pulp{background:#d86d69}.legend-dot.cementum{background:#c89c52}\n  .interactive-detail{background:#fff;border:1px solid var(--line);border-radius:16px;padding:21px;min-height:260px}\n  .interactive-detail h4{font-size:1.35rem;color:var(--p);margin:7px 0}\n  .interactive-detail>p{color:var(--muted);margin:0 0 17px}\n  .structure-fact{background:#f7f2fb;border-radius:12px;padding:13px 15px}.structure-fact strong{color:var(--p);font-size:.88rem}.structure-fact p{margin:5px 0 0;color:#5e5368;font-size:.9rem}\n  @media(max-width:700px){.interactive-atlas{padding:17px}.interactive-atlas-grid{grid-template-columns:1fr;gap:13px}.interactive-tooth-svg{max-height:310px}.interactive-detail{min-height:0}}\n";document.head.appendChild(atlasStyle);
 })();
+
+/* Perfil académico completo y navegación móvil compacta */
+(() => {
+  const accountLink = document.querySelector(".nav-account");
+  if (accountLink) {
+    accountLink.href = "perfil-academico.html";
+    accountLink.textContent = "Mi perfil ↗";
+    accountLink.setAttribute("aria-label", "Abrir mi perfil académico");
+  }
+  const style = document.createElement("style");
+  style.textContent = `
+    @media(max-width:900px){
+      body:has(.nav) .top{display:none}
+      body:has(.nav) .nav{display:grid;grid-template-columns:1fr auto;align-items:center;gap:7px 10px;padding:8px 14px}
+      body:has(.nav) .navlinks{grid-column:1/-1;grid-row:2;order:initial;width:100%;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:1px 0 2px}
+      body:has(.nav) .navlinks::-webkit-scrollbar{display:none}
+      body:has(.nav) .navlinks a{white-space:nowrap;padding:6px 9px;font-size:.78rem}
+      body:has(.nav) .nav-account{grid-column:2;grid-row:1;margin:0;padding:8px 11px;font-size:.78rem;border-radius:10px}
+    }
+    @media(max-width:520px){
+      body:has(.nav) .nav{padding:7px 12px;gap:6px 8px}
+      body:has(.nav) .brand{font-size:1rem}
+      body:has(.nav) .navlinks a{font-size:.76rem;padding:5px 8px}
+      body:has(.nav) .nav-account{font-size:.75rem;padding:7px 9px}
+    }`;
+  document.head.appendChild(style);
+})();
