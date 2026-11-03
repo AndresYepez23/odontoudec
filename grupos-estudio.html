@@ -23,6 +23,7 @@ button.secondary{background:var(--mint);color:var(--teal)}button.danger{backgrou
 .auth{padding:20px}.empty{padding:22px;text-align:center;color:var(--muted)}.fine{font-size:.78rem;color:var(--muted);margin-top:12px}
 @media(max-width:760px){header{align-items:flex-start;flex-direction:column}header nav{display:flex;flex-wrap:wrap;gap:7px}header nav a{font-size:.82rem}main{margin:16px auto}.hero{padding:20px}.grid{grid-template-columns:1fr}.chat-log{height:48vh;min-height:300px}header{padding:13px 16px}}
 .site-nav{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}.site-nav a{display:inline-flex;align-items:center;padding:8px 10px;border-radius:10px;color:#54218b;text-decoration:none;font-size:.86rem;font-weight:750;white-space:nowrap}.site-nav a:hover,.site-nav a:focus-visible{background:#f3edf9;outline-color:#d7a928}.site-nav a[aria-current="page"]{background:#f3edf9;color:#32105f}@media(max-width:760px){header .site-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:5px}header .site-nav a{justify-content:center;padding:8px 5px;background:#faf8fc;font-size:.78rem}}@media(max-width:390px){header .site-nav{grid-template-columns:repeat(2,minmax(0,1fr))}}</style>
+<link rel="stylesheet" href="assets/community-dock.css">
 </head>
 <body>
 <header><a class="brand" href="index.html">Odonto<span>UdeC</span></a><nav class="site-nav" aria-label="Navegación principal"><a href="index.html#inicio">Inicio</a><a href="index.html#agenda">Calendario</a><a href="mi-espacio.html">Mi espacio</a><a href="grupos-estudio.html">Grupos</a><a href="academia.html">Academia</a><a href="perfil-academico.html">Mi perfil</a></nav></header>
@@ -127,4 +128,5 @@ db.auth.onAuthStateChange((_event,session)=>{
 });
 init();
 </script>
+<script src="assets/community-dock.js"></script>
 </body></html>
