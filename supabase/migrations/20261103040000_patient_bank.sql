@@ -57,14 +57,17 @@ alter table public.patient_bank_cases enable row level security;
 alter table public.patient_bank_private enable row level security;
 alter table public.patient_bank_intake_limits enable row level security;
 alter table public.patient_bank_case_events enable row level security;
+alter table public.patient_bank_case_events enable row level security;
 
 revoke all on public.patient_bank_cases from anon, authenticated;
 revoke all on public.patient_bank_private from anon, authenticated;
 revoke all on public.patient_bank_intake_limits from anon, authenticated;
 revoke all on public.patient_bank_case_events from anon, authenticated;
+revoke all on public.patient_bank_case_events from anon, authenticated;
 grant all on public.patient_bank_cases to service_role;
 grant all on public.patient_bank_private to service_role;
 grant all on public.patient_bank_intake_limits to service_role;
+grant all on public.patient_bank_case_events to service_role;
 grant all on public.patient_bank_case_events to service_role;
 
 create or replace function public.patient_bank_list_cases()
@@ -214,7 +217,7 @@ begin
   ) then
     raise exception 'Cuenta estudiantil no válida.';
   end if;
-  insert into public.patient_bank_cases(reason_summary, general_area, availability, source, consent_recorded, created_by_student)
+  insert into public.patient_bank_cases(reason_summary, general_area, availability, source, consent_recorded, consent_at, consent_version, created_by_student)
   values (left(trim(p_summary),500), nullif(trim(p_area),''), nullif(trim(p_availability),''), p_source, true, now(), '2026-11-03-v1', p_student_id)
   returning id into v_case_id;
   insert into public.patient_bank_private(case_id, patient_name, phone)
