@@ -14,7 +14,7 @@
 <form id="changePasswordForm" hidden style="margin-top:12px;padding:13px;background:#ffffff12;border:1px solid #ffffff35;border-radius:12px">
 <label for="currentPassword" style="display:block;color:#fff;font-size:.82rem;margin:4px 0">Contraseña actual</label>
 <input id="currentPassword" type="password" autocomplete="current-password" required style="width:100%;padding:10px;border:1px solid #ded5e8;border-radius:9px">
-<label for="newPassword" style="display:block;color:#fff;font-size:.82rem;margin:12px 0 4px">Nueva contraseña (mínimo 8 caracteres)</label>
+<label for="newPassword" style="display:block;color:#fff;font-size:.82rem;margin:12px 0 4px">Nueva contraseña (mínimo 6 caracteres)</label>
 <input id="newPassword" type="password" minlength="8" autocomplete="new-password" required style="width:100%;padding:10px;border:1px solid #ded5e8;border-radius:9px">
 <label for="confirmNewPassword" style="display:block;color:#fff;font-size:.82rem;margin:12px 0 4px">Confirmar nueva contraseña</label>
 <input id="confirmNewPassword" type="password" minlength="8" autocomplete="new-password" required style="width:100%;padding:10px;border:1px solid #ded5e8;border-radius:9px">
@@ -95,7 +95,7 @@ $("changePasswordForm").addEventListener("submit",async e=>{
  const confirmation=$("confirmNewPassword").value;
  const status=$("changePasswordStatus"),button=$("changePasswordSubmit");
  status.textContent="";
- if(newPassword.length<8){status.textContent="La nueva contraseña debe tener al menos 8 caracteres.";return;}
+ if(newPassword.length<6){status.textContent="La nueva contraseña debe tener al menos 6 caracteres.";return;}
  if(newPassword!==confirmation){status.textContent="Las contraseñas nuevas no coinciden.";return;}
  if(newPassword===currentPassword){status.textContent="La nueva contraseña debe ser diferente de la actual.";return;}
  if(!user?.email){status.textContent="No pudimos identificar el correo de tu cuenta. Cierra sesión y vuelve a entrar.";return;}
