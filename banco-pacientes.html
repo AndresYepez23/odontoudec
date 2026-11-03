@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#32105f">
+<meta name="description" content="Conectamos pacientes con estudiantes de Odontología de la Universidad de Cartagena.">
+<title>Banco de pacientes · OdontoUdeC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="assets/patient-bank.css">
+</head>
+<body>
+<header class="pb-topbar"><a class="pb-brand" href="index.html"><span class="pb-mark">O</span><span>OdontoUdeC<small>Comunidad odontológica</small></span></a><a class="pb-back" href="index.html">← Volver al inicio</a></header>
+<main class="pb-shell">
+<section class="pb-hero">
+  <span class="pb-eyebrow"><span></span> Conectamos formación y comunidad</span>
+  <h1>La odontología también <em>empieza escuchando.</em></h1>
+  <p>Un espacio para acercar a pacientes que buscan atención odontológica y estudiantes que necesitan fortalecer su experiencia clínica, con respeto y responsabilidad.</p>
+  <div class="pb-trust"><span>✦ Sin crear una cuenta como paciente</span><span>✦ Tus datos no son públicos</span></div>
+</section>
+<section class="pb-switch" aria-label="Selecciona tu acceso">
+  <button class="pb-tab active" data-tab="patient" type="button"><span>♡</span><b>Soy paciente</b><small>Quiero recibir orientación de contacto</small></button>
+  <button class="pb-tab" data-tab="student" type="button"><span>✳</span><b>Soy estudiante</b><small>Consultar el banco de pacientes</small></button>
+</section>
+<section id="pb-patient-panel" class="pb-panel">
+  <div class="pb-panel-heading"><span class="pb-kicker">SOLICITUD DE CONTACTO</span><h2>Cuéntanos cómo podemos ayudarte.</h2><p>Completa estos datos básicos. No necesitas conocer el nombre de un tratamiento ni tener una cuenta.</p></div>
+  <form id="pb-intake-form" class="pb-form">
+    <label>Nombre y apellido<input name="name" autocomplete="name" maxlength="100" required placeholder="¿Cómo te llamas?"></label>
+    <label>Número de contacto<input name="phone" autocomplete="tel" inputmode="tel" maxlength="30" required placeholder="Tu teléfono"></label>
+    <label>¿Qué te gustaría atender o revisar?<textarea name="summary" rows="4" minlength="5" maxlength="500" required placeholder="Cuéntanos con tus palabras qué necesitas. Evita escribir documentos, direcciones o información de otras personas."></textarea></label>
+    <div class="pb-form-grid"><label>¿En qué zona te encuentras? <span>(opcional)</span><input name="area" maxlength="80" placeholder="Barrio o municipio"></label><label>¿Cuándo podrías asistir? <span>(opcional)</span><select name="availability"><option value="">Seleccionar</option><option>Entre semana en la mañana</option><option>Entre semana en la tarde</option><option>En cualquier horario</option><option>Por acordar</option></select></label></div>
+    <label class="pb-consent"><input type="checkbox" name="consent" required><span>Autorizo de manera previa, expresa e informada el tratamiento de mis datos personales y de la información sobre mi salud bucal que decida compartir, para gestionar esta solicitud y facilitar el contacto con estudiantes de OdontoUdeC. Entiendo que mi nombre y teléfono solo se revelarán al estudiante que gestione el caso y a los administradores autorizados; los demás estudiantes verán únicamente una ficha resumida.</span></label>
+    <p class="pb-legal">La información sobre salud es sensible: comparte solo lo necesario. No incluyas documentos de identidad, historias clínicas, fotografías ni datos de terceras personas. Esta solicitud no constituye una cita ni garantiza atención.</p>
+    <div class="pb-form-foot"><button class="pb-submit" type="submit">Enviar solicitud <span>↗</span></button><p id="pb-intake-status" role="status" aria-live="polite"></p></div>
+  </form>
+</section>
+<section id="pb-student-panel" class="pb-panel pb-student-panel" hidden>
+  <div id="pb-student-gate" class="pb-gate"><div class="pb-gate-icon">✳</div><h2>Un espacio para nuestra comunidad estudiantil.</h2><p>Inicia sesión con tu cuenta de OdontoUdeC para consultar los pacientes disponibles y gestionar los casos que tomes.</p><a href="index.html#acceso" class="pb-submit">Iniciar sesión ↗</a></div>
+  <div id="pb-student-content" hidden>
+    <div class="pb-panel-heading pb-student-heading"><div><span class="pb-kicker">ESPACIO ESTUDIANTIL · COMUNIDAD CLÍNICA</span><h2>Pacientes para tu práctica clínica.</h2><p>Explora las solicitudes, toma los casos que puedas gestionar y comunícate directamente con el paciente.</p></div><div class="pb-privacy-note"><span aria-hidden="true">⌑</span><div><b>Contacto protegido</b><small>Se desbloquea al tomar un caso</small></div></div></div>
+    <div class="pb-stats"><div><b id="pb-count-available">—</b><span>Disponibles</span></div><div><b id="pb-count-progress">—</b><span>En gestión</span></div><div><b id="pb-count-completed">—</b><span>Finalizados</span></div></div>
+    <div class="pb-toolbar"><div class="pb-toolbar-copy"><span class="pb-kicker">EXPLORA EL BANCO</span><strong>Casos registrados</strong></div><div class="pb-filters" role="group" aria-label="Filtrar pacientes"><button class="active" data-filter="all">Todos</button><button data-filter="available">Disponibles</button><button data-filter="claimed">En gestión</button><button data-filter="completed">Finalizados</button></div><button id="pb-refresh" class="pb-refresh" type="button">↻ Actualizar</button></div>
+<div id="pb-case-list" class="pb-case-list"><div class="pb-empty">Cargando banco de pacientes…</div></div>
+    <section class="pb-share"><div><span class="pb-kicker">¿CONOCES A ALGUIEN QUE NECESITE ATENCIÓN?</span><h3>Comparte una oportunidad de atención.</h3><p>Solo registra a una persona si te autorizó expresamente a compartir sus datos para este propósito.</p></div><button id="pb-share-toggle" class="pb-outline" type="button">Compartir paciente</button></section>
+    <form id="pb-student-share-form" class="pb-form pb-share-form" hidden>
+      <label>Nombre del paciente<input name="name" maxlength="100" required></label><label>Teléfono de contacto<input name="phone" inputmode="tel" maxlength="30" required></label><label>¿Qué necesita atender?<textarea name="summary" rows="3" minlength="5" maxlength="500" required></textarea></label>
+      <label class="pb-consent"><input type="checkbox" name="consent" required><span>Confirmo que el paciente autorizó de manera expresa el tratamiento y la comunicación de sus datos personales y de la información sobre su salud bucal para facilitar el contacto con un estudiante autorizado de OdontoUdeC.</span></label>
+      <button class="pb-submit" type="submit">Enviar paciente ↗</button><p id="pb-share-status" role="status"></p>
+    </form>
+  </div>
+</section>
+<footer class="pb-footer"><span>OdontoUdeC · Universidad de Cartagena</span><p class="pb-footer-contact">¿Tienes dudas o necesitas orientación sobre esta iniciativa? Puedes comunicarte con el <strong>CEFOUC (Consejo Estudiantil de la Facultad de Odontología)</strong>.</p><a href="index.html">Volver a OdontoUdeC</a></footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/patient-bank.js"></script>
+</body></html>
