@@ -145,8 +145,8 @@ const subjectSemesterMap={
 10:['Rotaciones Electivas','Fundamentación Electiva','Clínica Hospitalaria III','Clínica Integral del Adulto','Clínica de Mantenimiento','Clínica de Proyección Social II','Clínica de Proyección Social','Cursos Libres I–V']
 };
 function renderSubjects(){
- const q=document.getElementById('subjectSearch').value.toLocaleLowerCase('es').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');
- const normalize=x=>x.toLocaleLowerCase('es').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');
+ const q=document.getElementById('subjectSearch').value.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ const normalize=x=>x.toLocaleLowerCase('es').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
  const filtered=subjects.filter(x=>normalize(x).includes(q));
  const assigned=new Set(),groups=[];
  for(let n=1;n<=10;n++){const items=filtered.filter(x=>subjectSemesterMap[n].includes(x));items.forEach(x=>assigned.add(x));if(items.length)groups.push('<details class="subject-semester-group"><summary>Semestre '+n+' <span>'+items.length+' asignaturas</span></summary><div class="subject-group-items">'+items.map(x=>'<span class="subject">'+x+'</span>').join('')+'</div></details>');}
