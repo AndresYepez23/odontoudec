@@ -27,8 +27,7 @@ Deno.serve(async(req:Request)=>{
    if(error||!user)return reply({error:"Tu sesión no es válida."},401);
    studentId=user.id;
   }
-  const forwarded=req.headers.get("x-forwarded-for")||"";
-  const ip=req.headers.get("cf-connecting-ip")||req.headers.get("x-real-ip")||forwarded.split(",")[0].trim()||"unknown";
+  const ip=req.headers.get("x-nf-client-connection-ip")||req.headers.get("cf-connecting-ip")||"unknown";
   const {data,error}=await admin.rpc("patient_bank_submit",{p_ip_hash:await hashIp(ip,serviceKey),p_name:name,p_phone:phone,p_summary:summary,p_area:area||null,p_availability:availability||null,p_source:source,p_student_id:studentId});
   if(error)throw error;
   return reply({ok:true,case_id:data});
