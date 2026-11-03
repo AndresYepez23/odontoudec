@@ -1,7 +1,7 @@
 -- Banco de pacientes: separar datos de contacto de la ficha visible.
 create table if not exists public.patient_bank_cases (
   id uuid primary key default gen_random_uuid(),
-  public_code text not null unique default ('OD-' || upper(substr(encode(gen_random_bytes(5),'hex'),1,8))),
+  public_code text not null unique default ('OD-' || upper(substr(replace(gen_random_uuid()::text,'-',''),1,8))),
   reason_summary text not null check (char_length(reason_summary) between 10 and 500),
   general_area text,
   availability text,
@@ -55,7 +55,7 @@ grant all on public.patient_bank_intake_limits to service_role;
 create or replace function public.patient_bank_list_cases()
 returns table (
   id uuid, public_code text, reason_summary text, general_area text,
-  availability text, source text, status text, created_at timestamptz
+  availability text, source text, status text, created_at timestamptz, is_mine boolean
 )
 language sql
 stable
@@ -63,7 +63,8 @@ security definer
 set search_path = ''
 as $$
   select c.id, c.public_code, c.reason_summary, c.general_area,
-         c.availability, c.source, c.status, c.created_at
+         c.availability, c.source, c.status, c.created_at,
+         (c.claimed_by = (select auth.uid())) as is_mine
   from public.patient_bank_cases c
   where auth.uid() is not null
     and exists (select 1 from public.profiles p where p.id = (select auth.uid()))
