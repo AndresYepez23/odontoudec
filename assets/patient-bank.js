@@ -44,7 +44,7 @@ async function pbLoadCases(){
  const list=document.getElementById("pb-case-list");list.innerHTML='<div class="pb-empty">Actualizando casos…</div>';
  const {data,error}=await pbClient.rpc("patient_bank_list_cases");
  if(error){list.innerHTML='<div class="pb-empty">No pudimos cargar el banco. Intenta actualizar.</div>';return;}
- pbCases=data||[];pbRender();for(const c of pbCases.filter(x=>x.status==="claimed"&&x.is_mine)){pbLoadPrivateContact(c.id);}await pbLoadAdminQueue();
+ pbCases=data||[];pbRender();await Promise.all(pbCases.filter(x=>x.status==="claimed"&&x.is_mine).map(x=>pbLoadPrivateContact(x.id)));await pbLoadAdminQueue();
 }
 async function pbLoadPrivateContact(id){
  const {data,error}=await pbClient.rpc("patient_bank_my_contact",{p_case_id:id});
@@ -57,11 +57,7 @@ async function pbHandleAction(button){
   if(action==="claim"){
    if(!confirm("¿Confirmas que deseas gestionar este caso? Al continuar, dejará de estar disponible para otros estudiantes."))return;
    const {data,error}=await pbClient.rpc("patient_bank_claim_case",{p_case_id:id});if(error)throw error;if(!data)throw new Error("Otro estudiante acaba de tomar este caso. Actualiza el banco.");
-   const {data:contact,error:contactError}=await pbClient.rpc("patient_bank_my_contact",{p_case_id:id});if(contactError)throw contactError;
-   const box=document.getElementById("pb-contact-"+id);box.hidden=false;box.textContent="";
-   if(contact?.length){const d=contact[0];box.textContent="Contacto privado · "+d.patient_name+" · "+d.phone;}
    await pbLoadCases();
-   const refreshed=document.getElementById("pb-contact-"+id);if(refreshed&&contact?.length){refreshed.hidden=false;refreshed.textContent="Contacto privado · "+contact[0].patient_name+" · "+contact[0].phone;}
   }else if(action==="release"||action==="complete"){
    const promptText=action==="release"?"¿Quieres devolver este caso al banco para que otro estudiante pueda gestionarlo?":"¿Confirmas que la atención de este caso ya finalizó?";
    if(!confirm(promptText))return;
