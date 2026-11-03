@@ -24,7 +24,7 @@ const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co"
 const $=id=>document.getElementById(id);let recoverySession=false,finished=false;const recoveryStorageKey="ou-password-recovery";
 function showError(message){$("loading").textContent=message;$("errorActions").classList.remove("hidden");$("resetForm").classList.add("hidden");}
 function enableForm(){recoverySession=true;$("loading").classList.add("hidden");$("errorActions").classList.add("hidden");$("resetForm").classList.remove("hidden");}
-db.auth.onAuthStateChange((event,session)=>{if(event==="PASSWORD_RECOVERY"&&session)enableForm();});
+db.auth.onAuthStateChange((event,session)=>{if(event==="PASSWORD_RECOVERY"&&session){sessionStorage.removeItem(recoveryStorageKey);enableForm();}});
 (async()=>{
  const {data,error}=await db.auth.getSession();
  if(error){showError("No se pudo verificar el enlace: "+error.message);return;}
