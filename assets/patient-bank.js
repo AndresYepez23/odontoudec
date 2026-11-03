@@ -25,7 +25,7 @@ function pbRender(){
  if(!filtered.length){list.innerHTML='<div class="pb-empty">No hay pacientes en esta categoría por ahora.</div>';return;}
  list.innerHTML=filtered.map(c=>{const status=pbStatusLabels[c.status]||"Disponible";const source=c.source==="student"?"Compartido por un estudiante":"Solicitud de paciente";let actions="";
  if(c.status==="available")actions='<button class="primary" data-action="claim" data-id="'+c.id+'">Gestionar este caso</button>';
- if(c.status==="claimed")actions='<span class="pb-case-meta">Este caso ya está siendo gestionado.</span>';
+ if(c.status==="claimed")actions=c.is_mine?'<button data-action="release" data-id="'+c.id+'">Devolver al banco</button><button class="primary" data-action="complete" data-id="'+c.id+'">Marcar finalizado</button>':'<span class="pb-case-meta">Este caso ya está siendo gestionado.</span>';
  if(c.status==="completed")actions='<span class="pb-case-meta">Caso finalizado · Registro histórico</span>';
  return '<article class="pb-case"><div class="pb-case-top"><span class="pb-code">'+c.public_code+'</span><span class="pb-status '+c.status+'">'+status+'</span></div><h3>'+pbEscape(c.reason_summary)+'</h3><p>'+source+'</p><div class="pb-case-meta">'+(c.general_area?'<span>⌖ '+pbEscape(c.general_area)+'</span>':"")+(c.availability?'<span>◷ '+pbEscape(c.availability)+'</span>':"")+'</div><div class="pb-case-actions">'+actions+'</div><div class="pb-contact" id="pb-contact-'+c.id+'" hidden></div></article>';}).join("");
 }
@@ -34,7 +34,12 @@ async function pbLoadCases(){
  const list=document.getElementById("pb-case-list");list.innerHTML='<div class="pb-empty">Actualizando casos…</div>';
  const {data,error}=await pbClient.rpc("patient_bank_list_cases");
  if(error){list.innerHTML='<div class="pb-empty">No pudimos cargar el banco. Intenta actualizar.</div>';return;}
- pbCases=data||[];pbRender();
+ pbCases=data||[];pbRender();for(const c of pbCases.filter(x=>x.status==="claimed"&&x.is_mine)){pbLoadPrivateContact(c.id);}
+}
+async function pbLoadPrivateContact(id){
+ const {data,error}=await pbClient.rpc("patient_bank_my_contact",{p_case_id:id});
+ const box=document.getElementById("pb-contact-"+id);if(error||!box||!data?.length)return;
+ box.hidden=false;box.textContent="Contacto privado · "+data[0].patient_name+" · "+data[0].phone;
 }
 async function pbHandleAction(button){
  const id=button.dataset.id,action=button.dataset.action;button.disabled=true;
