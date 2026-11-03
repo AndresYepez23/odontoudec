@@ -336,7 +336,7 @@ document.getElementById('monthNext')?.addEventListener('click',()=>{calendarMont
 function renderAcademicEvents(){
  const query=norm(document.getElementById('eventSearch').value.trim()),semester=document.getElementById('eventSemester').value,type=document.getElementById('eventType').value,cut=document.getElementById('eventCut')?.value||'';
  const filtered=eventRows.filter(e=>(!query||norm([e.title,e.description,e.category].join(' ')).includes(query))&&(!semester||e.semester==null||String(e.semester)===semester)&&(!type||e.category===type)&&(!cut||norm(e.description||'').includes(norm(cut))));
- eventStatus.textContent=filtered.length+' fechas disponibles. Selecciona un día para consultar sus actividades.'+(eventLoadWarning?' '+eventLoadWarning:'');
+ eventStatus.textContent=filtered.length+' actividades disponibles. Selecciona un día para consultar sus eventos y evaluaciones.'+(eventLoadWarning?' '+eventLoadWarning:'');
  renderMonthCalendar(filtered);
 
 }
