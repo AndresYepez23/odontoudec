@@ -11,7 +11,7 @@ async function pbInvokeIntake(form,source,statusEl){
  const button=form.querySelector('button[type="submit"]');button.disabled=true;statusEl.textContent="Enviando solicitud…";
  try{
   const data=Object.fromEntries(new FormData(form).entries());
-  const response=await fetch(PB_URL+"/functions/v1/patient-bank-intake",{method:"POST",headers:{"Content-Type":"application/json",...(pbSession?{Authorization:"Bearer "+pbSession.access_token}:{})},body:JSON.stringify({name:data.name,phone:data.phone,summary:data.summary,area:data.area||null,availability:data.availability||null,source,consent:data.consent==="on"})});
+  const response=await fetch(PB_URL+"/functions/v1/patient-bank-intake",{method:"POST",headers:{"Content-Type":"application/json","apikey":PB_KEY,...(pbSession?{Authorization:"Bearer "+pbSession.access_token}:{})},body:JSON.stringify({name:data.name,phone:data.phone,summary:data.summary,area:data.area||null,availability:data.availability||null,source,consent:data.consent==="on"})});
   const result=await response.json();if(!response.ok)throw new Error(result.error||"No se pudo enviar la solicitud.");
   form.reset();statusEl.textContent="¡Solicitud recibida! Revisaremos la información para incorporarla al banco.";
  }catch(error){statusEl.textContent=error.message;}finally{button.disabled=false;}
