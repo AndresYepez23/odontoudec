@@ -9,7 +9,7 @@ drop policy if exists "Profiles are viewable" on public.profiles;
 drop policy if exists "Profiles visible by privacy setting" on public.profiles;
 create policy "Profiles visible by privacy setting"
   on public.profiles for select to anon, authenticated
-  using (profile_visibility = 'public' or auth.uid() = id);
+  using (profile_visibility = 'public' or (select auth.uid()) = id);
 
 create or replace function public.search_students(search_term text)
 returns table (id uuid, display_name text, public_id text, semester smallint)
