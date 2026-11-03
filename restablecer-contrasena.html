@@ -15,7 +15,7 @@ button:disabled{opacity:.55;cursor:wait}.link{background:#f3edf9;color:var(--p);
 </style></head>
 <body><main class="card"><div class="brand">Odonto<span>UdeC</span></div><div class="eyebrow">SEGURIDAD DE TU CUENTA</div><h1>Restablece tu contraseña</h1><p>Elige una contraseña nueva para volver a entrar a tu cuenta.</p>
 <div id="loading" class="status" role="status" aria-live="polite">Verificando el enlace de recuperación…</div>
-<form id="resetForm" class="hidden"><label for="newPassword">Nueva contraseña</label><input id="newPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="Mínimo 8 caracteres"><label for="confirmPassword">Confirma la contraseña</label><input id="confirmPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="Escríbela nuevamente"><button id="saveButton" type="submit">Guardar nueva contraseña</button></form>
+<form id="resetForm" class="hidden"><label for="newPassword">Nueva contraseña</label><input id="newPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Mínimo 6 caracteres"><label for="confirmPassword">Confirma la contraseña</label><input id="confirmPassword" type="password" minlength="6" autocomplete="new-password" required placeholder="Escríbela nuevamente"><button id="saveButton" type="submit">Guardar nueva contraseña</button></form>
 <div id="success" class="hidden"><p>Tu contraseña fue actualizada correctamente. Ya puedes iniciar sesión con ella.</p><a class="link" href="index.html#acceso">Volver a OdontoUdeC</a></div>
 <div id="errorActions" class="hidden"><p>El enlace ya no se puede utilizar. Puedes solicitar uno nuevo aquí:</p><form id="resendForm"><label for="recoveryEmail">Correo de tu cuenta</label><input id="recoveryEmail" type="email" autocomplete="email" required placeholder="tu@correo.com"><button id="resendButton" type="submit">Enviar un enlace nuevo</button></form><a class="link" href="index.html#acceso">Volver al inicio de sesión</a></div>
 <div id="formStatus" class="status" role="status" aria-live="polite"></div></main>
@@ -52,7 +52,7 @@ $("resendForm").addEventListener("submit",async e=>{
 $("resetForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!recoverySession||finished)return;
  const password=$("newPassword").value,confirmation=$("confirmPassword").value;
- if(password.length<8){$("formStatus").textContent="La contraseña debe tener al menos 8 caracteres.";return;}
+ if(password.length<6){$("formStatus").textContent="La contraseña debe tener al menos 6 caracteres.";return;}
  if(password!==confirmation){$("formStatus").textContent="Las contraseñas no coinciden.";return;}
  $("saveButton").disabled=true;$("saveButton").textContent="Guardando…";$("formStatus").textContent="";
  const {error}=await db.auth.updateUser({password});
