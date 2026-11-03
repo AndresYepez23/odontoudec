@@ -110,7 +110,7 @@ begin
   end if;
   return v_updated = 1;
 end;
-$;
+$$;
 
 create or replace function public.patient_bank_release_case(p_case_id uuid)
 returns boolean
@@ -132,7 +132,7 @@ begin
   end if;
   return v_updated = 1;
 end;
-$;
+$$;
 
 create or replace function public.patient_bank_complete_case(p_case_id uuid)
 returns boolean
@@ -154,7 +154,7 @@ begin
   end if;
   return v_updated = 1;
 end;
-$;
+$$;
 
 create or replace function public.patient_bank_my_contact(p_case_id uuid)
 returns table (patient_name text, phone text)
