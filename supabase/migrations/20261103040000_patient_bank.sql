@@ -52,6 +52,8 @@ create index if not exists patient_bank_cases_created_by_idx
   on public.patient_bank_cases(created_by_student) where created_by_student is not null;
 create index if not exists patient_bank_case_events_case_created_idx
   on public.patient_bank_case_events(case_id, created_at desc);
+create index if not exists patient_bank_case_events_case_created_idx
+  on public.patient_bank_case_events(case_id, created_at desc);
 
 alter table public.patient_bank_cases enable row level security;
 alter table public.patient_bank_private enable row level security;
