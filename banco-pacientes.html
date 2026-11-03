@@ -33,12 +33,12 @@
     <div class="pb-form-foot"><button class="pb-submit" type="submit">Enviar solicitud <span>↗</span></button><p id="pb-intake-status" role="status" aria-live="polite"></p></div>
   </form>
 </section>
-<section id="pb-student-panel" class="pb-panel" hidden>
+<section id="pb-student-panel" class="pb-panel pb-student-panel" hidden>
   <div id="pb-student-gate" class="pb-gate"><div class="pb-gate-icon">✳</div><h2>Un espacio para nuestra comunidad estudiantil.</h2><p>Inicia sesión con tu cuenta de OdontoUdeC para consultar los pacientes disponibles y gestionar los casos que tomes.</p><a href="index.html#acceso" class="pb-submit">Iniciar sesión ↗</a></div>
   <div id="pb-student-content" hidden>
-    <div class="pb-panel-heading"><span class="pb-kicker">COMUNIDAD CLÍNICA</span><h2>Banco de pacientes</h2><p>Consulta los casos compartidos por pacientes y compañeros. La identidad del estudiante que gestiona un caso es privada.</p></div>
+    <div class="pb-panel-heading pb-student-heading"><div><span class="pb-kicker">ESPACIO ESTUDIANTIL · COMUNIDAD CLÍNICA</span><h2>Pacientes para tu práctica clínica.</h2><p>Explora las solicitudes, toma los casos que puedas gestionar y comunícate directamente con el paciente.</p></div><div class="pb-privacy-note"><span aria-hidden="true">⌑</span><div><b>Contacto protegido</b><small>Se desbloquea al tomar un caso</small></div></div></div>
     <div class="pb-stats"><div><b id="pb-count-available">—</b><span>Disponibles</span></div><div><b id="pb-count-progress">—</b><span>En gestión</span></div><div><b id="pb-count-completed">—</b><span>Finalizados</span></div></div>
-    <div class="pb-toolbar"><div class="pb-filters" role="group" aria-label="Filtrar pacientes"><button class="active" data-filter="all">Todos</button><button data-filter="available">Disponibles</button><button data-filter="claimed">En gestión</button><button data-filter="completed">Finalizados</button></div><button id="pb-refresh" class="pb-refresh" type="button">↻ Actualizar</button></div>
+    <div class="pb-toolbar"><div class="pb-toolbar-copy"><span class="pb-kicker">EXPLORA EL BANCO</span><strong>Casos registrados</strong></div><div class="pb-filters" role="group" aria-label="Filtrar pacientes"><button class="active" data-filter="all">Todos</button><button data-filter="available">Disponibles</button><button data-filter="claimed">En gestión</button><button data-filter="completed">Finalizados</button></div><button id="pb-refresh" class="pb-refresh" type="button">↻ Actualizar</button></div>
 <div id="pb-case-list" class="pb-case-list"><div class="pb-empty">Cargando banco de pacientes…</div></div>
     <section class="pb-share"><div><span class="pb-kicker">¿CONOCES A ALGUIEN QUE NECESITE ATENCIÓN?</span><h3>Comparte una oportunidad de atención.</h3><p>Solo registra a una persona si te autorizó expresamente a compartir sus datos para este propósito.</p></div><button id="pb-share-toggle" class="pb-outline" type="button">Compartir paciente</button></section>
     <form id="pb-student-share-form" class="pb-form pb-share-form" hidden>
