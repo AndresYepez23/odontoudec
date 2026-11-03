@@ -59,17 +59,14 @@ alter table public.patient_bank_cases enable row level security;
 alter table public.patient_bank_private enable row level security;
 alter table public.patient_bank_intake_limits enable row level security;
 alter table public.patient_bank_case_events enable row level security;
-alter table public.patient_bank_case_events enable row level security;
 
 revoke all on public.patient_bank_cases from anon, authenticated;
 revoke all on public.patient_bank_private from anon, authenticated;
 revoke all on public.patient_bank_intake_limits from anon, authenticated;
 revoke all on public.patient_bank_case_events from anon, authenticated;
-revoke all on public.patient_bank_case_events from anon, authenticated;
 grant all on public.patient_bank_cases to service_role;
 grant all on public.patient_bank_private to service_role;
 grant all on public.patient_bank_intake_limits to service_role;
-grant all on public.patient_bank_case_events to service_role;
 grant all on public.patient_bank_case_events to service_role;
 
 create or replace function public.patient_bank_list_cases()
