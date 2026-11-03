@@ -83,7 +83,7 @@ document.getElementById("pb-admin-list").addEventListener("click",async e=>{
   }else{
    const verb=action==="approve";if(!confirm(verb?"¿Aprobar esta solicitud y hacerla visible para los estudiantes?":"¿Rechazar esta solicitud?"))return;
    const {data,error}=await pbClient.rpc("patient_bank_admin_review",{p_case_id:id,p_approve:verb});if(error)throw error;if(!data)throw new Error("La solicitud ya no está pendiente.");
-   await pbLoadAdminQueue();await pbLoadCases();
+   await pbLoadCases();
   }
  }catch(error){alert(error.message||"No se pudo revisar la solicitud.");}finally{b.disabled=false;}
 });
