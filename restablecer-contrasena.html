@@ -17,7 +17,7 @@ button:disabled{opacity:.55;cursor:wait}.link{background:#f3edf9;color:var(--p);
 <div id="loading" class="status" role="status" aria-live="polite">Verificando el enlace de recuperación…</div>
 <form id="resetForm" class="hidden"><label for="newPassword">Nueva contraseña</label><input id="newPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="Mínimo 8 caracteres"><label for="confirmPassword">Confirma la contraseña</label><input id="confirmPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="Escríbela nuevamente"><button id="saveButton" type="submit">Guardar nueva contraseña</button></form>
 <div id="success" class="hidden"><p>Tu contraseña fue actualizada correctamente. Ya puedes iniciar sesión con ella.</p><a class="link" href="index.html#acceso">Volver a OdontoUdeC</a></div>
-<div id="errorActions" class="hidden"><p>Solicita un enlace nuevo desde la pantalla de inicio de sesión.</p><a class="link" href="index.html#acceso">Volver al inicio de sesión</a></div>
+<div id="errorActions" class="hidden"><p>El enlace ya no se puede utilizar. Puedes solicitar uno nuevo aquí:</p><form id="resendForm"><label for="recoveryEmail">Correo de tu cuenta</label><input id="recoveryEmail" type="email" autocomplete="email" required placeholder="tu@correo.com"><button id="resendButton" type="submit">Enviar un enlace nuevo</button></form><a class="link" href="index.html#acceso">Volver al inicio de sesión</a></div>
 <div id="formStatus" class="status" role="status" aria-live="polite"></div></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
 const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8");
@@ -39,6 +39,15 @@ db.auth.onAuthStateChange((event,session)=>{if(event==="PASSWORD_RECOVERY"&&sess
  }
  setTimeout(()=>{if(!recoverySession)showError("Esta sesión no corresponde a un enlace de recuperación. Solicita uno nuevo desde el inicio de sesión.");},7000);
 })();
+$("resendForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const email=$("recoveryEmail").value.trim().toLowerCase(),button=$("resendButton");
+ if(!email)return;
+ button.disabled=true;button.textContent="Enviando…";$("formStatus").textContent="";
+ const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+"/restablecer-contrasena.html"});
+ button.disabled=false;button.textContent="Enviar un enlace nuevo";
+ $("formStatus").textContent=error?"No se pudo solicitar el enlace: "+error.message:"Si el correo corresponde a una cuenta, recibirás un nuevo enlace. Revisa también la carpeta de spam.";
+});
 $("resetForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!recoverySession||finished)return;
  const password=$("newPassword").value,confirmation=$("confirmPassword").value;
