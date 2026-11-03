@@ -33,7 +33,7 @@ create table if not exists public.patient_bank_case_events (
   id bigint generated always as identity primary key,
   case_id uuid not null references public.patient_bank_cases(id) on delete cascade,
   actor_id uuid references auth.users(id) on delete set null,
-  action text not null check (action in ('patient_submitted','student_shared','claimed','released','completed')),
+  action text not null check (action in ('patient_submitted','student_shared','claimed','released','completed','review_approved','review_rejected')),
   created_at timestamptz not null default now()
 );
 
@@ -274,6 +274,10 @@ begin
      updated_at=now()
  where id=p_case_id and status='pending_review';
  get diagnostics v_updated=row_count;
+ if v_updated=1 then
+   insert into public.patient_bank_case_events(case_id,actor_id,action)
+   values (p_case_id,(select auth.uid()),case when p_approve then 'review_approved' else 'review_rejected' end);
+ end if;
  return v_updated=1;
 end;
 $$;
