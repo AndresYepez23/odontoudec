@@ -268,7 +268,7 @@ supabaseClient.auth.onAuthStateChange((event,session)=>{
 const eventList=document.getElementById('eventList'),eventStatus=document.getElementById('eventStatus');
 const resourceList=document.getElementById('resourceList'),resourceStatus=document.getElementById('resourceStatus');
 function escapeText(value){return safe(value);}
-function prettyDate(value){const key=String(value||'').slice(0,10),parts=key.split('-').map(Number);if(parts.length!==3||parts.some(Number.isNaN))return 'Fecha por confirmar';const d=new Date(parts[0],parts[1]-1,parts[2],12);return new Intl.DateTimeFormat('es-CO',{dateStyle:'long'}).format(d);}
+function prettyDate(value){const raw=String(value||'');if(!raw)return 'Fecha por confirmar';const dateOnly=/^\d{4}-\d{2}-\d{2}$/.test(raw),d=dateOnly?(()=>{const [y,m,day]=raw.split('-').map(Number);return new Date(y,m-1,day,12);})():new Date(raw);if(Number.isNaN(d.getTime()))return 'Fecha por confirmar';return new Intl.DateTimeFormat('es-CO',{dateStyle:'long',timeZone:'America/Bogota'}).format(d);}
 function showSetupMessage(target,status,kind){target.innerHTML='<div class="empty-state">Aún no hay '+(kind==='event'?'fechas publicadas':'recursos compartidos')+'.</div>';status.textContent='Si aparece un error de configuración, primero hay que crear las tablas de Supabase indicadas en los pasos de instalación.';}
 let eventRows=[],resourceRows=[],eventLoadWarning='';
 async function loadAcademicEvents(){
@@ -297,7 +297,8 @@ async function loadAcademicEvents(){
 }
 let calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1),selectedCalendarDate=null;
 function localDateKey(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');}
-function eventsForDate(rows,date){const key=localDateKey(date);return rows.filter(e=>String(e.event_date||'').slice(0,10)===key);}
+function eventDateKey(value){const raw=String(value||'');if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;const d=new Date(raw);if(Number.isNaN(d.getTime()))return '';const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d),part=k=>parts.find(x=>x.type===k)?.value;return part('year')+'-'+part('month')+'-'+part('day');}
+function eventsForDate(rows,date){const key=localDateKey(date);return rows.filter(e=>eventDateKey(e.event_date)===key);}
 function renderCalendarDayDetail(rows){
  const panel=document.getElementById('calendarDayDetail');if(!panel)return;
  if(!selectedCalendarDate){panel.innerHTML='<strong>Selecciona una fecha</strong><p>Al pulsar un día podrás consultar aquí sus actividades y evaluaciones.</p>';return;}
