@@ -8,7 +8,7 @@ window.ODONTOUDEC_CALENDAR_2026_2 = [
 {title:"Parciales de segundo corte",event_date:"2026-10-19T12:00:00-05:00",category:"Parcial",semester:null,description:"Del 19 al 30 de octubre de 2026."},
 {title:"Apertura y cierre de planillas — segundos parciales",event_date:"2026-10-20T12:00:00-05:00",category:"Evento",semester:null,description:"Del 20 de octubre al 4 de noviembre de 2026."},
 {title:"Receso de fiestas novembrinas",event_date:"2026-11-09T12:00:00-05:00",category:"Otro",semester:null,description:"Del 9 al 14 de noviembre de 2026."},
-{title:"Reprogramación de planillas",event_date:"2026-11-17T12:00:00-05:00",category:"Evento",semester:null,description:"Del 17 al 20 de noviembre de 2026."},
+{title:"Solicitudes de supletorios — segundos parciales",event_date:"2026-10-20T12:00:00-05:00",category:"Evento",semester:null,description:"Inicia el 20 de octubre de 2026; la fecha final aparece como noviembre de 2026 sin día especificado en la transcripción."},{title:"Reprogramación de planillas",event_date:"2026-11-17T12:00:00-05:00",category:"Evento",semester:null,description:"Del 17 al 20 de noviembre de 2026."},
 {title:"Inclusión de notas de supletorios — segundos parciales",event_date:"2026-11-24T12:00:00-05:00",category:"Evento",semester:null,description:"24 de noviembre de 2026. El día inicial no aparece completo en el texto compartido."},
 {title:"Parciales finales",event_date:"2026-12-07T12:00:00-05:00",category:"Parcial",semester:null,description:"Del 7 al 18 de diciembre de 2026."},
 {title:"Apertura y cierre de planillas — finales",event_date:"2026-12-07T12:00:00-05:00",category:"Evento",semester:null,description:"Del 7 al 22 de diciembre de 2026."},
