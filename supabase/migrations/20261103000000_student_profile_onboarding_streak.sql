@@ -22,13 +22,13 @@ alter table public.user_activity_days enable row level security;
 drop policy if exists "Users read own activity days" on public.user_activity_days;
 create policy "Users read own activity days"
   on public.user_activity_days for select to authenticated
-  using (auth.uid() = user_id);
+  using ((select auth.uid()) = user_id);
 
 drop policy if exists "Users record own current activity day" on public.user_activity_days;
 create policy "Users record own current activity day"
   on public.user_activity_days for insert to authenticated
   with check (
-    auth.uid() = user_id
+    (select auth.uid()) = user_id
     and activity_date = (now() at time zone 'America/Bogota')::date
   );
 
