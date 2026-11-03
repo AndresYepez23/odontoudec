@@ -7,7 +7,9 @@ create table if not exists public.patient_bank_cases (
   availability text,
   source text not null check (source in ('patient','student')),
   consent_recorded boolean not null default false check (consent_recorded = true),
-  status text not null default 'available' check (status in ('available','claimed','completed','removed')),
+  consent_at timestamptz not null default now(),
+  consent_version text not null default '2026-11-03-v1',
+  status text not null default 'pending_review' check (status in ('pending_review','available','claimed','completed','rejected','removed')),
   created_by_student uuid references auth.users(id) on delete set null,
   claimed_by uuid references auth.users(id) on delete set null,
   claimed_at timestamptz,
@@ -213,7 +215,7 @@ begin
     raise exception 'Cuenta estudiantil no válida.';
   end if;
   insert into public.patient_bank_cases(reason_summary, general_area, availability, source, consent_recorded, created_by_student)
-  values (left(trim(p_summary),500), nullif(trim(p_area),''), nullif(trim(p_availability),''), p_source, true, p_student_id)
+  values (left(trim(p_summary),500), nullif(trim(p_area),''), nullif(trim(p_availability),''), p_source, true, now(), '2026-11-03-v1', p_student_id)
   returning id into v_case_id;
   insert into public.patient_bank_private(case_id, patient_name, phone)
   values (v_case_id, trim(p_name), trim(p_phone));
@@ -238,3 +240,44 @@ grant execute on function public.patient_bank_submit(text,text,text,text,text,te
 
 comment on table public.patient_bank_private is 'Datos de contacto sensibles; no accesibles directamente por anon/authenticated.';
 comment on column public.patient_bank_cases.claimed_by is 'Identidad interna del estudiante responsable; nunca se devuelve en la lista pública del banco.';
+
+create or replace function public.patient_bank_is_admin()
+returns boolean language sql stable security definer set search_path = ''
+as $$ select public.is_admin(); $$;
+
+create or replace function public.patient_bank_admin_pending()
+returns table (
+ id uuid, public_code text, reason_summary text, general_area text,
+ availability text, source text, created_at timestamptz
+)
+language sql stable security definer set search_path = ''
+as $$
+ select c.id,c.public_code,c.reason_summary,c.general_area,c.availability,c.source,c.created_at
+ from public.patient_bank_cases c
+ where (select auth.uid()) is not null and public.is_admin() and c.status='pending_review'
+ order by c.created_at asc;
+$$;
+
+create or replace function public.patient_bank_admin_review(p_case_id uuid,p_approve boolean)
+returns boolean language plpgsql security definer set search_path = ''
+as $$
+declare v_updated integer;
+begin
+ if (select auth.uid()) is null or not public.is_admin() then
+   raise exception 'No tienes permisos para revisar solicitudes.';
+ end if;
+ update public.patient_bank_cases
+ set status=case when p_approve then 'available' else 'rejected' end,
+     updated_at=now()
+ where id=p_case_id and status='pending_review';
+ get diagnostics v_updated=row_count;
+ return v_updated=1;
+end;
+$$;
+
+revoke all on function public.patient_bank_is_admin() from public,anon;
+revoke all on function public.patient_bank_admin_pending() from public,anon;
+revoke all on function public.patient_bank_admin_review(uuid,boolean) from public,anon;
+grant execute on function public.patient_bank_is_admin() to authenticated;
+grant execute on function public.patient_bank_admin_pending() to authenticated;
+grant execute on function public.patient_bank_admin_review(uuid,boolean) to authenticated;
