@@ -1,0 +1,64 @@
+const PB_URL="https://jqbrheonqqsiijrprsqs.supabase.co";
+const PB_KEY="sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8";
+const pbClient=window.supabase.createClient(PB_URL,PB_KEY);
+const pbTabs=[...document.querySelectorAll(".pb-tab")];
+const patientPanel=document.getElementById("pb-patient-panel"),studentPanel=document.getElementById("pb-student-panel");
+function pbSelectTab(name){pbTabs.forEach(t=>t.classList.toggle("active",t.dataset.tab===name));patientPanel.hidden=name!=="patient";studentPanel.hidden=name!=="student";}
+pbTabs.forEach(t=>t.addEventListener("click",()=>pbSelectTab(t.dataset.tab)));
+const pbStatusLabels={available:"Disponible",claimed:"En gestión",completed:"Finalizado"};
+let pbCases=[],pbFilter="all",pbSession=null;
+async function pbInvokeIntake(form,source,statusEl){
+ const button=form.querySelector('button[type="submit"]');button.disabled=true;statusEl.textContent="Enviando solicitud…";
+ try{
+  const data=Object.fromEntries(new FormData(form).entries());
+  const response=await fetch(PB_URL+"/functions/v1/patient-bank-intake",{method:"POST",headers:{"Content-Type":"application/json",...(pbSession?{Authorization:"Bearer "+pbSession.access_token}:{})},body:JSON.stringify({name:data.name,phone:data.phone,summary:data.summary,area:data.area||null,availability:data.availability||null,source,consent:data.consent==="on"})});
+  const result=await response.json();if(!response.ok)throw new Error(result.error||"No se pudo enviar la solicitud.");
+  form.reset();statusEl.textContent="¡Solicitud recibida! Revisaremos la información para incorporarla al banco.";
+ }catch(error){statusEl.textContent=error.message;}finally{button.disabled=false;}
+}
+document.getElementById("pb-intake-form").addEventListener("submit",e=>{e.preventDefault();if(!e.currentTarget.reportValidity())return;pbInvokeIntake(e.currentTarget,"patient",document.getElementById("pb-intake-status"));});
+function pbRender(){
+ const list=document.getElementById("pb-case-list"),filtered=pbCases.filter(c=>pbFilter==="all"||c.status===pbFilter);
+ document.getElementById("pb-count-available").textContent=pbCases.filter(c=>c.status==="available").length;
+ document.getElementById("pb-count-progress").textContent=pbCases.filter(c=>c.status==="claimed").length;
+ document.getElementById("pb-count-completed").textContent=pbCases.filter(c=>c.status==="completed").length;
+ if(!filtered.length){list.innerHTML='<div class="pb-empty">No hay pacientes en esta categoría por ahora.</div>';return;}
+ list.innerHTML=filtered.map(c=>{const status=pbStatusLabels[c.status]||"Disponible";const source=c.source==="student"?"Compartido por un estudiante":"Solicitud de paciente";let actions="";
+ if(c.status==="available")actions='<button class="primary" data-action="claim" data-id="'+c.id+'">Gestionar este caso</button>';
+ if(c.status==="claimed")actions='<span class="pb-case-meta">Este caso ya está siendo gestionado.</span>';
+ if(c.status==="completed")actions='<span class="pb-case-meta">Caso finalizado · Registro histórico</span>';
+ return '<article class="pb-case"><div class="pb-case-top"><span class="pb-code">'+c.public_code+'</span><span class="pb-status '+c.status+'">'+status+'</span></div><h3>'+pbEscape(c.reason_summary)+'</h3><p>'+source+'</p><div class="pb-case-meta">'+(c.general_area?'<span>⌖ '+pbEscape(c.general_area)+'</span>':"")+(c.availability?'<span>◷ '+pbEscape(c.availability)+'</span>':"")+'</div><div class="pb-case-actions">'+actions+'</div><div class="pb-contact" id="pb-contact-'+c.id+'" hidden></div></article>';}).join("");
+}
+function pbEscape(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+async function pbLoadCases(){
+ const list=document.getElementById("pb-case-list");list.innerHTML='<div class="pb-empty">Actualizando casos…</div>';
+ const {data,error}=await pbClient.rpc("patient_bank_list_cases");
+ if(error){list.innerHTML='<div class="pb-empty">No pudimos cargar el banco. Intenta actualizar.</div>';return;}
+ pbCases=data||[];pbRender();
+}
+async function pbHandleAction(button){
+ const id=button.dataset.id,action=button.dataset.action;button.disabled=true;
+ try{
+  if(action==="claim"){
+   if(!confirm("¿Confirmas que deseas gestionar este caso? Al continuar, dejará de estar disponible para otros estudiantes."))return;
+   const {data,error}=await pbClient.rpc("patient_bank_claim_case",{p_case_id:id});if(error)throw error;if(!data)throw new Error("Otro estudiante acaba de tomar este caso. Actualiza el banco.");
+   const {data:contact,error:contactError}=await pbClient.rpc("patient_bank_my_contact",{p_case_id:id});if(contactError)throw contactError;
+   const box=document.getElementById("pb-contact-"+id);box.hidden=false;box.textContent="";
+   if(contact?.length){const d=contact[0];box.textContent="Contacto privado · "+d.patient_name+" · "+d.phone;}
+   await pbLoadCases();
+   const refreshed=document.getElementById("pb-contact-"+id);if(refreshed&&contact?.length){refreshed.hidden=false;refreshed.textContent="Contacto privado · "+contact[0].patient_name+" · "+contact[0].phone;}
+  }
+ }catch(error){alert(error.message||"No se pudo actualizar el caso.");}finally{button.disabled=false;}
+}
+document.getElementById("pb-case-list").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)pbHandleAction(b);});
+document.querySelectorAll(".pb-filters button").forEach(b=>b.addEventListener("click",()=>{pbFilter=b.dataset.filter;document.querySelectorAll(".pb-filters button").forEach(x=>x.classList.toggle("active",x===b));pbRender();}));
+document.getElementById("pb-refresh").addEventListener("click",pbLoadCases);
+document.getElementById("pb-share-toggle").addEventListener("click",()=>{const f=document.getElementById("pb-student-share-form");f.hidden=!f.hidden;});
+document.getElementById("pb-student-share-form").addEventListener("submit",e=>{e.preventDefault();if(e.currentTarget.reportValidity())pbInvokeIntake(e.currentTarget,"student",document.getElementById("pb-share-status"));});
+async function pbInit(){
+ const {data}=await pbClient.auth.getSession();pbSession=data.session;
+ const gate=document.getElementById("pb-student-gate"),content=document.getElementById("pb-student-content");
+ if(pbSession){gate.hidden=true;content.hidden=false;await pbLoadCases();}
+ pbClient.auth.onAuthStateChange(async(_event,session)=>{pbSession=session;if(session){gate.hidden=true;content.hidden=false;await pbLoadCases();}else{gate.hidden=false;content.hidden=true;}});
+}
+pbInit();
