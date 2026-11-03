@@ -129,8 +129,12 @@ async function showFirstVisitGuide(user){
  const onboardingKey='ou-onboarding-shown-'+user.id;
  if(sessionStorage.getItem(onboardingKey)||onboardingInFlightFor===user.id)return;
  onboardingInFlightFor=user.id;
- const {data:profile,error}=await supabaseClient.from('profiles').select('onboarding_completed').eq('id',user.id).maybeSingle();
+ let {data:profile,error}=await supabaseClient.from('profiles').select('onboarding_completed').eq('id',user.id).maybeSingle();
  if(error){onboardingInFlightFor=null;console.warn('No se pudo consultar el estado de bienvenida:',error.message);return;}
+ if(!profile){
+  try{await ensureProfile(user);const retry=await supabaseClient.from('profiles').select('onboarding_completed').eq('id',user.id).maybeSingle();profile=retry.data;if(retry.error)throw retry.error;}
+  catch(profileError){onboardingInFlightFor=null;console.warn('No se pudo preparar el perfil para la bienvenida:',profileError.message);return;}
+ }
  if(profile?.onboarding_completed){sessionStorage.setItem(onboardingKey,'1');onboardingInFlightFor=null;return;}
  const modal=document.getElementById('onboardingGuide');
  if(!modal){onboardingInFlightFor=null;return;}
