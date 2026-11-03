@@ -268,7 +268,7 @@ supabaseClient.auth.onAuthStateChange((event,session)=>{
 const eventList=document.getElementById('eventList'),eventStatus=document.getElementById('eventStatus');
 const resourceList=document.getElementById('resourceList'),resourceStatus=document.getElementById('resourceStatus');
 function escapeText(value){return safe(value);}
-function prettyDate(value){const raw=String(value||'');if(!raw)return 'Fecha por confirmar';const dateOnly=/^\d{4}-\d{2}-\d{2}$/.test(raw),d=dateOnly?(()=>{const [y,m,day]=raw.split('-').map(Number);return new Date(y,m-1,day,12);})():new Date(raw);if(Number.isNaN(d.getTime()))return 'Fecha por confirmar';return new Intl.DateTimeFormat('es-CO',{dateStyle:'long',timeZone:'America/Bogota'}).format(d);}
+function prettyDate(value){const raw=String(value||'');if(!raw)return 'Fecha por confirmar';const dateOnly=/^\d{4}-\d{2}-\d{2}$/.test(raw),d=dateOnly?(()=>{const [y,m,day]=raw.split('-').map(Number);return new Date(Date.UTC(y,m-1,day,12));})():new Date(raw);if(Number.isNaN(d.getTime()))return 'Fecha por confirmar';return new Intl.DateTimeFormat('es-CO',{dateStyle:'long',timeZone:'America/Bogota'}).format(d);}
 function showSetupMessage(target,status,kind){target.innerHTML='<div class="empty-state">Aún no hay '+(kind==='event'?'fechas publicadas':'recursos compartidos')+'.</div>';status.textContent='Si aparece un error de configuración, primero hay que crear las tablas de Supabase indicadas en los pasos de instalación.';}
 let eventRows=[],resourceRows=[],eventLoadWarning='';
 async function loadAcademicEvents(){
@@ -295,7 +295,7 @@ async function loadAcademicEvents(){
  const notesBox=document.getElementById('calendarSourceNotes');
  if(notesBox)notesBox.innerHTML=notes.map(n=>'<li>'+escapeText(n)+'</li>').join('');
 }
-let calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1),selectedCalendarDate=null;
+let calendarMonth=(()=>{const p=new Intl.DateTimeFormat('en-US',{timeZone:'America/Bogota',year:'numeric',month:'2-digit'}).formatToParts(new Date()),y=Number(p.find(x=>x.type==='year').value),m=Number(p.find(x=>x.type==='month').value);return new Date(y,m-1,15,12);})(),selectedCalendarDate=null;
 function localDateKey(d){return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');}
 function eventDateKey(value){const raw=String(value||'');if(/^\d{4}-\d{2}-\d{2}$/.test(raw))return raw;const d=new Date(raw);if(Number.isNaN(d.getTime()))return '';const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d),part=k=>parts.find(x=>x.type===k)?.value;return part('year')+'-'+part('month')+'-'+part('day');}
 function eventsForDate(rows,date){const key=localDateKey(date);return rows.filter(e=>eventDateKey(e.event_date)===key);}
@@ -311,10 +311,10 @@ function renderMonthCalendar(filtered){
  const year=calendarMonth.getFullYear(),month=calendarMonth.getMonth();
  document.getElementById('monthTitle').textContent=new Intl.DateTimeFormat('es-CO',{month:'long',year:'numeric'}).format(calendarMonth);
  const names=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];grid.innerHTML=names.map(n=>'<div class="month-day-name">'+n+'</div>').join('');
- const first=(new Date(year,month,1).getDay()+6)%7,days=new Date(year,month+1,0).getDate(),prevDays=new Date(year,month,0).getDate(),today=new Date();
+ const first=(new Date(year,month,1).getDay()+6)%7,days=new Date(year,month+1,0).getDate(),prevDays=new Date(year,month,0).getDate(),todayKey=eventDateKey(new Date());
  for(let cell=0;cell<42;cell++){
   let d,other=false;if(cell<first){d=new Date(year,month-1,prevDays-first+cell+1);other=true;}else if(cell>=first+days){d=new Date(year,month+1,cell-first-days+1);other=true;}else d=new Date(year,month,cell-first+1);
-  const dayEvents=eventsForDate(filtered,d),isToday=d.toDateString()===today.toDateString(),isSelected=selectedCalendarDate&&localDateKey(selectedCalendarDate)===localDateKey(d);
+  const dayEvents=eventsForDate(filtered,d),isToday=localDateKey(d)===todayKey,isSelected=selectedCalendarDate&&localDateKey(selectedCalendarDate)===localDateKey(d);
   const cellEl=document.createElement('button');cellEl.type='button';cellEl.className='month-day'+(other?' muted':'')+(isToday?' today':'')+(dayEvents.length?' has-event':'')+(isSelected?' selected':'');cellEl.setAttribute('aria-label',new Intl.DateTimeFormat('es-CO',{dateStyle:'full'}).format(d)+(dayEvents.length?', '+dayEvents.length+' actividad(es)':'') );cellEl.setAttribute('aria-pressed',String(!!isSelected));
   cellEl.innerHTML='<span class="month-day-num">'+d.getDate()+'</span>'+dayEvents.slice(0,2).map(e=>'<span class="month-event-dot" title="'+escapeText(e.title)+'">• '+escapeText(e.title)+'</span>').join('')+(dayEvents.length>2?'<span class="month-event-dot">+'+(dayEvents.length-2)+' más</span>':'');
   cellEl.addEventListener('click',()=>{selectedCalendarDate=new Date(d.getFullYear(),d.getMonth(),d.getDate());renderMonthCalendar(filtered);renderCalendarDayDetail(filtered);});
