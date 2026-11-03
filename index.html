@@ -125,11 +125,12 @@ document.getElementById('showLogin').addEventListener('click',()=>setAuthMode('s
 document.getElementById('showSignup').addEventListener('click',()=>setAuthMode('signup'));
 let onboardingInFlightFor=null;
 async function showFirstVisitGuide(user){
- if(!user||sessionStorage.getItem('ou-onboarding-shown')||onboardingInFlightFor===user.id)return;
+ const onboardingKey='ou-onboarding-shown-'+user.id;
+ if(!user||sessionStorage.getItem(onboardingKey)||onboardingInFlightFor===user.id)return;
  onboardingInFlightFor=user.id;
  const {data:profile,error}=await supabaseClient.from('profiles').select('onboarding_completed').eq('id',user.id).maybeSingle();
  if(error){onboardingInFlightFor=null;console.warn('No se pudo consultar el estado de bienvenida:',error.message);return;}
- if(profile?.onboarding_completed){sessionStorage.setItem('ou-onboarding-shown','1');onboardingInFlightFor=null;return;}
+ if(profile?.onboarding_completed){sessionStorage.setItem(onboardingKey,'1');onboardingInFlightFor=null;return;}
  const modal=document.getElementById('onboardingGuide');
  if(!modal){onboardingInFlightFor=null;return;}
  modal.classList.add('open');modal.setAttribute('aria-hidden','false');
@@ -264,16 +265,16 @@ const resourceList=document.getElementById('resourceList'),resourceStatus=docume
 function escapeText(value){return safe(value);}
 function prettyDate(value){const key=String(value||'').slice(0,10),parts=key.split('-').map(Number);if(parts.length!==3||parts.some(Number.isNaN))return 'Fecha por confirmar';const d=new Date(parts[0],parts[1]-1,parts[2],12);return new Intl.DateTimeFormat('es-CO',{dateStyle:'long'}).format(d);}
 function showSetupMessage(target,status,kind){target.innerHTML='<div class="empty-state">Aún no hay '+(kind==='event'?'fechas publicadas':'recursos compartidos')+'.</div>';status.textContent='Si aparece un error de configuración, primero hay que crear las tablas de Supabase indicadas en los pasos de instalación.';}
-let eventRows=[],resourceRows=[];
+let eventRows=[],resourceRows=[],eventLoadWarning='';
 async function loadAcademicEvents(){
  eventStatus.textContent='Cargando calendario académico 2026-2…';
  const {data,error}=await supabaseClient.from('academic_events').select('id,title,description,event_date,category,semester,created_at').order('event_date',{ascending:true});
- if(error){eventStatus.textContent=error.code==='42P01'?'Falta configurar la tabla del calendario en Supabase.':'No se pudo cargar el calendario comunitario: '+error.message;}
+ eventLoadWarning=error?(error.code==='42P01'?'No se pudo cargar el calendario compartido: falta configurar la tabla academic_events.':'No se pudieron cargar las fechas compartidas: '+error.message):'';
  const official=(window.ODONTOUDEC_CALENDAR_2026_2||[]).map((e,i)=>({...e,id:'official-'+i,created_at:null}));
  const {data:{user:calendarUser}}=await supabaseClient.auth.getUser();
  if(calendarUser&&!document.getElementById('eventSemester').value){const {data:studentProfile}=await supabaseClient.from('profiles').select('semester').eq('id',calendarUser.id).maybeSingle();if(studentProfile?.semester)document.getElementById('eventSemester').value=String(studentProfile.semester);}
  let personal=[];
- if(calendarUser){const {data:reminders,error:reminderError}=await supabaseClient.from('student_reminders').select('id,title,description,reminder_at').eq('user_id',calendarUser.id).order('reminder_at',{ascending:true});if(!reminderError)personal=(reminders||[]).map(r=>({id:r.id,title:r.title,description:r.description,event_date:r.reminder_at,category:'Personal',semester:null,is_personal:true,created_at:null}));}
+ if(calendarUser){const {data:reminders,error:reminderError}=await supabaseClient.from('student_reminders').select('id,title,description,reminder_at').eq('user_id',calendarUser.id).order('reminder_at',{ascending:true});if(!reminderError)personal=(reminders||[]).map(r=>({id:r.id,title:r.title,description:r.description,event_date:r.reminder_at,category:'Personal',semester:null,is_personal:true,created_at:null}));else eventLoadWarning=(eventLoadWarning?eventLoadWarning+' · ':'')+'No se pudieron cargar tus recordatorios personales.';}
 
  const cuts=['Primeros parciales','Segundos parciales','Parciales finales'];
  const exams=(window.ODONTOUDEC_EXAMS_2026_2||[]).flatMap((row)=>row.dates.map((date,index)=>date&&/^2026-\d{2}-\d{2}$/.test(date)?({
@@ -315,12 +316,12 @@ function renderMonthCalendar(filtered){
  }
  renderCalendarDayDetail(filtered);
 }
-document.getElementById('monthPrev')?.addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);renderAcademicEvents();});
-document.getElementById('monthNext')?.addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);renderAcademicEvents();});
+document.getElementById('monthPrev')?.addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);selectedCalendarDate=null;renderAcademicEvents();});
+document.getElementById('monthNext')?.addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);selectedCalendarDate=null;renderAcademicEvents();});
 function renderAcademicEvents(){
  const query=norm(document.getElementById('eventSearch').value.trim()),semester=document.getElementById('eventSemester').value,type=document.getElementById('eventType').value,cut=document.getElementById('eventCut')?.value||'';
  const filtered=eventRows.filter(e=>(!query||norm([e.title,e.description,e.category].join(' ')).includes(query))&&(!semester||e.semester==null||String(e.semester)===semester)&&(!type||e.category===type)&&(!cut||norm(e.description||'').includes(norm(cut))));
- eventStatus.textContent=filtered.length+' fecha(s) encontrada(s).';
+ eventStatus.textContent=filtered.length+' fecha(s) encontrada(s).'+(eventLoadWarning?' '+eventLoadWarning:'');
  renderMonthCalendar(filtered);
  eventList.innerHTML=filtered.length?filtered.map(e=>'<article class="event-item"><span class="event-date">📅 '+escapeText(prettyDate(e.event_date))+'</span><h3>'+escapeText(e.title)+'</h3><div class="event-meta">'+escapeText(e.category||'Evento')+' · '+escapeText(e.semester==null?'Todos los semestres':'Semestre '+e.semester)+'</div><p>'+escapeText(e.description||'Sin detalles adicionales.')+'</p></article>').join(''):'<div class="empty-state">No hay fechas que coincidan con esos filtros.</div>';
 }
