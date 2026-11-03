@@ -21,6 +21,7 @@ button:disabled{opacity:.55;cursor:wait}.link{background:#f3edf9;color:var(--p);
 <div id="formStatus" class="status" role="status" aria-live="polite"></div></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
 const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8");
+const RECOVERY_REDIRECT_URL="https://odontoudec.online/restablecer-contrasena.html";
 const $=id=>document.getElementById(id);let recoverySession=false,finished=false;const recoveryStorageKey="ou-password-recovery";
 function showError(message){$("loading").textContent=message;$("errorActions").classList.remove("hidden");$("resetForm").classList.add("hidden");}
 function enableForm(){recoverySession=true;$("loading").classList.add("hidden");$("errorActions").classList.add("hidden");$("resetForm").classList.remove("hidden");}
@@ -44,7 +45,7 @@ $("resendForm").addEventListener("submit",async e=>{
  const email=$("recoveryEmail").value.trim().toLowerCase(),button=$("resendButton");
  if(!email)return;
  button.disabled=true;button.textContent="Enviando…";$("formStatus").textContent="";
- const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+"/restablecer-contrasena.html"});
+ const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:RECOVERY_REDIRECT_URL});
  button.disabled=false;button.textContent="Enviar un enlace nuevo";
  const detail=String(error?.message||"");$("formStatus").textContent=error?(/rate[\s_-]*limit|too many requests|429|email.*limit/i.test(detail)?"El servicio de correo de Supabase alcanzó su límite temporal (email rate limit exceeded). No solicites más enlaces por ahora; espera y vuelve a intentarlo. Para habilitar la recuperación para todos los estudiantes debemos configurar un proveedor SMTP propio.":"No se pudo solicitar el enlace: "+detail):"Si el correo corresponde a una cuenta, recibirás un nuevo enlace. Revisa también la carpeta de spam.";
 });
