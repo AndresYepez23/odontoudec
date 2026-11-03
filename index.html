@@ -139,7 +139,7 @@ async function showFirstVisitGuide(user){
   const button=document.getElementById('finishOnboarding');button.disabled=true;button.textContent='Guardando…';
   const {error:updateError}=await supabaseClient.from('profiles').update({onboarding_completed:true,updated_at:new Date().toISOString()}).eq('id',user.id);
   if(updateError){button.disabled=false;button.textContent='Continuar';notify('No se pudo guardar la guía como completada. Inténtalo de nuevo.');return;}
-  sessionStorage.setItem('ou-onboarding-shown','1');
+  sessionStorage.setItem(onboardingKey,'1');
   modal.classList.remove('open');modal.setAttribute('aria-hidden','true');
   onboardingInFlightFor=null;
  };
