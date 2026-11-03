@@ -27,6 +27,14 @@ create table if not exists public.patient_bank_private (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.patient_bank_case_events (
+  id bigint generated always as identity primary key,
+  case_id uuid not null references public.patient_bank_cases(id) on delete cascade,
+  actor_id uuid references auth.users(id) on delete set null,
+  action text not null check (action in ('patient_submitted','student_shared','claimed','released','completed')),
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.patient_bank_intake_limits (
   ip_hash text primary key,
   window_started_at timestamptz not null default now(),
@@ -40,17 +48,22 @@ create index if not exists patient_bank_cases_claimed_by_idx
   on public.patient_bank_cases(claimed_by) where claimed_by is not null;
 create index if not exists patient_bank_cases_created_by_idx
   on public.patient_bank_cases(created_by_student) where created_by_student is not null;
+create index if not exists patient_bank_case_events_case_created_idx
+  on public.patient_bank_case_events(case_id, created_at desc);
 
 alter table public.patient_bank_cases enable row level security;
 alter table public.patient_bank_private enable row level security;
 alter table public.patient_bank_intake_limits enable row level security;
+alter table public.patient_bank_case_events enable row level security;
 
 revoke all on public.patient_bank_cases from anon, authenticated;
 revoke all on public.patient_bank_private from anon, authenticated;
 revoke all on public.patient_bank_intake_limits from anon, authenticated;
+revoke all on public.patient_bank_case_events from anon, authenticated;
 grant all on public.patient_bank_cases to service_role;
 grant all on public.patient_bank_private to service_role;
 grant all on public.patient_bank_intake_limits to service_role;
+grant all on public.patient_bank_case_events to service_role;
 
 create or replace function public.patient_bank_list_cases()
 returns table (
@@ -91,9 +104,13 @@ begin
          claimed_at = now(), updated_at = now()
    where id = p_case_id and status = 'available';
   get diagnostics v_updated = row_count;
+  if v_updated = 1 then
+    insert into public.patient_bank_case_events(case_id, actor_id, action)
+    values (p_case_id, (select auth.uid()), 'claimed');
+  end if;
   return v_updated = 1;
 end;
-$$;
+$;
 
 create or replace function public.patient_bank_release_case(p_case_id uuid)
 returns boolean
@@ -109,9 +126,13 @@ begin
    where id = p_case_id and status = 'claimed'
      and claimed_by = (select auth.uid());
   get diagnostics v_updated = row_count;
+  if v_updated = 1 then
+    insert into public.patient_bank_case_events(case_id, actor_id, action)
+    values (p_case_id, (select auth.uid()), 'released');
+  end if;
   return v_updated = 1;
 end;
-$$;
+$;
 
 create or replace function public.patient_bank_complete_case(p_case_id uuid)
 returns boolean
@@ -127,9 +148,13 @@ begin
    where id = p_case_id and status = 'claimed'
      and claimed_by = (select auth.uid());
   get diagnostics v_updated = row_count;
+  if v_updated = 1 then
+    insert into public.patient_bank_case_events(case_id, actor_id, action)
+    values (p_case_id, (select auth.uid()), 'completed');
+  end if;
   return v_updated = 1;
 end;
-$$;
+$;
 
 create or replace function public.patient_bank_my_contact(p_case_id uuid)
 returns table (patient_name text, phone text)
@@ -192,6 +217,8 @@ begin
   returning id into v_case_id;
   insert into public.patient_bank_private(case_id, patient_name, phone)
   values (v_case_id, trim(p_name), trim(p_phone));
+  insert into public.patient_bank_case_events(case_id, actor_id, action)
+  values (v_case_id, p_student_id, case when p_source = 'student' then 'student_shared' else 'patient_submitted' end);
   return v_case_id;
 end;
 $$;
