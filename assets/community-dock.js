@@ -61,12 +61,6 @@ async function init(){
   if(!client){guest.style.display='block';frame.style.display='none';tabbar.style.display='none';return;}
   const {data}=await client.auth.getSession();logged=!!data.session;
   syncOnboardingShortcut();
-  if(logged){
-   const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),part=k=>parts.find(x=>x.type===k)?.value;
-   const activityDate=part('year')+'-'+part('month')+'-'+part('day');
-   const {error}=await client.from('user_activity_days').insert({user_id:data.session.user.id,activity_date:activityDate});
-   if(error&&error.code!=='23505')console.info('No se pudo registrar la actividad diaria:',error.message);
-  }
   if(logged){await refreshUnread(client,data.session.user.id);unreadTimer=setInterval(()=>refreshUnread(client,data.session.user.id),30000);}
   if(!logged){guest.style.display='block';frame.style.display='none';tabbar.style.display='none';}
   client.auth.onAuthStateChange(async(_event,session)=>{
