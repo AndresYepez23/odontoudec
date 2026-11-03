@@ -57,7 +57,7 @@ Deno.serve(async (req: Request) => {
     let studentId: string | null = null;
 
     if (source === "student") {
-      const token = (req.headers.get("Authorization") || "").replace(/^Bearer\\s+/i, "");
+      const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
       if (!token) return reply(req, { error: "Inicia sesión para compartir un paciente." }, 401);
       const { data: { user }, error } = await admin.auth.getUser(token);
       if (error || !user) return reply(req, { error: "Tu sesión no es válida." }, 401);
