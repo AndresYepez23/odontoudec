@@ -21,7 +21,7 @@ function syncOnboardingShortcut(){
   modal.classList.add('open');modal.setAttribute('aria-hidden','false');
   menu.closest('details')?.removeAttribute('open');
   document.getElementById('navlinks')?.classList.remove('open');
-  document.getElementById('finishOnboarding')?.focus();
+  document.getElementById('closeOnboarding')?.focus();
  });
  menu.appendChild(link);
 }
