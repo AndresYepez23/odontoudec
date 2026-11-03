@@ -46,7 +46,7 @@ $("resendForm").addEventListener("submit",async e=>{
  button.disabled=true;button.textContent="Enviando…";$("formStatus").textContent="";
  const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+"/restablecer-contrasena.html"});
  button.disabled=false;button.textContent="Enviar un enlace nuevo";
- const detail=String(error?.message||"");$("formStatus").textContent=error?(/rate.?limit|too many requests|429/i.test(detail)?"Supabase ha limitado temporalmente el envío de correos. Espera antes de volver a solicitarlo. Para habilitar la recuperación para todos los estudiantes debemos configurar un proveedor SMTP propio en Supabase.":"No se pudo solicitar el enlace: "+detail):"Si el correo corresponde a una cuenta, recibirás un nuevo enlace. Revisa también la carpeta de spam.";
+ const detail=String(error?.message||"");$("formStatus").textContent=error?(/rate[\s_-]*limit|too many requests|429|email.*limit/i.test(detail)?"El servicio de correo de Supabase alcanzó su límite temporal (email rate limit exceeded). No solicites más enlaces por ahora; espera y vuelve a intentarlo. Para habilitar la recuperación para todos los estudiantes debemos configurar un proveedor SMTP propio.":"No se pudo solicitar el enlace: "+detail):"Si el correo corresponde a una cuenta, recibirás un nuevo enlace. Revisa también la carpeta de spam.";
 });
 $("resetForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!recoverySession||finished)return;
