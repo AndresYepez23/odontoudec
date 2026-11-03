@@ -245,7 +245,7 @@ document.getElementById('forgotPasswordLink')?.addEventListener('click',async e=
  if(!email){notify('Escribe primero el correo de tu cuenta para enviarte el enlace de recuperación.');document.getElementById('loginIdentifier').focus();return;}
  if(!document.getElementById('loginIdentifier').checkValidity()){notify('Revisa el formato del correo electrónico.');return;}
  const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/restablecer-contrasena.html'});
- if(error){notify('No se pudo enviar el enlace: '+error.message);return;}
+ if(error){const detail=String(error.message||"");notify(/rate.?limit|too many requests|429/i.test(detail)?"Supabase ha limitado temporalmente los correos de recuperación. Espera antes de volver a intentarlo. Para habilitar el envío a todos los estudiantes debemos configurar un proveedor SMTP propio.":"No se pudo enviar el enlace: "+detail);return;}
  notify('Si el correo corresponde a una cuenta, recibirás instrucciones para restablecer la contraseña.');
 });
 async function handleAuth(mode){
