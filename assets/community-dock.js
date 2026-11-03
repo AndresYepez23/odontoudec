@@ -7,6 +7,24 @@ document.body.appendChild(root);
 const panel=root.querySelector('#ouDockPanel'),button=root.querySelector('#ouDockButton'),frame=root.querySelector('#ouDockFrame'),guest=root.querySelector('#ouDockGuest'),tabs=[...root.querySelectorAll('#ouDockTabs button')],tabbar=root.querySelector('#ouDockTabs');
 let logged=false,unreadTimer=null;
 function setUnreadUnavailable(){const badge=root.querySelector('#ouDockUnread');badge.classList.remove('ou-visible');badge.removeAttribute('title');badge.setAttribute('aria-label','No se pudo consultar el contador de mensajes privados sin leer');}
+function syncOnboardingShortcut(){
+ const menu=document.querySelector('.nav-more-menu'),existing=menu?.querySelector('[data-ou-onboarding-shortcut]');
+ if(!menu)return;
+ if(!logged){existing?.remove();return;}
+ if(existing)return;
+ const link=document.createElement('a');
+ link.href='#onboardingGuide';link.textContent='Guía de bienvenida';link.dataset.ouOnboardingShortcut='true';
+ link.addEventListener('click',event=>{
+  event.preventDefault();
+  const modal=document.getElementById('onboardingGuide');
+  if(!modal)return;
+  modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+  menu.closest('details')?.removeAttribute('open');
+  document.getElementById('navlinks')?.classList.remove('open');
+  document.getElementById('finishOnboarding')?.focus();
+ });
+ menu.appendChild(link);
+}
 async function refreshUnread(client,userId){
  try{
   const {data:conversations,error}=await client.from('private_conversations').select('id,created_at').or('user_one.eq.'+userId+',user_two.eq.'+userId).order('created_at',{ascending:false}).limit(50);
@@ -40,6 +58,7 @@ async function init(){
   const client=window.supabase?.createClient?.('https://jqbrheonqqsiijrprsqs.supabase.co','sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8');
   if(!client){guest.style.display='block';frame.style.display='none';tabbar.style.display='none';return;}
   const {data}=await client.auth.getSession();logged=!!data.session;
+  syncOnboardingShortcut();
   if(logged){
    const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),part=k=>parts.find(x=>x.type===k)?.value;
    const activityDate=part('year')+'-'+part('month')+'-'+part('day');
@@ -49,7 +68,7 @@ async function init(){
   if(logged){await refreshUnread(client,data.session.user.id);unreadTimer=setInterval(()=>refreshUnread(client,data.session.user.id),30000);}
   if(!logged){guest.style.display='block';frame.style.display='none';tabbar.style.display='none';}
   client.auth.onAuthStateChange(async(_event,session)=>{
-   logged=!!session;guest.style.display=logged?'none':'block';frame.style.display=logged?'block':'none';tabbar.style.display=logged?'grid':'none';
+   logged=!!session;syncOnboardingShortcut();guest.style.display=logged?'none':'block';frame.style.display=logged?'block':'none';tabbar.style.display=logged?'grid':'none';
    if(logged&&!frame.hasAttribute('src'))frame.src='chat.html?embed=1';
    if(logged){if(unreadTimer)clearInterval(unreadTimer);await refreshUnread(client,session.user.id);unreadTimer=setInterval(()=>refreshUnread(client,session.user.id),30000);}
    if(!logged){if(unreadTimer)clearInterval(unreadTimer);frame.removeAttribute('src');const badge=root.querySelector('#ouDockUnread');badge.classList.remove('ou-visible');badge.textContent='0';}
