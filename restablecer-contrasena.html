@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#32105f">
+<title>Restablecer contraseña | OdontoUdeC</title>
+<style>
+:root{--p:#32105f;--p2:#54218b;--gold:#d7a928;--ink:#211a2b;--muted:#706879;--line:#ece6f2;--paper:#fbfafc}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(circle at 15% 0%,#eee3ff,transparent 38%),var(--paper);font:15px/1.55 Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
+.card{width:min(100%,470px);background:#fff;border:1px solid var(--line);border-radius:22px;padding:clamp(22px,5vw,34px);box-shadow:0 18px 50px #32105f12}
+.brand{font-weight:950;color:var(--p);letter-spacing:-.04em}.brand span{color:#b88912}.eyebrow{color:#a47a12;font-size:.72rem;font-weight:900;letter-spacing:.13em;margin-top:25px}
+h1{color:var(--p);font-size:clamp(1.8rem,5vw,2.35rem);line-height:1.1;letter-spacing:-.04em;margin:8px 0}p{color:var(--muted)}label{display:block;font-weight:750;margin:16px 0 6px}
+input{width:100%;padding:13px;border:1px solid #ded5e8;border-radius:11px;font:inherit}input:focus{outline:3px solid #eee3ff;border-color:var(--p2)}
+button,.link{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:11px;padding:12px 16px;background:var(--p);color:white;font:inherit;font-weight:800;text-decoration:none;cursor:pointer;margin-top:17px;width:100%}
+button:disabled{opacity:.55;cursor:wait}.link{background:#f3edf9;color:var(--p);margin-top:10px}.status{min-height:25px;margin-top:14px;font-size:.9rem;color:var(--p)}.hidden{display:none!important}
+</style></head>
+<body><main class="card"><div class="brand">Odonto<span>UdeC</span></div><div class="eyebrow">SEGURIDAD DE TU CUENTA</div><h1>Restablece tu contraseña</h1><p>Elige una contraseña nueva para volver a entrar a tu cuenta.</p>
+<div id="loading" class="status" role="status" aria-live="polite">Verificando el enlace de recuperación…</div>
+<form id="resetForm" class="hidden"><label for="newPassword">Nueva contraseña</label><input id="newPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="Mínimo 8 caracteres"><label for="confirmPassword">Confirma la contraseña</label><input id="confirmPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="Escríbela nuevamente"><button id="saveButton" type="submit">Guardar nueva contraseña</button></form>
+<div id="success" class="hidden"><p>Tu contraseña fue actualizada correctamente. Ya puedes iniciar sesión con ella.</p><a class="link" href="index.html#acceso">Volver a OdontoUdeC</a></div>
+<div id="errorActions" class="hidden"><p>El enlace ya no se puede utilizar. Puedes solicitar uno nuevo aquí:</p><form id="resendForm"><label for="recoveryEmail">Correo de tu cuenta</label><input id="recoveryEmail" type="email" autocomplete="email" required placeholder="tu@correo.com"><button id="resendButton" type="submit">Enviar un enlace nuevo</button></form><a class="link" href="index.html#acceso">Volver al inicio de sesión</a></div>
+<div id="formStatus" class="status" role="status" aria-live="polite"></div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
+const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8");
+const RECOVERY_REDIRECT_URL="https://odontoudec.online/restablecer-contrasena.html";
+const $=id=>document.getElementById(id);let recoverySession=false,finished=false;const recoveryStorageKey="ou-password-recovery";
+function showError(message){$("loading").textContent=message;$("errorActions").classList.remove("hidden");$("resetForm").classList.add("hidden");}
+function enableForm(){recoverySession=true;$("loading").classList.add("hidden");$("errorActions").classList.add("hidden");$("resetForm").classList.remove("hidden");}
+db.auth.onAuthStateChange((event,session)=>{if(event==="PASSWORD_RECOVERY"&&session){sessionStorage.removeItem(recoveryStorageKey);enableForm();}});
+(async()=>{
+ const {data,error}=await db.auth.getSession();
+ if(error){showError("No se pudo verificar el enlace: "+error.message);return;}
+ const params=new URLSearchParams(location.hash.slice(1));
+ const message=params.get("error_description")||params.get("error");
+ if(message){sessionStorage.removeItem(recoveryStorageKey);showError("El enlace no es válido o ha expirado. "+message);return;}
+ if(recoverySession)return;
+ if(sessionStorage.getItem(recoveryStorageKey)==="1"&&data.session){sessionStorage.removeItem(recoveryStorageKey);enableForm();return;}
+ if(!data.session){
+   setTimeout(()=>{if(!recoverySession)showError("No se pudo validar el enlace de recuperación. Solicita uno nuevo e inténtalo desde el mismo navegador.");},7000);
+   return;
+ }
+ setTimeout(()=>{if(!recoverySession)showError("Esta sesión no corresponde a un enlace de recuperación. Solicita uno nuevo desde el inicio de sesión.");},7000);
+})();
+$("resendForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const email=$("recoveryEmail").value.trim().toLowerCase(),button=$("resendButton");
+ if(!email)return;
+ button.disabled=true;button.textContent="Enviando…";$("formStatus").textContent="";
+ const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:RECOVERY_REDIRECT_URL});
+ button.disabled=false;button.textContent="Enviar un enlace nuevo";
+ const detail=String(error?.message||"");$("formStatus").textContent=error?(/rate[\s_-]*limit|too many requests|429|email.*limit/i.test(detail)?"El servicio de correo de Supabase alcanzó su límite temporal (email rate limit exceeded). No solicites más enlaces por ahora; espera y vuelve a intentarlo. Para habilitar la recuperación para todos los estudiantes debemos configurar un proveedor SMTP propio.":"No se pudo solicitar el enlace: "+detail):"Si el correo corresponde a una cuenta, recibirás un nuevo enlace. Revisa también la carpeta de spam.";
+});
+$("resetForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(!recoverySession||finished)return;
+ const password=$("newPassword").value,confirmation=$("confirmPassword").value;
+ if(password.length<8){$("formStatus").textContent="La contraseña debe tener al menos 8 caracteres.";return;}
+ if(password!==confirmation){$("formStatus").textContent="Las contraseñas no coinciden.";return;}
+ $("saveButton").disabled=true;$("saveButton").textContent="Guardando…";$("formStatus").textContent="";
+ const {error}=await db.auth.updateUser({password});
+ $("saveButton").disabled=false;$("saveButton").textContent="Guardar nueva contraseña";
+ if(error){$("formStatus").textContent="No se pudo actualizar la contraseña: "+error.message;return;}
+ finished=true;$("resetForm").classList.add("hidden");$("success").classList.remove("hidden");$("loading").classList.add("hidden");
+ await db.auth.signOut({scope:"local"});
+});
+</script></body></html>
