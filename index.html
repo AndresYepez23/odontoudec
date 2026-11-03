@@ -332,17 +332,19 @@ function renderAcademicEvents(){
  eventList.innerHTML=filtered.length?filtered.map(e=>'<article class="event-item"><span class="event-date">📅 '+escapeText(prettyDate(e.event_date))+'</span><h3>'+escapeText(e.title)+'</h3><div class="event-meta">'+escapeText(e.category||'Evento')+' · '+escapeText(e.semester==null?'Todos los semestres':'Semestre '+e.semester)+'</div><p>'+escapeText(e.description||'Sin detalles adicionales.')+'</p></article>').join(''):'<div class="empty-state">No hay fechas que coincidan con esos filtros.</div>';
 }
 ['eventSearch','eventSemester','eventType','eventCut'].forEach(id=>document.getElementById(id).addEventListener(id==='eventSearch'?'input':'change',renderAcademicEvents));
+function bogotaDateTimeToISO(value){if(!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/.test(String(value||'')))return null;const date=new Date(value+':00-05:00');return Number.isNaN(date.getTime())?null:date.toISOString();}
 document.getElementById('personalReminderForm').addEventListener('submit',async e=>{
  e.preventDefault();const {data:{user}}=await supabaseClient.auth.getUser();if(!user){notify('Inicia sesión para guardar recordatorios personales.');return;}
  const title=document.getElementById('reminderTitle').value.trim(),value=document.getElementById('reminderDate').value,description=document.getElementById('reminderDescription').value.trim();
- if(!title||!value){notify('Completa el título y la fecha del recordatorio.');return;}
- const {error}=await supabaseClient.from('student_reminders').insert({user_id:user.id,title,description,reminder_at:new Date(value).toISOString()});
+ const reminderAt=bogotaDateTimeToISO(value);if(!title||!reminderAt){notify('Completa el título y una fecha válida para Colombia.');return;}
+ const {error}=await supabaseClient.from('student_reminders').insert({user_id:user.id,title,description,reminder_at:reminderAt});
  if(error){notify('No se pudo guardar el recordatorio: '+error.message);return;}
  e.target.reset();await loadAcademicEvents();notify('Recordatorio guardado en tu agenda privada.');
 });
 document.getElementById('eventForm').addEventListener('submit',async e=>{
  e.preventDefault();if(!currentUser){notify('Inicia sesión para compartir una fecha.');return;}
- const title=document.getElementById('eventTitle').value.trim(),event_date=new Date(document.getElementById('eventDate').value).toISOString(),category=document.getElementById('eventCategory').value,semesterValue=document.getElementById('eventSemForm').value,semester=semesterValue==='Todos'?null:Number(semesterValue),description=document.getElementById('eventDescription').value.trim();
+ const title=document.getElementById('eventTitle').value.trim(),event_date=bogotaDateTimeToISO(document.getElementById('eventDate').value),category=document.getElementById('eventCategory').value,semesterValue=document.getElementById('eventSemForm').value,semester=semesterValue==='Todos'?null:Number(semesterValue),description=document.getElementById('eventDescription').value.trim();
+ if(!title||!event_date){notify('Completa el nombre y una fecha válida para Colombia.');return;}
  const {error}=await supabaseClient.from('academic_events').insert({title,event_date,category,semester,description,created_by:currentUser.id});
  if(error){notify('No se pudo guardar la fecha: '+error.message);return;}e.target.reset();await loadAcademicEvents();notify('Fecha compartida. ¡Gracias por aportar!');});
 async function loadAcademicResources(){
