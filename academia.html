@@ -38,7 +38,8 @@
 .odonto-mascot svg path,.odonto-mascot svg circle{stroke:#54218b}
 .odonto-mascot svg stop[offset="1"]{stop-color:#fff0d1}
 @media(max-width:760px){}
-</style></head>
+</style><link rel="stylesheet" href="assets/community-dock.css">
+</head>
 <body>
 <div class="top">OdontoUdeC · Comunidad estudiantil de Odontología · Universidad de Cartagena</div>
 <header class="nav"><a class="brand" href="index.html">Odonto<span>UdeC</span></a><nav class="navlinks"><a href="index.html#inicio">Inicio</a><a href="index.html#agenda">Calendario</a><a href="index.html#biblioteca">Biblioteca</a><a href="mi-espacio.html">Mi espacio</a><a href="grupos-estudio.html">Grupos</a><a href="perfil-academico.html">Mi perfil</a><a class="current" href="academia.html">Academia</a></nav><a class="nav-account" href="index.html#acceso">Acceso de estudiantes ↗</a></header>
@@ -177,4 +178,5 @@ function loadQ(){answered=false;const q=questions[qi];document.getElementById('q
 function choose(i){if(answered)return;answered=true;const q=questions[qi],ok=i===q.c;if(ok)score+=10;answers.querySelectorAll('button').forEach((b,j)=>{b.disabled=true;if(j===q.c)b.style.borderColor='#23845a';if(j===i&&!ok)b.style.borderColor='#c45a5a'});feedback.textContent=(ok?'¡Correcto! +10 puntos. ':'No es esa. ')+q.e;document.getElementById('qScore').textContent=score+' puntos';next.hidden=false;next.textContent=qi===questions.length-1?'Ver resultado':'Siguiente pregunta';}
 next.addEventListener('click',()=>{if(qi<questions.length-1){qi++;loadQ()}else{qText.textContent='Terminaste la ronda';answers.innerHTML='';feedback.textContent='Resultado: '+score+' de 100 puntos. '+(score>=80?'¡Excelente repaso!':score>=40?'Buen intento. Refuerza los temas que fallaste.':'Sigue practicando: cada ronda ayuda.');next.hidden=true;restart.hidden=false;}});restart.addEventListener('click',()=>{qi=0;score=0;restart.hidden=true;loadQ()});loadQ();
 </script>
-<script src="academia-enhancements.js"></script></body></html>
+<script src="academia-enhancements.js"></script><script src="assets/community-dock.js"></script>
+</body></html>
