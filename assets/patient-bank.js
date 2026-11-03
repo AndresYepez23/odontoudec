@@ -52,6 +52,13 @@ async function pbHandleAction(button){
    if(contact?.length){const d=contact[0];box.textContent="Contacto privado · "+d.patient_name+" · "+d.phone;}
    await pbLoadCases();
    const refreshed=document.getElementById("pb-contact-"+id);if(refreshed&&contact?.length){refreshed.hidden=false;refreshed.textContent="Contacto privado · "+contact[0].patient_name+" · "+contact[0].phone;}
+  }else if(action==="release"||action==="complete"){
+   const promptText=action==="release"?"¿Quieres devolver este caso al banco para que otro estudiante pueda gestionarlo?":"¿Confirmas que la atención de este caso ya finalizó?";
+   if(!confirm(promptText))return;
+   const rpc=action==="release"?"patient_bank_release_case":"patient_bank_complete_case";
+   const {data,error}=await pbClient.rpc(rpc,{p_case_id:id});if(error)throw error;
+   if(!data)throw new Error("No se pudo actualizar el estado del caso.");
+   await pbLoadCases();
   }
  }catch(error){alert(error.message||"No se pudo actualizar el caso.");}finally{button.disabled=false;}
 }
