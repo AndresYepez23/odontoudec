@@ -30,11 +30,21 @@ function pbRender(){
  return '<article class="pb-case"><div class="pb-case-top"><span class="pb-code">'+c.public_code+'</span><span class="pb-status '+c.status+'">'+status+'</span></div><h3>'+pbEscape(c.reason_summary)+'</h3><p>'+source+'</p><div class="pb-case-meta">'+(c.general_area?'<span>⌖ '+pbEscape(c.general_area)+'</span>':"")+(c.availability?'<span>◷ '+pbEscape(c.availability)+'</span>':"")+'</div><div class="pb-case-actions">'+actions+'</div><div class="pb-contact" id="pb-contact-'+c.id+'" hidden></div></article>';}).join("");
 }
 function pbEscape(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+async function pbLoadAdminQueue(){
+ const panel=document.getElementById("pb-admin-review"),list=document.getElementById("pb-admin-list");
+ const {data:isAdmin,error:adminError}=await pbClient.rpc("patient_bank_is_admin");
+ if(adminError||!isAdmin)return;
+ panel.hidden=false;
+ const {data,error}=await pbClient.rpc("patient_bank_admin_pending");
+ if(error){list.innerHTML='<div class="pb-empty">No se pudo cargar la cola de revisión.</div>';return;}
+ if(!data?.length){list.innerHTML='<div class="pb-empty">No hay solicitudes pendientes de revisión.</div>';return;}
+ list.innerHTML=data.map(c=>'<article class="pb-case"><div class="pb-case-top"><span class="pb-code">'+pbEscape(c.public_code)+'</span><span class="pb-status claimed">Pendiente de revisión</span></div><h3>'+pbEscape(c.reason_summary)+'</h3><p>'+(c.source==="student"?"Compartido por un estudiante":"Solicitud directa de paciente")+'</p><div class="pb-case-actions"><button data-admin-action="contact" data-id="'+c.id+'">Ver contacto privado</button><button class="primary" data-admin-action="approve" data-id="'+c.id+'">Aprobar y publicar</button><button data-admin-action="reject" data-id="'+c.id+'">Rechazar</button></div><div class="pb-contact" id="pb-admin-contact-'+c.id+'" hidden></div></article>').join("");
+}
 async function pbLoadCases(){
  const list=document.getElementById("pb-case-list");list.innerHTML='<div class="pb-empty">Actualizando casos…</div>';
  const {data,error}=await pbClient.rpc("patient_bank_list_cases");
  if(error){list.innerHTML='<div class="pb-empty">No pudimos cargar el banco. Intenta actualizar.</div>';return;}
- pbCases=data||[];pbRender();for(const c of pbCases.filter(x=>x.status==="claimed"&&x.is_mine)){pbLoadPrivateContact(c.id);}
+ pbCases=data||[];pbRender();for(const c of pbCases.filter(x=>x.status==="claimed"&&x.is_mine)){pbLoadPrivateContact(c.id);}await pbLoadAdminQueue();
 }
 async function pbLoadPrivateContact(id){
  const {data,error}=await pbClient.rpc("patient_bank_my_contact",{p_case_id:id});
@@ -63,6 +73,20 @@ async function pbHandleAction(button){
  }catch(error){alert(error.message||"No se pudo actualizar el caso.");}finally{button.disabled=false;}
 }
 document.getElementById("pb-case-list").addEventListener("click",e=>{const b=e.target.closest("button[data-action]");if(b)pbHandleAction(b);});
+document.getElementById("pb-admin-list").addEventListener("click",async e=>{
+ const b=e.target.closest("button[data-admin-action]");if(!b)return;const id=b.dataset.id,action=b.dataset.adminAction;b.disabled=true;
+ try{
+  if(action==="contact"){
+   const {data,error}=await pbClient.rpc("patient_bank_my_contact",{p_case_id:id});if(error)throw error;
+   const box=document.getElementById("pb-admin-contact-"+id);box.hidden=false;
+   box.textContent=data?.length?("Contacto privado · "+data[0].patient_name+" · "+data[0].phone):"No se encontró contacto.";
+  }else{
+   const verb=action==="approve";if(!confirm(verb?"¿Aprobar esta solicitud y hacerla visible para los estudiantes?":"¿Rechazar esta solicitud?"))return;
+   const {data,error}=await pbClient.rpc("patient_bank_admin_review",{p_case_id:id,p_approve:verb});if(error)throw error;if(!data)throw new Error("La solicitud ya no está pendiente.");
+   await pbLoadAdminQueue();await pbLoadCases();
+  }
+ }catch(error){alert(error.message||"No se pudo revisar la solicitud.");}finally{b.disabled=false;}
+});
 document.querySelectorAll(".pb-filters button").forEach(b=>b.addEventListener("click",()=>{pbFilter=b.dataset.filter;document.querySelectorAll(".pb-filters button").forEach(x=>x.classList.toggle("active",x===b));pbRender();}));
 document.getElementById("pb-refresh").addEventListener("click",pbLoadCases);
 document.getElementById("pb-share-toggle").addEventListener("click",()=>{const f=document.getElementById("pb-student-share-form");f.hidden=!f.hidden;});
