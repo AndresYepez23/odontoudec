@@ -37,9 +37,13 @@ async function pbLoadCases(){
  pbCases=data||[];pbRender();await Promise.all(pbCases.filter(x=>x.status==="claimed"&&x.is_mine).map(x=>pbLoadPrivateContact(x.id)));
 }
 async function pbLoadPrivateContact(id){
+ const box=document.getElementById("pb-contact-"+id);if(!box)return;
+ box.hidden=false;box.innerHTML='<div class="pb-contact-loading"><span class="pb-contact-lock" aria-hidden="true">⌑</span><span>Consultando contacto privado…</span></div>';
  const {data,error}=await pbClient.rpc("patient_bank_my_contact",{p_case_id:id});
- const box=document.getElementById("pb-contact-"+id);if(error||!box||!data?.length)return;
- box.hidden=false;box.textContent="Contacto privado · "+data[0].patient_name+" · "+data[0].phone;
+ if(!box.isConnected)return;
+ if(error||!data?.length){box.innerHTML='<strong>No pudimos mostrar el contacto.</strong><p>Actualiza el banco e inténtalo de nuevo. Solo el estudiante responsable puede consultar estos datos.</p>';return;}
+ const person=data[0],phone=String(person.phone??""),tel=phone.replace(/[^0-9+]/g,"").replace(/(?!^)\+/g,"");
+ box.innerHTML='<div class="pb-contact-heading"><span class="pb-contact-lock" aria-hidden="true">⌑</span><div><b>Contacto desbloqueado</b><small>Este caso está asignado a tu cuenta</small></div></div><div class="pb-contact-details"><div><small>Nombre del paciente</small><strong>'+pbEscape(person.patient_name)+'</strong></div><div><small>Teléfono de contacto</small><a href="tel:'+pbEscape(tel)+'">'+pbEscape(phone)+'</a></div></div><p class="pb-contact-foot">Información privada. Utilízala únicamente para coordinar la atención de este caso.</p>';
 }
 async function pbHandleAction(button){
  const id=button.dataset.id,action=button.dataset.action;button.disabled=true;
