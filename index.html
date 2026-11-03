@@ -123,18 +123,23 @@ function setAuthUI(){
 }
 document.getElementById('showLogin').addEventListener('click',()=>setAuthMode('signin'));
 document.getElementById('showSignup').addEventListener('click',()=>setAuthMode('signup'));
+let onboardingInFlightFor=null;
 async function showFirstVisitGuide(user){
- if(!user||sessionStorage.getItem('ou-onboarding-shown'))return;
+ if(!user||sessionStorage.getItem('ou-onboarding-shown')||onboardingInFlightFor===user.id)return;
+ onboardingInFlightFor=user.id;
  const {data:profile,error}=await supabaseClient.from('profiles').select('onboarding_completed').eq('id',user.id).maybeSingle();
- if(error||profile?.onboarding_completed)return;
- sessionStorage.setItem('ou-onboarding-shown','1');
- const modal=document.getElementById('onboardingGuide');if(!modal)return;
+ if(error){onboardingInFlightFor=null;console.warn('No se pudo consultar el estado de bienvenida:',error.message);return;}
+ if(profile?.onboarding_completed){sessionStorage.setItem('ou-onboarding-shown','1');onboardingInFlightFor=null;return;}
+ const modal=document.getElementById('onboardingGuide');
+ if(!modal){onboardingInFlightFor=null;return;}
  modal.classList.add('open');modal.setAttribute('aria-hidden','false');
  document.getElementById('finishOnboarding').onclick=async()=>{
   const button=document.getElementById('finishOnboarding');button.disabled=true;button.textContent='Guardando…';
   const {error:updateError}=await supabaseClient.from('profiles').update({onboarding_completed:true,updated_at:new Date().toISOString()}).eq('id',user.id);
-  if(updateError){button.disabled=false;button.textContent='Continuar';notify('No se pudo guardar la guía como completada.');}
+  if(updateError){button.disabled=false;button.textContent='Continuar';notify('No se pudo guardar la guía como completada. Inténtalo de nuevo.');return;}
+  sessionStorage.setItem('ou-onboarding-shown','1');
   modal.classList.remove('open');modal.setAttribute('aria-hidden','true');
+  onboardingInFlightFor=null;
  };
 }
 async function ensureProfile(user){
