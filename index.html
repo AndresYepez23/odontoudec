@@ -266,6 +266,7 @@ async function loadAcademicEvents(){
  if(error){eventStatus.textContent=error.code==='42P01'?'Falta configurar la tabla del calendario en Supabase.':'No se pudo cargar el calendario comunitario: '+error.message;}
  const official=(window.ODONTOUDEC_CALENDAR_2026_2||[]).map((e,i)=>({...e,id:'official-'+i,created_at:null}));
  const {data:{user:calendarUser}}=await supabaseClient.auth.getUser();
+ if(calendarUser&&!document.getElementById('eventSemester').value){const {data:studentProfile}=await supabaseClient.from('profiles').select('semester').eq('id',calendarUser.id).maybeSingle();if(studentProfile?.semester)document.getElementById('eventSemester').value=String(studentProfile.semester);}
  let personal=[];
  if(calendarUser){const {data:reminders,error:reminderError}=await supabaseClient.from('student_reminders').select('id,title,description,reminder_at').eq('user_id',calendarUser.id).order('reminder_at',{ascending:true});if(!reminderError)personal=(reminders||[]).map(r=>({id:r.id,title:r.title,description:r.description,event_date:r.reminder_at,category:'Personal',semester:null,is_personal:true,created_at:null}));}
 
@@ -313,7 +314,7 @@ document.getElementById('monthPrev')?.addEventListener('click',()=>{calendarMont
 document.getElementById('monthNext')?.addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);renderAcademicEvents();});
 function renderAcademicEvents(){
  const query=norm(document.getElementById('eventSearch').value.trim()),semester=document.getElementById('eventSemester').value,type=document.getElementById('eventType').value,cut=document.getElementById('eventCut')?.value||'';
- const filtered=eventRows.filter(e=>(!query||norm([e.title,e.description,e.category].join(' ')).includes(query))&&(!semester||String(e.semester??'')===semester)&&(!type||e.category===type)&&(!cut||norm(e.description||'').includes(norm(cut))));
+ const filtered=eventRows.filter(e=>(!query||norm([e.title,e.description,e.category].join(' ')).includes(query))&&(!semester||e.semester==null||String(e.semester)===semester)&&(!type||e.category===type)&&(!cut||norm(e.description||'').includes(norm(cut))));
  eventStatus.textContent=filtered.length+' fecha(s) encontrada(s).';
  renderMonthCalendar(filtered);
  eventList.innerHTML=filtered.length?filtered.map(e=>'<article class="event-item"><span class="event-date">📅 '+escapeText(prettyDate(e.event_date))+'</span><h3>'+escapeText(e.title)+'</h3><div class="event-meta">'+escapeText(e.category||'Evento')+' · '+escapeText(e.semester==null?'Todos los semestres':'Semestre '+e.semester)+'</div><p>'+escapeText(e.description||'Sin detalles adicionales.')+'</p></article>').join(''):'<div class="empty-state">No hay fechas que coincidan con esos filtros.</div>';
