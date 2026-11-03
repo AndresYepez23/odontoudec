@@ -21,7 +21,7 @@ button:disabled{opacity:.55;cursor:wait}.link{background:#f3edf9;color:var(--p);
 <div id="formStatus" class="status" role="status" aria-live="polite"></div></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
 const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8");
-const $=id=>document.getElementById(id);let recoverySession=false,finished=false;
+const $=id=>document.getElementById(id);let recoverySession=false,finished=false;const recoveryStorageKey="ou-password-recovery";
 function showError(message){$("loading").textContent=message;$("errorActions").classList.remove("hidden");$("resetForm").classList.add("hidden");}
 function enableForm(){recoverySession=true;$("loading").classList.add("hidden");$("errorActions").classList.add("hidden");$("resetForm").classList.remove("hidden");}
 db.auth.onAuthStateChange((event,session)=>{if(event==="PASSWORD_RECOVERY"&&session)enableForm();});
@@ -30,8 +30,9 @@ db.auth.onAuthStateChange((event,session)=>{if(event==="PASSWORD_RECOVERY"&&sess
  if(error){showError("No se pudo verificar el enlace: "+error.message);return;}
  const params=new URLSearchParams(location.hash.slice(1));
  const message=params.get("error_description")||params.get("error");
- if(message){showError("El enlace no es válido o ha expirado. "+message);return;}
+ if(message){sessionStorage.removeItem(recoveryStorageKey);showError("El enlace no es válido o ha expirado. "+message);return;}
  if(recoverySession)return;
+ if(sessionStorage.getItem(recoveryStorageKey)==="1"&&data.session){sessionStorage.removeItem(recoveryStorageKey);enableForm();return;}
  if(!data.session){
    setTimeout(()=>{if(!recoverySession)showError("No se pudo validar el enlace de recuperación. Solicita uno nuevo e inténtalo desde el mismo navegador.");},7000);
    return;
