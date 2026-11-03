@@ -51,6 +51,7 @@ async function pbHandleAction(button){
   if(action==="claim"){
    if(!confirm("¿Confirmas que deseas gestionar este caso? Al continuar, dejará de estar disponible para otros estudiantes."))return;
    const {data,error}=await pbClient.rpc("patient_bank_claim_case",{p_case_id:id});if(error)throw error;if(!data)throw new Error("Otro estudiante acaba de tomar este caso. Actualiza el banco.");
+   pbFilter="all";document.querySelectorAll(".pb-filters button").forEach(x=>x.classList.toggle("active",x.dataset.filter==="all"));
    await pbLoadCases();
   }else if(action==="release"||action==="complete"){
    const promptText=action==="release"?"¿Quieres devolver este caso al banco para que otro estudiante pueda gestionarlo?":"¿Confirmas que la atención de este caso ya finalizó?";
