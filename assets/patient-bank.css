@@ -56,3 +56,24 @@
 .pb-footer{max-width:1120px}
 @media(max-width:760px){.pb-student-heading{align-items:flex-start;flex-direction:column}.pb-privacy-note{width:100%}.pb-case-list{grid-template-columns:1fr}.pb-toolbar{align-items:flex-start}.pb-toolbar-copy{width:100%}}
 @media(max-width:520px){.pb-stats{gap:7px}.pb-stats>div{padding:13px 10px}.pb-stats b{font-size:25px}.pb-stats span{font-size:9px}.pb-filters{width:100%;overflow-x:auto;flex-wrap:nowrap}.pb-filters button{white-space:nowrap}.pb-toolbar{gap:10px}.pb-refresh{margin-left:auto}.pb-contact-details{grid-template-columns:1fr}.pb-share{padding:17px}}
+
+
+/* Barra superior con la identidad morada de OdontoUdeC */
+.pb-topbar{
+  background:linear-gradient(110deg,#32105f 0%,#43206f 58%,#51277c 100%);
+  border-bottom:1px solid #24103f;
+  box-shadow:0 5px 18px #23084420;
+}
+.pb-brand{color:#fff}
+.pb-brand small{color:#e1d3ee}
+.pb-mark{
+  background:linear-gradient(145deg,#fff,#f3eaf9);
+  color:#32105f;
+  box-shadow:0 2px 9px #17072b30;
+}
+.pb-back{color:#fff;opacity:.92}
+.pb-back:hover{opacity:1;text-decoration:underline;text-underline-offset:4px}
+@media(max-width:620px){
+  .pb-topbar{background:linear-gradient(110deg,#32105f,#51277c)}
+  .pb-back{color:#fff}
+}
