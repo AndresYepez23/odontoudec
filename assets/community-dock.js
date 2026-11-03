@@ -19,6 +19,8 @@ function syncOnboardingShortcut(){
   const modal=document.getElementById('onboardingGuide');
   if(!modal)return;
   modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+  const finishButton=document.getElementById('finishOnboarding');
+  if(finishButton)finishButton.onclick=()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');};
   menu.closest('details')?.removeAttribute('open');
   document.getElementById('navlinks')?.classList.remove('open');
   document.getElementById('closeOnboarding')?.focus();
