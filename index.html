@@ -125,8 +125,9 @@ document.getElementById('showLogin').addEventListener('click',()=>setAuthMode('s
 document.getElementById('showSignup').addEventListener('click',()=>setAuthMode('signup'));
 let onboardingInFlightFor=null;
 async function showFirstVisitGuide(user){
+ if(!user)return;
  const onboardingKey='ou-onboarding-shown-'+user.id;
- if(!user||sessionStorage.getItem(onboardingKey)||onboardingInFlightFor===user.id)return;
+ if(sessionStorage.getItem(onboardingKey)||onboardingInFlightFor===user.id)return;
  onboardingInFlightFor=user.id;
  const {data:profile,error}=await supabaseClient.from('profiles').select('onboarding_completed').eq('id',user.id).maybeSingle();
  if(error){onboardingInFlightFor=null;console.warn('No se pudo consultar el estado de bienvenida:',error.message);return;}
