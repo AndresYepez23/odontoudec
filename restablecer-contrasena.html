@@ -28,10 +28,15 @@ db.auth.onAuthStateChange((event,session)=>{if(event==="PASSWORD_RECOVERY"&&sess
 (async()=>{
  const {data,error}=await db.auth.getSession();
  if(error){showError("No se pudo verificar el enlace: "+error.message);return;}
- if(data.session){enableForm();return;}
  const params=new URLSearchParams(location.hash.slice(1));
  const message=params.get("error_description")||params.get("error");
- showError(message?"El enlace no es válido o ha expirado. "+decodeURIComponent(message.replace(/\+/g," ")):"El enlace no es válido o ya expiró. Solicita uno nuevo.");
+ if(message){showError("El enlace no es válido o ha expirado. "+message);return;}
+ if(recoverySession)return;
+ if(!data.session){
+   setTimeout(()=>{if(!recoverySession)showError("No se pudo validar el enlace de recuperación. Solicita uno nuevo e inténtalo desde el mismo navegador.");},7000);
+   return;
+ }
+ setTimeout(()=>{if(!recoverySession)showError("Esta sesión no corresponde a un enlace de recuperación. Solicita uno nuevo desde el inicio de sesión.");},7000);
 })();
 $("resetForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!recoverySession||finished)return;
