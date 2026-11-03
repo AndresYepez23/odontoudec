@@ -47,7 +47,7 @@ Deno.serve(async (req: Request) => {
     const source = body.source === "student" ? "student" : "patient";
 
     if (body.consent !== true) return reply(req, { error: "Necesitamos tu autorización para gestionar la solicitud." }, 400);
-    if (name.length < 2 || phone.replace(/\\D/g, "").length < 7 || summary.length < 10) {
+    if (name.length < 2 || phone.replace(/\D/g, "").length < 6 || summary.length < 5) {
       return reply(req, { error: "Revisa el nombre, teléfono y descripción antes de enviar." }, 400);
     }
 
