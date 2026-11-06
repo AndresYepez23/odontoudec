@@ -38,6 +38,10 @@
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     const statusEl = document.getElementById('status');
+    const params = new URLSearchParams(window.location.search);
+    const requestedReturn = params.get('returnTo') || '';
+    const safeReturn = requestedReturn.startsWith('/') && !requestedReturn.startsWith('//') && !requestedReturn.includes('\\\\') ? requestedReturn : '/';
+    document.getElementById('continue').href = safeReturn;
     async function verify(){
       statusEl.className = 'status';
       statusEl.textContent = 'Verificando…';
@@ -51,7 +55,7 @@
       if(user?.email_confirmed_at){
         statusEl.className = 'status success';
         statusEl.textContent = '✓ Correo verificado. Tu cuenta está confirmada.';
-        document.getElementById('continue').textContent = 'Entrar a la comunidad';
+        document.getElementById('continue').textContent = safeReturn === '/' ? 'Entrar a la comunidad' : 'Continuar con mi encuesta';
       } else if(user){
         statusEl.textContent = 'Tu sesión está activa, pero el correo todavía no aparece como confirmado. Abre el enlace más reciente que recibiste.';
       } else {
