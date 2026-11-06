@@ -214,3 +214,14 @@ Base auditada: main
 - Verificaciones estáticas realizadas: existencia de RLS, ausencia de privilegios directos para roles de navegador, validación del JWT, control de administrador, detección de duplicados, configuración de función y bloqueo del envío mientras no esté activado.
 - Pendiente antes de habilitar: ejecutar migración en entorno de prueba, desplegar función, probar con dos cuentas estudiantiles y una administrativa, verificar rechazo de duplicados y acceso denegado a estudiantes, revisar CORS/secretos y probar retorno desde confirmación de correo. SMTP sigue pendiente.
 - Todo lo anterior permanece en la rama de rediseño. No se aplicó SQL en Supabase ni se desplegó la Edge Function en el proyecto conectado.
+
+
+## Revisión adicional — backend de encuesta y estado de seguridad (6 nov 2026)
+
+- Se compararon automáticamente los ocho catálogos de candidatos del frontend con los del servidor: **coinciden exactamente** (5, 7, 8, 13, 9, 9, 8 y 14 opciones respectivamente). Las 15 claves de respuesta están representadas en la encuesta y en la validación del servidor.
+- Se verificó el esquema remoto existente en modo lectura: `profiles` contiene `id`, `display_name`, `semester` y `public_id`; `user_roles` tiene clave primaria en `user_id` y el campo `role`. Esto confirma que las consultas de perfil y autorización administrativa usan nombres de columnas existentes.
+- La migración de encuesta todavía no existe en la base remota: la tabla `survey_submissions` no aparece en el esquema inspeccionado. Por tanto, la función no debe desplegarse ni el botón habilitarse antes de aplicar la migración en un entorno controlado.
+- Aclaración: la tabla propuesta está en el esquema `public`, no en un esquema no expuesto. La protección prevista se basa en RLS y en revocar privilegios de `public`, `anon` y `authenticated`; el acceso se reserva a `service_role`. También se debe confirmar la exposición del esquema en Data API antes de la activación.
+- Se revisaron los asesores de Supabase. Hay alertas preexistentes que requieren auditoría separada: 8 tablas con RLS sin políticas (incluida `user_roles`, cuyo acceso está pensado para backend), 12 funciones `SECURITY DEFINER` ejecutables por usuarios autenticados, protección de contraseñas filtradas desactivada y un índice faltante en una FK del registro de eventos del Banco de pacientes. No se modificó ninguna de estas estructuras porque son ajenas al cambio de encuesta y requieren revisar el comportamiento actual antes de alterar permisos.
+- Rendimiento: el asesor también reporta 22 índices sin uso y una combinación de políticas permisivas en `posts`. No se eliminaron índices automáticamente: el uso observado puede ser bajo por el volumen actual y deben evaluarse con consultas reales.
+- La advertencia de la vista previa se mantiene: no enviar respuestas reales. No se ejecutó SQL, no se desplegó ninguna función y no se hizo deploy de Netlify.
