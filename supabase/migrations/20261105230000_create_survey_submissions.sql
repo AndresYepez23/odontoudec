@@ -1,8 +1,6 @@
 -- Survey submissions for OdontoUdeC.
 -- Keep the table in a non-exposed schema; all access is mediated by the Edge Function.
-create schema if not exists private;
-
-create table if not exists private.survey_submissions (
+create table if not exists public.survey_submissions (
   id uuid primary key default gen_random_uuid(),
   survey_key text not null,
   user_id uuid not null references auth.users(id) on delete cascade,
@@ -13,16 +11,14 @@ create table if not exists private.survey_submissions (
 );
 
 create index if not exists survey_submissions_survey_submitted_idx
-  on private.survey_submissions (survey_key, submitted_at desc);
+  on public.survey_submissions (survey_key, submitted_at desc);
 
-alter table private.survey_submissions enable row level security;
+alter table public.survey_submissions enable row level security;
 
 -- No direct table access for browser roles. The Edge Function performs
 -- authentication, input validation, duplicate protection and admin checks.
-revoke all on schema private from public, anon, authenticated;
-revoke all on table private.survey_submissions from public, anon, authenticated;
-grant usage on schema private to service_role;
-grant select, insert on table private.survey_submissions to service_role;
+revoke all on table public.survey_submissions from public, anon, authenticated;
+grant select, insert on table public.survey_submissions to service_role;
 
-comment on table private.survey_submissions is
+comment on table public.survey_submissions is
   'Respuestas identificadas de la encuesta estudiantil. Acceso mediado exclusivamente por Edge Function.';
