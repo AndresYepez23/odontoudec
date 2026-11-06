@@ -45,6 +45,6 @@ $("resourceList").addEventListener("click",async e=>{const b=e.target.closest("[
 async function init(){const {data:{session},error}=await db.auth.getSession();if(error||!session){window.OdontoOneSignal?.syncUser(null);$("auth").classList.remove("hidden");return;}user=session.user;window.OdontoOneSignal?.syncUser(user);$("workspace").classList.remove("hidden");await Promise.all([loadNotes(),loadCollections()]);}
 db.auth.onAuthStateChange((_event,session)=>{window.OdontoOneSignal?.syncUser(session?.user||null);if(session&&!user){user=session.user;$("auth").classList.add("hidden");$("workspace").classList.remove("hidden");loadNotes();loadCollections();}else if(!session){user=null;$("workspace").classList.add("hidden");$("auth").classList.remove("hidden");}});
 init();
-</script><script src="assets/community-dock.js"></script>
+</script><script src="/assets/notifications.js"></script><script src="assets/community-dock.js"></script>
 <script src="/assets/posthog.js" defer></script>
 </body></html>
