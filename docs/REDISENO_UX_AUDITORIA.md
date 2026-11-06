@@ -227,3 +227,11 @@ Base auditada: main
 - La advertencia de la vista previa se mantiene: no enviar respuestas reales. No se ejecutó SQL, no se desplegó ninguna función y no se hizo deploy de Netlify.
 
 - Se contrastó el CORS con el proyecto Netlify activo de la cuenta Simón: el dominio público es `odontoudec.online` y el subdominio de proyecto es `odontoudec.netlify.app`. Se corrigió la expresión de origen de previews para aceptar `https://deploy-preview-N--odontoudec.netlify.app` (antes apuntaba a otro slug), evitando que la encuesta falle en una vista previa válida. Cambio solo en la rama.
+
+## Avance de preparación para publicación única — 6 nov 2026
+
+- El registro de la portada ahora solicita **nombre completo**, no «nombre o alias», y ofrece autocompletado de nombre. Esto alinea el alta con la decisión de no crear apodos públicos.
+- La encuesta ahora intenta mostrar al usuario los mensajes devueltos por la Edge Function cuando Supabase responde con error HTTP (incluidos duplicados y validaciones), en lugar de mostrar siempre un mensaje genérico. Los fallos no autorizados al consultar resultados administrativos siguen ocultos a estudiantes; otros fallos se muestran en el resumen del panel.
+- Se añadió `scripts/validate-survey-contract.mjs` para comprobar automáticamente el contrato frontend/backend: 15 categorías, 8 listas idénticas, 7 campos abiertos, validación JWT, autorización admin y control de duplicados.
+- Se documentó una secuencia de release que concentra las correcciones en un único deploy de sitio: primero preparar/aplicar backend y verificarlo; después publicar el frontend habilitado. El segundo deploy queda reservado únicamente para corregir defectos descubiertos durante las pruebas reales.
+- No se ha habilitado el botón de envío ni se ha publicado la rama. No se ha ejecutado SQL ni se ha desplegado la función.
