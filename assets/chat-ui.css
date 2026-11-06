@@ -32,3 +32,5 @@
  .chat-compose-row>button[type="submit"]{min-width:70px}
  .chat-attachment{max-height:230px}
 }
+
+.message-body{white-space:pre-wrap;overflow-wrap:anywhere}
