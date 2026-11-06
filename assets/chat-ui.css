@@ -1,33 +1,34 @@
-/* Shared media and reaction controls for OdontoUdeC */
-.chat-compose-row{display:flex;align-items:center;gap:8px;min-width:0}
-.chat-compose-row input[type="text"],.chat-compose-row input:not([type]){flex:1;min-width:0}
-.chat-attach-btn{flex:0 0 auto!important;width:44px;min-width:44px;height:44px;padding:0!important;border:1px solid #e5d9ef!important;border-radius:12px!important;background:#f7f1fc!important;color:#32105f!important;box-shadow:none!important;font-size:20px!important}
-.chat-attach-btn:hover{background:#eee3f8!important}
-.chat-file-input{display:none!important}
-.chat-upload-status{min-height:0;margin:5px 0 0;color:#765d8d;font-size:12px}
+/* OdontoUdeC · Adjuntos de fotografía para los chats existentes */
+.chat-compose-row{display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:8px!important;min-width:0}
+.chat-compose-row>input{flex:1 1 auto!important;min-width:0!important;width:0}
+.chat-compose-row>button[type="submit"]{flex:0 0 auto!important;width:auto!important;min-width:76px}
+.chat-attach-wrap{position:relative;display:flex;flex:0 0 40px!important;width:40px;min-width:40px;align-items:center;justify-content:center}
+.chat-attach-trigger{display:inline-flex!important;align-items:center;justify-content:center;width:40px!important;min-width:40px!important;height:42px;min-height:42px;padding:0!important;border:1px solid #e5d9ef!important;border-radius:12px!important;background:#f7f1fc!important;color:#32105f!important;box-shadow:none!important}
+.chat-attach-trigger:hover{background:#eee4f7!important}
+.chat-attach-trigger svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.chat-attach-trigger:disabled{opacity:.45}
+.chat-attach-menu{position:absolute;left:0;bottom:calc(100% + 8px);z-index:10000;display:grid;gap:5px;min-width:185px;padding:7px;border:1px solid #e7ddef;border-radius:13px;background:#fff;box-shadow:0 12px 30px rgba(35,12,60,.17)}
+.chat-attach-menu[hidden]{display:none!important}
+.chat-attach-menu button{display:flex!important;justify-content:flex-start!important;min-height:39px;padding:8px 11px!important;border-radius:9px!important;background:#faf7fd!important;color:#32105f!important;box-shadow:none!important;font-size:13px!important;font-weight:700!important;white-space:nowrap}
+.chat-attach-menu button:hover{background:#f0e7f8!important}
+.chat-file-input{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;overflow:hidden!important;pointer-events:none!important}
+.chat-attachment-preview{display:flex;align-items:center;gap:10px;width:100%;min-width:0;margin:8px 0;padding:8px 10px;border:1px solid #e7ddef;border-radius:13px;background:#faf7fd}
+.chat-attachment-preview[hidden]{display:none!important}
+.chat-preview-thumb{display:block;flex:0 0 58px;width:58px;height:58px;object-fit:cover;border-radius:9px;background:#eee}
+.chat-preview-details{display:grid;gap:2px;flex:1;min-width:0}
+.chat-preview-details strong{color:#32105f;font-size:13px}
+.chat-preview-details span{color:#766d82;font-size:11px}
+.chat-preview-remove{flex:0 0 auto!important;padding:7px 9px!important;border-radius:9px!important;background:#f2eafa!important;color:#54218b!important;box-shadow:none!important;font-size:12px!important}
+.chat-upload-status{min-height:0;margin:5px 0 0;color:#765d8d;font-size:12px;line-height:1.4}
 .chat-upload-status:empty{display:none}
-.chat-attachment-link{display:block;width:fit-content;max-width:min(100%,380px);margin:8px 0 4px;line-height:0;border-radius:13px;overflow:hidden;border:1px solid #e9e1f1;background:#faf8fc}
+.chat-attachment-link{display:block;width:fit-content;max-width:min(100%,380px);margin:8px 0 4px;line-height:0;border:1px solid #e9e1f1;border-radius:13px;overflow:hidden;background:#faf8fc}
 .chat-attachment{display:block;width:auto;max-width:100%;max-height:280px;object-fit:contain;cursor:zoom-in}
-.reaction-bar{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:8px}
-.reaction-chip{display:inline-flex!important;align-items:center;justify-content:center;gap:3px;min-width:29px;min-height:29px;padding:3px 5px!important;border:1px solid transparent!important;border-radius:999px!important;background:transparent!important;color:#65536f!important;box-shadow:none!important;cursor:pointer}
-.reaction-chip img{display:block;width:19px;height:19px;object-fit:contain}
-.reaction-count{font-size:11px;line-height:1;font-weight:750}
-.reaction-chip:hover:not(:disabled){background:#f5effa!important;border-color:#e4d7ee!important;transform:translateY(-1px)}
-.reaction-chip.is-active{background:#f0e7f8!important;border-color:#cbb4df!important;box-shadow:0 0 0 2px #f7f1fb!important}
-.reaction-chip:disabled{opacity:.75;cursor:default}
-.reaction-bar.compact{gap:2px}
-.reaction-bar.compact .reaction-chip{min-width:25px;min-height:25px;padding:2px 4px!important}
-.reaction-bar.compact .reaction-chip img{width:17px;height:17px}
-.post-reaction-host{margin:10px 0 2px;padding-top:8px;border-top:1px solid #eee6f4}
-.post-reaction-host .reaction-bar{gap:7px}
-.post-reaction-host .reaction-chip{min-width:38px;min-height:34px;padding:5px 8px!important;background:#faf7fd!important;border:1px solid #eee6f4!important}
-.post-reaction-host .reaction-chip img{width:21px;height:21px}
-.post-reaction-host .reaction-chip.is-active{background:#f0e7f8!important;border-color:#cbb4df!important}
-.message .chat-attachment-link,.bubble .chat-attachment-link,.msg .chat-attachment-link{max-width:min(100%,320px)}
-.message .reaction-bar,.bubble .reaction-bar,.msg .reaction-bar{align-self:flex-start}
-@media(max-width:600px){
+.chat-attachment-unavailable{display:inline-block;padding:9px 11px;border-radius:9px;background:#f8f4fb;color:#766d82;font-size:12px;line-height:1.4}
+.chat-attachment-caption{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:560px){
+ .chat-compose-row{gap:6px!important}
+ .chat-attach-wrap{flex-basis:38px!important;width:38px;min-width:38px}
+ .chat-attach-trigger{width:38px!important;min-width:38px!important;height:42px}
+ .chat-compose-row>button[type="submit"]{min-width:70px}
  .chat-attachment{max-height:230px}
- .reaction-bar{gap:2px}
- .reaction-chip{min-width:27px;min-height:27px}
- .post-reaction-host .reaction-bar{gap:4px}
 }
