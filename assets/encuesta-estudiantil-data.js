@@ -1,6 +1,6 @@
 /* Encuesta estudiantil OdontoUdeC
  * Fuente: formulario compartido por el usuario.
- * Una sola selección por categoría. Las categorías sin candidatos quedan pendientes.
+ * Categorías con opciones: selección única. Categorías abiertas: respuesta escrita.
  * No conectar envíos hasta definir y verificar el esquema seguro de respuestas en Supabase.
  */
 window.ODONTOUDEC_SURVEY = Object.freeze({
@@ -69,8 +69,7 @@ window.ODONTOUDEC_SURVEY = Object.freeze({
       "PEREZ BENAVIDES JORGE",
       "RODRÍGUEZ VARGAS FEDERICO V.",
       "TORRES OSORIO LENIN",
-      "CANTILLO OSWALDO",
-      "Opción 10"
+      "CANTILLO OSWALDO"
     ]},
     { id: "semiologo", title: "Mejor Semiólogo", required: true, options: [
       "HIGUERA BLANCO JULIAN",
@@ -82,7 +81,7 @@ window.ODONTOUDEC_SURVEY = Object.freeze({
       "TETAY SALGADO SINDY",
       "TORRES OSORIO LENIN"
     ]},
-    { id: "docente", title: "Mejor Docente", required: true, options: [], pending: true },
+    { id: "docente", title: "Mejor Docente", required: true, type: "free_text", options: [] },
     { id: "coordinador_clinica", title: "Mejor Coordinador de Clínica", required: true, options: [
       "COVO MORALES EDUARDO E.",
       "DÍAZ CABALLERO ANTONIO",
@@ -99,11 +98,11 @@ window.ODONTOUDEC_SURVEY = Object.freeze({
       "ABDALA ESCALA AIZAR",
       "JIMÉNEZ MALAGÓN MARIA DEL C."
     ]},
-    { id: "docente_didactico", title: "Docente más Didáctico", required: true, options: [], pending: true },
-    { id: "docente_colaborador", title: "Docente más Colaborador", required: true, options: [], pending: true },
-    { id: "docente_inspirador", title: "Docente más Inspirador", required: true, options: [], pending: true },
-    { id: "docente_paciente", title: "Docente más Paciente", required: true, options: [], pending: true },
-    { id: "docente_calidad_humana", title: "Docente con Mayor Calidad Humana", required: true, options: [], pending: true },
-    { id: "docente_deja_huella", title: "Docente que Deja Huella", required: true, options: [], pending: true }
+    { id: "docente_didactico", title: "Docente más Didáctico", required: true, type: "free_text", options: [] },
+    { id: "docente_colaborador", title: "Docente más Colaborador", required: true, type: "free_text", options: [] },
+    { id: "docente_inspirador", title: "Docente más Inspirador", required: true, type: "free_text", options: [] },
+    { id: "docente_paciente", title: "Docente más Paciente", required: true, type: "free_text", options: [] },
+    { id: "docente_calidad_humana", title: "Docente con Mayor Calidad Humana", required: true, type: "free_text", options: [] },
+    { id: "docente_deja_huella", title: "Docente que Deja Huella", required: true, type: "free_text", options: [] }
   ]
 });
