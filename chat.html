@@ -58,7 +58,40 @@ function applySession(session){user=session?.user||null;composer.setAvailable(Bo
 async function login(){const email=$("email").value.trim().toLowerCase(),password=$("password").value;if(!email||!password){say("Escribe correo y contraseña.");return;}const button=$("signIn");button.disabled=true;button.textContent="Ingresando…";try{const {data,error}=await db.auth.signInWithPassword({email,password});if(error){say("No se pudo iniciar sesión: "+error.message);return;}applySession(data.session||{user:data.user});say("Sesión iniciada correctamente.");}catch(error){say("No se pudo completar el inicio de sesión. "+(error?.message||"Inténtalo nuevamente."));}finally{button.disabled=false;button.textContent="Iniciar sesión";}}
 $("signIn").onclick=login;$("password").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
 $("signOut").onclick=async()=>{await db.auth.signOut();user=null;known.clear();view();say("Sesión cerrada.")};
-function esc(t){return String(t??"")}async function loadMessages(){if(!user)return;const {data,error}=await db.from("chat_messages").select("id,user_id,display_name,content,created_at").order("created_at",{ascending:true}).limit(100);if(error){say("El chat necesita configuración en Supabase. Revisa el SQL de instalación.");return}if(!data)return;const box=$("messages"),atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<70;const next=new Set();for(const m of data){next.add(String(m.id));if(known.has(String(m.id)))continue;const article=document.createElement("article");article.className="msg";const meta=document.createElement("div");meta.className="meta";const name=document.createElement("strong");name.textContent=m.display_name||"Estudiante";const date=document.createElement("span");date.textContent=new Date(m.created_at).toLocaleString("es-CO",{dateStyle:"short",timeStyle:"short"});meta.append(name,date);const body=document.createElement("p");body.className="body";article.append(meta,body);await OdontoChatUI.renderMessageContent(body,m.content,db);const report=document.createElement("button");report.type="button";report.textContent="Reportar";report.onclick=async()=>{const reason=prompt("Motivo del reporte (spam, acoso, datos privados u otro):");if(!reason?.trim())return;const {error}=await db.from("chat_reports").insert({message_id:m.id,reporter_id:user.id,reason:reason.trim().slice(0,300)});say(error?"No se pudo enviar el reporte. Comprueba la configuración del chat.":"Reporte enviado a moderación.");};if(m.user_id!==user.id){const actions=document.createElement("div");actions.className="row";actions.append(report);article.append(actions)}box.append(article)}known=next;while(box.children.length>100)box.firstElementChild.remove();if(atBottom)box.scrollTop=box.scrollHeight}
+function esc(t){return String(t??"")}
+async function loadMessages(){
+ if(!user)return;
+ const {data,error}=await db.from("chat_messages").select("id,user_id,display_name,content,created_at").order("created_at",{ascending:true}).limit(100);
+ if(error){say("El chat necesita configuración en Supabase. Revisa el SQL de instalación.");return}
+ if(!data)return;
+ const box=$("messages"),atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<70,ids=data.map(m=>m.id);
+ let reactionRows=[];
+ if(ids.length){const result=await db.from("chat_message_reactions").select("id,chat_message_id,user_id,reaction").in("chat_message_id",ids);if(!result.error)reactionRows=result.data||[];else console.warn("[OdontoUdeC reactions] No se pudieron cargar:",result.error);}
+ const next=new Set();
+ for(const m of data){
+  const id=String(m.id);next.add(id);
+  let article=box.querySelector('[data-message-id="'+id+'"]');
+  if(!article){
+   article=document.createElement("article");article.className="msg";article.dataset.messageId=id;
+   const meta=document.createElement("div");meta.className="meta";
+   const name=document.createElement("strong");name.textContent=m.display_name||"Estudiante";
+   const date=document.createElement("span");date.textContent=new Date(m.created_at).toLocaleString("es-CO",{dateStyle:"short",timeStyle:"short"});
+   meta.append(name,date);
+   const body=document.createElement("p");body.className="body";
+   article.append(meta,body);await OdontoChatUI.renderMessageContent(body,m.content,db);
+   if(m.user_id!==user.id){
+    const actions=document.createElement("div");actions.className="row";
+    const report=document.createElement("button");report.type="button";report.textContent="Reportar";
+    report.onclick=async()=>{const reason=prompt("Motivo del reporte (spam, acoso, datos privados u otro):");if(!reason?.trim())return;const {error}=await db.from("chat_reports").insert({message_id:m.id,reporter_id:user.id,reason:reason.trim().slice(0,300)});say(error?"No se pudo enviar el reporte. Comprueba la configuración del chat.":"Reporte enviado a moderación.");};
+    actions.append(report);article.append(actions);
+   }
+   const host=document.createElement("div");host.className="message-reactions";article.append(host);box.append(article);
+  }
+  const host=article.querySelector(".message-reactions");
+  if(host)OdontoReactions.mount(host,{db,table:"chat_message_reactions",targetColumn:"chat_message_id",targetId:m.id,userId:user.id,rows:reactionRows.filter(r=>String(r.chat_message_id)===id),onStatus:say});
+ }
+ known=next;while(box.children.length>100)box.firstElementChild.remove();if(atBottom)box.scrollTop=box.scrollHeight;
+}
 $("sendForm").onsubmit=async e=>{e.preventDefault();if(!user)return;const input=$("message"),text=input.value.trim();if(!text&&!composer.hasPending())return;$("send").disabled=true;composer.setBusy(true);let prepared=null;try{prepared=await composer.prepare({text,scope:{type:"community"},userId:user.id});const {error}=await db.from("chat_messages").insert({user_id:user.id,display_name:user.user_metadata?.display_name||user.email?.split("@")[0]||"Estudiante",content:prepared.content});if(error){if(prepared.path)await composer.rollback(prepared.path);say(error.message.includes("CHAT_RATE")?"Espera unos segundos antes de enviar otro mensaje. Límite: 5 mensajes por minuto.":"No se pudo enviar. Puede que hayas alcanzado el límite anti-spam o falte configurar Supabase.");return}input.value="";composer.clear();say("Mensaje enviado.");await loadMessages();$("messages").scrollTop=$("messages").scrollHeight}catch(error){say(error?.message||"No se pudo enviar la fotografía.")}finally{$("send").disabled=false;composer.setBusy(false)}};
 // Escuchar cambios antes de leer el almacenamiento evita perder un inicio de sesión
 // que ocurra mientras se está inicializando el chat.
