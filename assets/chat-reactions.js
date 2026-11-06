@@ -5,7 +5,7 @@
     { key: "love", file: "love.svg", label: "Me encanta" },
     { key: "laughing", file: "laughing.svg", label: "Me divierte" },
     { key: "soaked", file: "soaked.svg", label: "Me sorprende" },
-    { key: "sad", file: "sad-face.svg", label: "Me entristece" },
+    { key: "sad", file: "sad-fixed.svg?v=20261106-final", label: "Me entristece" },
     { key: "angry", file: "angry.svg", label: "Me enoja" }
   ];
   const LEGACY = {
@@ -84,11 +84,6 @@
         const img = document.createElement("img");
         img.src = asset(option.file); img.alt = ""; img.width = 18; img.height = 18;
         img.onerror = () => {
-          if (option.key === "sad" && img.dataset.fallback !== "1") {
-            img.dataset.fallback = "1";
-            img.src = asset("sad.svg");
-            return;
-          }
           img.onerror = null;
           if (option.key === "sad") img.replaceWith(document.createTextNode("😢"));
         };
@@ -112,11 +107,6 @@
         const img = document.createElement("img");
         img.src = asset(option.file); img.alt = ""; img.width = 30; img.height = 30;
         img.onerror = () => {
-          if (option.key === "sad" && img.dataset.fallback !== "1") {
-            img.dataset.fallback = "1";
-            img.src = asset("sad.svg");
-            return;
-          }
           img.onerror = null;
           if (option.key === "sad") img.replaceWith(document.createTextNode("😢"));
         };

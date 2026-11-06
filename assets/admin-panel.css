@@ -134,3 +134,42 @@
   #adminPanel .ou-admin-form-row{grid-template-columns:1fr}
   #adminPanel .ou-admin-tab{padding:9px 10px;font-size:.75rem}
 }
+
+/* Reparación móvil: los componentes no pueden expandir su tarjeta hasta el ancho del escritorio. */
+#adminPanel, #adminPanel .ou-admin-shell, #adminPanel .ou-admin-head,
+#adminPanel .ou-admin-pane, #adminPanel .ou-admin-tabs,
+#adminPanel .ou-admin-card, #adminPanel .ou-admin-privacy-note {
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+}
+#adminPanel .ou-admin-tabs{width:100%;overflow-x:auto;overscroll-behavior-x:contain}
+#adminPanel .ou-admin-head-actions, #adminPanel .ou-admin-connection{min-width:0}
+#adminPanel .ou-admin-connection{flex-wrap:wrap;overflow-wrap:anywhere}
+#adminPanel .ou-admin-overview-grid{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)}
+#adminPanel .ou-admin-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+#adminPanel .ou-admin-quick-actions button{width:100%;min-width:0}
+#adminPanel .ou-admin-quick-actions button b,
+#adminPanel .ou-admin-quick-actions button small{min-width:0;overflow-wrap:anywhere;white-space:normal}
+#adminPanel .ou-admin-privacy-note p,
+#adminPanel .ou-admin-recent-item,
+#adminPanel .ou-admin-section-heading,
+#adminPanel .ou-admin-card-heading{min-width:0;overflow-wrap:anywhere}
+#adminPanel .ou-admin-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+#adminPanel #adminAnalytics .ph-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+#adminPanel #adminAnalytics .ph-panels{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+@media(max-width:850px){
+ #adminPanel .ou-admin-overview-grid,
+ #adminPanel #adminAnalytics .ph-panels{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:650px){
+ #adminPanel .ou-admin-head-actions{align-items:flex-start}
+ #adminPanel .ou-admin-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #adminPanel .ou-admin-quick-actions{grid-template-columns:minmax(0,1fr)}
+ #adminPanel .ou-admin-content-grid,
+ #adminPanel .ou-admin-report-columns,
+ #adminPanel .ou-admin-academic-lists,
+ #adminPanel #adminAnalytics .ph-metrics{grid-template-columns:minmax(0,1fr)}
+ #adminPanel .ou-admin-privacy-note{padding:12px}
+ #adminPanel .ou-admin-section-heading{flex-wrap:wrap}
+}

@@ -110,7 +110,7 @@
     const analytics = document.getElementById("adminAnalytics");
     const style = document.createElement("link");
     style.rel = "stylesheet";
-    style.href = "/assets/admin-panel.css";
+    style.href = "/assets/admin-panel.css?v=20261106-pwa";
     document.head.appendChild(style);
 
     const shell = make("div", "ou-admin-shell");

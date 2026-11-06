@@ -1,0 +1,84 @@
+/* OdontoUdeC · Reparación del desbordamiento horizontal en la comunidad
+   No cambia el estilo de escritorio; impide que los contenidos impongan un ancho mayor al viewport. */
+#comunidad,
+#comunidad .container,
+#comunidad .community-box,
+#comunidad .community-box > *,
+#comunidad .community-panel,
+#comunidad .feed,
+#comunidad .post,
+#comunidad #adminPanel,
+#comunidad #adminPanel .ou-admin-shell,
+#comunidad #adminPanel .ou-admin-pane,
+#comunidad #adminPanel .ou-admin-card,
+#comunidad #adminPanel .ou-admin-privacy-note {
+  min-width: 0;
+  max-width: 100%;
+}
+#comunidad .community-box {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+#comunidad .community-box > #adminPanel {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+}
+#comunidad .community-panel > *,
+#comunidad .post > *,
+#comunidad .post p,
+#comunidad .post h4,
+#comunidad #adminPanel p,
+#comunidad #adminPanel h2,
+#comunidad #adminPanel h3,
+#comunidad #adminPanel h4,
+#comunidad #adminPanel b,
+#comunidad #adminPanel small {
+  overflow-wrap: anywhere;
+}
+#comunidad .post p { white-space: pre-wrap; }
+#comunidad .post img,
+#comunidad .post video,
+#comunidad .community-panel img,
+#comunidad .community-panel video { max-width: 100%; height: auto; }
+#comunidad .community-panel input,
+#comunidad .community-panel select,
+#comunidad .community-panel textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+#comunidad .post .post-actions,
+#comunidad .post .post-footer,
+#comunidad .post .reaction-actions,
+#comunidad .post .post-reactions,
+#comunidad .post .ou-reactions,
+#comunidad .post .ou-reactions-shell,
+#comunidad .post .ou-reactions-summary {
+  min-width: 0;
+  max-width: 100%;
+}
+#comunidad .post .post-actions,
+#comunidad .post .post-footer,
+#comunidad .post .reaction-actions,
+#comunidad .post .post-reactions {
+  flex-wrap: wrap;
+}
+@media (max-width: 850px) {
+  #comunidad .community-box {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  #comunidad .community-box > #adminPanel { grid-column: 1; }
+}
+@media (max-width: 600px) {
+  #comunidad .container { width: 100%; padding-inline: 15px; }
+  #comunidad .community-panel { padding: 17px; border-radius: 18px; }
+  #comunidad .feed { gap: 12px; }
+  #comunidad .post { padding: 15px; }
+  #comunidad .post h4 { font-size: 1.08rem; }
+  #comunidad .post p { font-size: .95rem; line-height: 1.55; }
+  #comunidad .post .post-actions,
+  #comunidad .post .post-footer,
+  #comunidad .post .reaction-actions,
+  #comunidad .post .post-reactions { gap: 7px; }
+}

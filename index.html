@@ -61,7 +61,7 @@
 
 .pwa-install-help{max-width:600px;margin:12px 0 0;padding:12px 14px;border:1px solid #e5d8f2;border-radius:12px;background:#f7f2fb;color:#51435e;font-size:.9rem;line-height:1.5}.pwa-install-help[hidden],#installPwaButton[hidden]{display:none!important}
 </style>
-<link rel="stylesheet" href="/enhancements.css"><link rel="stylesheet" href="assets/community-dock.css">
+<link rel="stylesheet" href="/enhancements.css"><link rel="stylesheet" href="/assets/community-mobile.css?v=20261106-pwa"><link rel="stylesheet" href="assets/community-dock.css">
 
 <link rel="icon" type="image/png" href="/assets/download-removebg-preview%20(2).png">
 <link rel="apple-touch-icon" href="/assets/download-removebg-preview%20(2).png">
@@ -258,7 +258,7 @@ async function loadPosts(){
   const date=new Date(post.created_at).toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});
   const pc=commentRows.filter(c=>String(c.post_id)===String(post.id));
   const pr=reactionRows.filter(x=>String(x.post_id)===String(post.id));
-  const reactionDefs=[{key:'like',file:'like.svg',label:'Me gusta'},{key:'love',file:'love.svg',label:'Me encanta'},{key:'laughing',file:'laughing.svg',label:'Me divierte'},{key:'soaked',file:'soaked.svg',label:'Me sorprende'},{key:'sad',file:'sad.svg',label:'Me entristece'},{key:'angry',file:'angry.svg',label:'Me enoja'}];
+  const reactionDefs=[{key:'like',file:'like.svg',label:'Me gusta'},{key:'love',file:'love.svg',label:'Me encanta'},{key:'laughing',file:'laughing.svg',label:'Me divierte'},{key:'soaked',file:'soaked.svg',label:'Me sorprende'},{key:'sad',file:'sad-fixed.svg?v=20261106-final',label:'Me entristece'},{key:'angry',file:'angry.svg',label:'Me enoja'}];
   const legacyReaction={apoyo:'like',me_encanta:'love',divertido:'laughing',sorprendido:'soaked'};
   const normalizeReaction=key=>legacyReaction[key]||key;
   const myReaction=currentUser&&pr.find(x=>x.user_id===currentUser.id);
