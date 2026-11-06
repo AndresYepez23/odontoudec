@@ -158,3 +158,9 @@ button, input, select { font: inherit; }
 }
 /* Reduce el encabezado de resultados: el título dominaba visualmente la página. */
 .results-toolbar h2 { font-size: clamp(1.25rem, 2vw, 1.65rem); line-height: 1.2; letter-spacing: -.035em; }
+
+/* Selector compacto de bases bibliográficas */
+.source-picker{display:grid;grid-template-columns:minmax(180px,260px) minmax(0,1fr);align-items:center;gap:5px 14px;margin:0 0 16px;color:var(--purple);font-weight:800;font-size:.88rem}
+.source-picker select{grid-column:1;min-height:43px;padding:9px 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);font:inherit;font-weight:650}
+.source-picker small{grid-column:2;grid-row:1;color:var(--muted);font-size:.8rem;font-weight:500;line-height:1.4}
+@media(max-width:600px){.source-picker{grid-template-columns:1fr;gap:7px}.source-picker select,.source-picker small{grid-column:1;grid-row:auto}}
