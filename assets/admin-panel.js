@@ -301,7 +301,7 @@
       const actions = make("div", "ou-admin-item-actions");
       actions.append(makeButton("Editar", "ou-admin-btn ou-admin-btn-light ou-admin-btn-small", () => editPost(post)));
       actions.append(makeButton("Eliminar", "ou-admin-btn ou-admin-btn-danger ou-admin-btn-small", async () => {
-        if (!window.confirm("¿Eliminar esta publicación permanentemente?")) return;
+        if (!window.confirm("¿Eliminar esta publicación permanentemente? También se eliminarán sus comentarios, reacciones y reportes asociados.")) return;
         try {
           await api("delete-post", "POST", { id: post.id });
           toast("Publicación eliminada.");
@@ -354,7 +354,7 @@
       if (content) {
         card.append(makeButton("Retirar contenido y cerrar reportes", "ou-admin-btn ou-admin-btn-danger ou-admin-btn-small", async () => {
           const label = type === "post" ? "publicación" : "mensaje";
-          if (!window.confirm("¿Retirar este " + label + "? Se eliminará el contenido y se cerrarán todos sus reportes.")) return;
+          if (!window.confirm("¿Retirar este " + label + "? Se eliminará el contenido y se cerrarán todos sus reportes." + (type === "post" ? " También se eliminarán sus comentarios y reacciones." : ""))) return;
           try {
             await api("resolve-report", "POST", { type, reportId: item.reports[0].id, contentId: item.contentId, decision: "remove" });
             toast("Contenido retirado y reportes cerrados.");
@@ -434,7 +434,7 @@
       const actions = make("div", "ou-admin-item-actions");
       actions.append(makeButton("Editar", "ou-admin-btn ou-admin-btn-light ou-admin-btn-small", () => editResource(resource)));
       actions.append(makeButton("Eliminar", "ou-admin-btn ou-admin-btn-danger ou-admin-btn-small", async () => {
-        if (!window.confirm("¿Eliminar este recurso de la biblioteca?")) return;
+        if (!window.confirm("¿Eliminar este recurso de la biblioteca? También se quitarán los marcadores que los estudiantes hayan guardado.")) return;
         try {
           await api("delete-resource", "POST", { id: resource.id });
           toast("Recurso eliminado.");
