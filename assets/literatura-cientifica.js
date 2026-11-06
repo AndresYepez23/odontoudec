@@ -19,6 +19,10 @@
   const dateFilter = document.getElementById("dateFilter");
   const typeFilter = document.getElementById("typeFilter");
   const sortFilter = document.getElementById("sortFilter");
+  const sourceFilter = document.getElementById("sourceFilter");
+  const sourceDescription = document.getElementById("sourceDescription");
+  const sourceWebsiteLink = document.getElementById("sourceWebsiteLink");
+  const resultsSourceLabel = document.getElementById("resultsSourceLabel");
   const searchButton = document.getElementById("searchButton");
   const loadMoreButton = document.getElementById("loadMoreButton");
   const resultsList = document.getElementById("resultsList");
@@ -29,11 +33,13 @@
 
   const state = {
     query: "",
+    source: "pubmed",
     date: "all",
     type: "",
     sort: "relevance",
     offset: 0,
     total: 0,
+    cursorMark: "*",
     loading: false
   };
 
@@ -222,18 +228,18 @@
 
     const journal = document.createElement("p");
     journal.className = "article-journal";
-    journal.textContent = "PMID: " + item.pmid;
+    journal.textContent = item.pmid ? "PMID: " + item.pmid : (item.doi ? "DOI: " + item.doi : "Fuente: " + (item.source || "Registro académico"));
 
     const actions = document.createElement("div");
     actions.className = "article-actions";
-    actions.appendChild(makeLink("Ver ficha en PubMed ↗", "https://pubmed.ncbi.nlm.nih.gov/" + encodeURIComponent(item.pmid) + "/", true));
+    const recordUrl = item.recordUrl || (item.pmid ? "https://pubmed.ncbi.nlm.nih.gov/" + encodeURIComponent(item.pmid) + "/" : "");
+    if (recordUrl) actions.appendChild(makeLink(item.source === "PubMed · NCBI" ? "Ver ficha en PubMed ↗" : "Ver registro original ↗", recordUrl, true));
+    if (item.openAccessUrl) actions.appendChild(makeLink("Texto completo disponible ↗", item.openAccessUrl, false));
     if (item.pmc) {
       const pmcId = item.pmc.startsWith("PMC") ? item.pmc : "PMC" + item.pmc;
       actions.appendChild(makeLink("Texto completo en PMC ↗", "https://pmc.ncbi.nlm.nih.gov/articles/" + encodeURIComponent(pmcId) + "/", false));
     }
-    if (item.doi) {
-      actions.appendChild(makeLink("Consultar DOI ↗", "https://doi.org/" + encodeURIComponent(item.doi), false));
-    }
+    if (item.doi) actions.appendChild(makeLink("Consultar DOI ↗", "https://doi.org/" + encodeURIComponent(item.doi), false));
 
     card.append(meta, title, authors, journal);
 
@@ -274,6 +280,155 @@
       " de " + state.total.toLocaleString("es-CO") + " publicaciones.";
   }
 
+  const SOURCE_INFO = {
+    pubmed: { label: "PubMed · NCBI", url: "https://pubmed.ncbi.nlm.nih.gov/", description: "Referencias biomédicas, resúmenes y enlaces a texto completo cuando están disponibles." },
+    europepmc: { label: "Europe PMC", url: "https://europepmc.org/", description: "Literatura de ciencias de la vida, resúmenes, preprints y enlaces a millones de textos completos." },
+    openalex: { label: "OpenAlex", url: "https://openalex.org/", description: "Catálogo académico amplio: trabajos, autores, revistas, instituciones y versiones de acceso abierto." },
+    crossref: { label: "Crossref", url: "https://www.crossref.org/", description: "Metadatos editoriales, DOI, autores, revistas y fechas de publicación." }
+  };
+
+  function updateSourceUI() {
+    const info = SOURCE_INFO[sourceFilter.value] || SOURCE_INFO.pubmed;
+    sourceDescription.textContent = info.description;
+    sourceWebsiteLink.href = info.url;
+    sourceWebsiteLink.textContent = "Abrir " + info.label + " ↗";
+    resultsSourceLabel.textContent = "Resultados de " + info.label;
+    typeFilter.disabled = sourceFilter.value !== "pubmed";
+    typeFilter.title = typeFilter.disabled ? "El filtro por tipo de publicación está disponible en PubMed." : "";
+    queryInput.placeholder = sourceFilter.value === "crossref" ? "Ej. dental implants, periodontitis o un DOI..." : "Ej. dental implants, periodontitis, dental caries...";
+  }
+
+  function isoDateYearsBack(years) {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() - Number(years));
+    return date.toISOString().slice(0, 10);
+  }
+
+  async function fetchJSON(url, sourceName) {
+    const response = await fetch(url, { method: "GET", mode: "cors", credentials: "omit", headers: { Accept: "application/json" } });
+    if (!response.ok) throw new Error(sourceName + " respondió con el estado " + response.status + ".");
+    return response.json();
+  }
+
+  function normalizeEuropePMC(item) {
+    const pmcid = item.pmcid || "";
+    const fullText = (item.fullTextUrlList && item.fullTextUrlList.fullTextUrl || []).find(link => link.url);
+    const pmid = item.pmid || "";
+    const doi = item.doi || "";
+    return {
+      source: "Europe PMC",
+      title: item.title || "Título no disponible",
+      journal: item.journalTitle || "Revista no especificada",
+      year: (item.firstPublicationDate || "").slice(0, 4) || "Fecha no indicada",
+      authors: item.authorString || "Autores no especificados en el registro",
+      abstract: item.abstractText || "",
+      doi, pmid, pmc: pmcid,
+      recordUrl: pmid ? "https://europepmc.org/article/MED/" + encodeURIComponent(pmid) : (doi ? "https://europepmc.org/article/MED/" + encodeURIComponent(doi) : "https://europepmc.org/"),
+      openAccessUrl: String(item.isOpenAccess || "").toUpperCase() === "Y" ? (fullText && fullText.url || (pmcid ? "https://europepmc.org/articles/" + encodeURIComponent(pmcid) : "")) : "",
+      publicationLabels: [item.pubType || ""].filter(Boolean)
+    };
+  }
+
+  function normalizeOpenAlex(item) {
+    const authors = (item.authorships || []).slice(0, 4).map(a => a.author && a.author.display_name).filter(Boolean);
+    const oa = item.open_access || {};
+    const location = item.best_oa_location || {};
+    const doi = String(item.doi || "").replace(/^https?:\/\/doi\.org\//i, "");
+    return {
+      source: "OpenAlex",
+      title: item.title || "Título no disponible",
+      journal: item.primary_location && item.primary_location.source && item.primary_location.source.display_name || "Fuente no especificada",
+      year: item.publication_year || "Fecha no indicada",
+      authors: authors.length ? authors.join(", ") + ((item.authorships || []).length > 4 ? " y cols." : "") : "Autores no especificados en el registro",
+      abstract: "",
+      doi,
+      recordUrl: item.id || (doi ? "https://doi.org/" + doi : "https://openalex.org/"),
+      openAccessUrl: oa.is_oa ? (location.landing_page_url || location.pdf_url || oa.oa_url || "") : "",
+      publicationLabels: [item.type || ""].filter(Boolean)
+    };
+  }
+
+  function normalizeCrossref(item) {
+    const authors = (item.author || []).slice(0, 4).map(a => [a.given, a.family].filter(Boolean).join(" ")).filter(Boolean);
+    const dateParts = item.published && item.published["date-parts"] && item.published["date-parts"][0] || [];
+    const doi = item.DOI || "";
+    return {
+      source: "Crossref",
+      title: Array.isArray(item.title) ? item.title[0] : (item.title || "Título no disponible"),
+      journal: Array.isArray(item["container-title"]) ? item["container-title"][0] : "Revista no especificada",
+      year: dateParts[0] || "Fecha no indicada",
+      authors: authors.length ? authors.join(", ") + ((item.author || []).length > 4 ? " y cols." : "") : "Autores no especificados en el registro",
+      abstract: item.abstract ? String(item.abstract).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim() : "",
+      doi,
+      recordUrl: doi ? "https://doi.org/" + encodeURIComponent(doi) : (item.URL || "https://www.crossref.org/"),
+      openAccessUrl: "",
+      publicationLabels: [item.type || ""].filter(Boolean)
+    };
+  }
+
+  async function runExternalSearch(append) {
+    if (state.loading) return;
+    state.loading = true;
+    searchButton.disabled = true;
+    searchButton.textContent = "Buscando…";
+    loadMoreButton.disabled = true;
+    const source = state.source;
+    const sourceName = SOURCE_INFO[source].label;
+    setStatus(append ? "Cargando más publicaciones desde " + sourceName + "…" : "Consultando " + sourceName + "…", false);
+    try {
+      let items = [], total = 0, nextCursor = "";
+      if (source === "europepmc") {
+        let query = "(" + state.query + ")";
+        if (state.date !== "all") query += " AND FIRST_PDATE:[" + isoDateYearsBack(state.date) + " TO " + new Date().toISOString().slice(0, 10) + "]";
+        if (state.sort === "pub_date") query += " sort_date:y";
+        const params = new URLSearchParams({ query, format: "json", resultType: "core", pageSize: String(PAGE_SIZE), cursorMark: state.cursorMark || "*" });
+        const data = await fetchJSON("https://www.ebi.ac.uk/europepmc/webservices/rest/search?" + params.toString(), sourceName);
+        items = (data.resultList && data.resultList.result || []).map(normalizeEuropePMC);
+        total = Number(data.hitCount || 0);
+        nextCursor = data.nextCursorMark || "";
+      } else if (source === "openalex") {
+        const params = new URLSearchParams({ search: state.query, per_page: String(PAGE_SIZE), page: String(Math.floor(state.offset / PAGE_SIZE) + 1), select: "id,doi,title,publication_year,authorships,primary_location,open_access,best_oa_location,type" });
+        if (state.date !== "all") params.set("filter", "from_publication_date:" + isoDateYearsBack(state.date));
+        params.set("sort", state.sort === "pub_date" ? "publication_date:desc" : "relevance_score:desc");
+        const data = await fetchJSON("https://api.openalex.org/works?" + params.toString(), sourceName);
+        items = (data.results || []).map(normalizeOpenAlex);
+        total = Number(data.meta && data.meta.count || 0);
+      } else if (source === "crossref") {
+        const params = new URLSearchParams({ "query.bibliographic": state.query, rows: String(PAGE_SIZE), offset: String(state.offset), select: "DOI,title,author,published,container-title,URL,type,abstract" });
+        if (state.date !== "all") params.set("filter", "from-pub-date:" + isoDateYearsBack(state.date));
+        if (state.sort === "pub_date") { params.set("sort", "published"); params.set("order", "desc"); }
+        const data = await fetchJSON("https://api.crossref.org/works?" + params.toString(), sourceName);
+        const message = data.message || {};
+        items = (message.items || []).map(normalizeCrossref);
+        total = Number(message["total-results"] || 0);
+      }
+      if (!items.length) {
+        if (!append) renderEmpty("No encontramos publicaciones", "Prueba con otros términos o cambia de fuente.");
+        state.total = total; state.offset = 0; updateResultsSummary(); loadMoreButton.hidden = true;
+        setStatus("Búsqueda completada. No hay registros para esos filtros.", false);
+        return;
+      }
+      const fragment = document.createDocumentFragment();
+      items.forEach(item => fragment.appendChild(renderArticle(item)));
+      if (append) resultsList.appendChild(fragment); else resultsList.replaceChildren(fragment);
+      state.offset += items.length;
+      if (source === "europepmc") state.cursorMark = nextCursor || state.cursorMark;
+      state.total = total;
+      updateResultsSummary();
+      loadMoreButton.hidden = state.offset >= state.total || items.length < PAGE_SIZE || (source === "europepmc" && !nextCursor);
+      setStatus("Resultados obtenidos directamente de " + sourceName + ". Consulta la ficha original y verifica las opciones de acceso al texto completo.", false);
+    } catch (error) {
+      console.error("[OdontoUdeC " + sourceName + "]", error);
+      setStatus("No pudimos completar la búsqueda. " + (error && error.message ? error.message : "Comprueba tu conexión e inténtalo de nuevo."), true);
+      if (!append && !resultsList.children.length) renderEmpty("No se pudo consultar " + sourceName, "Puedes volver a intentarlo o abrir la fuente directamente.");
+    } finally {
+      state.loading = false;
+      searchButton.disabled = false;
+      searchButton.innerHTML = 'Buscar artículos <span aria-hidden="true">↗</span>';
+      loadMoreButton.disabled = false;
+    }
+  }
+
   async function runSearch(append) {
     if (state.loading) return;
 
@@ -285,12 +440,19 @@
         return;
       }
       state.query = query;
+      state.source = sourceFilter.value;
       state.date = dateFilter.value;
       state.type = typeFilter.value;
       state.sort = sortFilter.value;
       state.offset = 0;
       state.total = 0;
+      state.cursorMark = "*";
       resultsList.replaceChildren();
+    }
+
+    if (state.source !== "pubmed") {
+      await runExternalSearch(append);
+      return;
     }
 
     state.loading = true;
@@ -352,6 +514,9 @@
       loadMoreButton.disabled = false;
     }
   }
+
+  sourceFilter.addEventListener("change", updateSourceUI);
+  updateSourceUI();
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
