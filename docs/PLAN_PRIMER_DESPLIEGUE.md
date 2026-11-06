@@ -54,3 +54,13 @@ No hacer el primer deploy si:
 - No desplegar a producción ni ejecutar SQL sin confirmación explícita de la ventana de publicación.
 - Registrar aquí el SHA del commit publicado, ID del deploy Netlify, resultado de cada prueba y cualquier segundo deploy.
 - Mantener SMTP como tarea aparte: antes de pruebas de registro/recuperación con tráfico real, configurar proveedor SMTP y verificar SPF/DKIM/DMARC.
+
+## Verificación automática antes del deploy
+
+Desde la raíz del repositorio, ejecutar:
+
+```bash
+node scripts/validate-survey-contract.mjs
+```
+
+El validador comprueba que el frontend y la Edge Function mantengan los mismos 15 campos, las ocho listas de candidatos y los siete campos abiertos, además de detectar la ausencia de validación JWT, control administrativo o manejo de duplicados. Debe ejecutarse después de cualquier cambio al formulario o al catálogo del servidor.
