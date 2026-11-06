@@ -43,8 +43,10 @@ footer{text-align:center;padding:25px;color:#82778b;font-size:.8rem}
 </div>
 <form id="survey" class="hidden" autocomplete="off">
 <div id="questions"></div>
+<div class="auth-actions"><button class="btn" id="submitSurvey" type="submit">Enviar mi participación</button></div>
 </form>
-<div id="pendingNotice" class="notice hidden"><strong>Vista previa del formulario</strong>La estructura y las preguntas ya están organizadas. El envío se habilitará cuando terminemos la configuración de almacenamiento y validación segura de respuestas. Tus selecciones no se están enviando ni guardando.</div>
+<section id="adminPanel" class="question hidden" style="margin-top:18px"><div class="q-head"><span class="q-num">A</span><div><h2>Resultados administrativos</h2><p class="hint">Acceso restringido a administradores. Cada respuesta está asociada a la identidad del estudiante.</p></div></div><button class="btn alt" id="refreshResults" type="button">Actualizar resultados</button><p id="adminSummary" class="hint" aria-live="polite"></p><div id="adminResults"></div></section>
+
 </main>
 <footer>OdontoUdeC · Comunidad estudiantil de Odontología</footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -69,6 +71,52 @@ function renderQuestions(){
   return '<fieldset class="question" style="border:1px solid var(--line);min-width:0"><legend class="hidden">'+esc(category.title)+'</legend>'+head+'<div class="options">'+category.options.map((option,i)=>'<label class="option"><input type="radio" name="'+esc(category.id)+'" value="'+esc(option)+'" required><span>'+esc(option)+'</span></label>').join("")+'</div></fieldset>';
  }).join("");
 }
+function collectAnswers(){
+ const answers={};
+ for(const category of window.ODONTOUDEC_SURVEY.categories){
+  const field=document.querySelector('[name="'+CSS.escape(category.id)+'"]');
+  if(category.type==="free_text") answers[category.id]=field?.value.trim()||"";
+  else answers[category.id]=document.querySelector('input[name="'+CSS.escape(category.id)+'"]:checked')?.value||"";
+ }
+ return answers;
+}
+function renderAdminResults(rows){
+ const host=document.getElementById("adminResults");
+ const summary=document.getElementById("adminSummary");
+ summary.textContent="Participaciones registradas: "+rows.length;
+ if(!rows.length){host.innerHTML='<p class="hint">Aún no hay participaciones.</p>';return;}
+ host.innerHTML=rows.map((row,index)=>{
+  const student=row.student||{};
+  const answers=Object.entries(row.answers||{}).map(([key,value])=>'<p><strong>'+esc(window.ODONTOUDEC_SURVEY.categories.find(c=>c.id===key)?.title||key)+':</strong> '+esc(value)+'</p>').join("");
+  return '<details class="question"><summary><strong>'+esc(student.display_name||"Estudiante")+'</strong> · '+esc(student.public_id||row.user_id)+' · '+esc(student.semester?student.semester+" semestre":"Semestre no registrado")+' · '+esc(new Date(row.submitted_at).toLocaleString("es-CO"))+'</summary><div style="padding-top:12px">'+answers+'</div></details>';
+ }).join("");
+}
+async function loadAdminResults(){
+ const {data,error}=await client.functions.invoke("survey-submissions",{body:{action:"admin_results"}});
+ if(!error&&data?.ok){
+  document.getElementById("adminPanel").classList.remove("hidden");
+  renderAdminResults(data.results||[]);
+  return true;
+ }
+ return false;
+}
+document.getElementById("survey").addEventListener("submit",async event=>{
+ event.preventDefault();
+ const form=event.currentTarget,button=document.getElementById("submitSurvey");
+ if(!form.reportValidity()) return;
+ button.disabled=true;button.textContent="Enviando…";
+ statusEl.textContent="Validando y registrando tu participación…";
+ const {data,error}=await client.functions.invoke("survey-submissions",{body:{action:"submit",answers:collectAnswers()}});
+ if(error||!data?.ok){
+  statusEl.textContent=data?.error||"No pudimos registrar tu respuesta. Inténtalo nuevamente.";
+  button.disabled=false;button.textContent="Enviar mi participación";
+  return;
+ }
+ statusEl.textContent=data.message||"Tu participación quedó registrada.";
+ form.querySelectorAll("input,textarea,button").forEach(el=>el.disabled=true);
+ await loadAdminResults();
+});
+document.getElementById("refreshResults").addEventListener("click",loadAdminResults);
 async function init(){
  renderQuestions();
  const {data,error}=await client.auth.getSession();
@@ -76,7 +124,7 @@ async function init(){
  if(data.session?.user){
   statusEl.innerHTML="<strong>Sesión iniciada.</strong> Ya puedes revisar las categorías de la encuesta.";
   document.getElementById("survey").classList.remove("hidden");
-  document.getElementById("pendingNotice").classList.remove("hidden");
+  await loadAdminResults();
  }else{
   statusEl.innerHTML="<strong>Tu participación requiere iniciar sesión.</strong> La invitación y las categorías son visibles, pero las respuestas están reservadas para estudiantes con cuenta.";
   document.getElementById("guest").classList.remove("hidden");
