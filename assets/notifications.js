@@ -63,12 +63,13 @@
     if (state.seen.has(key)) return;
     state.seen.add(key);
     if (state.seen.size > 250) state.seen = new Set([...state.seen].slice(-150));
-    if (document.hidden && "Notification" in window && Notification.permission === "granted") {
-      try { const n = new Notification(title, { body, icon: "/assets/odontoudec-logo.svg", tag: key }); n.onclick = () => { window.focus(); location.href = href; n.close(); }; } catch (_) {}
-    } else {
-      showToast(title, body, href);
-      beep();
+    if (document.hidden) {
+      // Las notificaciones del sistema en segundo plano las entrega OneSignal.
+      // Evitamos crear una segunda notificación nativa para el mismo evento.
+      return;
     }
+    showToast(title, body, href);
+    beep();
   }
   control.addEventListener("click", async () => {
     state.audioReady = true;
