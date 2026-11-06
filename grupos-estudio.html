@@ -58,7 +58,7 @@ html.ou-embedded #groupList{display:block;flex:1 1 0;height:0;max-height:none;mi
 html.ou-embedded .group{min-width:0;overflow-wrap:anywhere}
 html.ou-embedded #chatPanel{min-height:0}
 html.ou-embedded #chatLog{height:0;min-height:0;max-height:none;flex:1 1 0;overflow-y:auto!important;overscroll-behavior:contain}
-html.ou-embedded #messageForm{flex-shrink:0}
+html.ou-embedded #messageForm{flex-shrink:0}\nhtml.ou-embedded .ou-group-heading{display:flex;align-items:center;gap:8px;min-width:0}\nhtml.ou-embedded .ou-group-heading img,.ou-group-mark img{width:29px;height:29px;object-fit:contain;background:#fff;border-radius:8px;padding:1px;flex-shrink:0}\nhtml.ou-embedded .ou-group-mark{display:flex;align-items:center;flex-shrink:0}\nhtml.ou-embedded #chatPanel .chat-head{gap:8px}
 
 </style>
 <link rel="stylesheet" href="assets/community-dock.css">
@@ -78,13 +78,13 @@ html.ou-embedded #messageForm{flex-shrink:0}
 <div class="field"><label for="groupDescription">Descripción</label><textarea id="groupDescription" maxlength="500" placeholder="¿Qué van a estudiar? ¿Cómo se organizarán?"></textarea></div>
 <button type="submit">Crear grupo</button></form><div id="createStatus" class="status" role="status"></div>
 </section>
-<section class="panel"><div class="chat-head"><div><h2>Explorar grupos</h2><p class="muted">Encuentra espacios abiertos o vuelve a tus conversaciones.</p></div><button id="refreshGroups" class="secondary" type="button">Actualizar ↻</button></div>
+<section class="panel"><div class="chat-head"><div class="ou-group-heading"><img src="assets/odontoudec-logo.svg" alt="OdontoUdeC"><div><h2>Explorar grupos</h2><p class="muted">Encuentra espacios abiertos o vuelve a tus conversaciones.</p></div></div><button id="refreshGroups" class="secondary" type="button">Actualizar ↻</button></div>
 <input id="groupSearch" placeholder="Buscar por nombre, tema o semestre…" aria-label="Buscar grupos">
 <div id="groupList" class="group-list"><p class="empty">Cargando grupos…</p></div>
 </section>
 </div>
 <section id="chatPanel" class="panel hidden" style="margin-top:16px">
-<div class="chat-head"><button id="backGroups" class="secondary" type="button">← Grupos</button><div><h2 id="chatTitle">Conversación del grupo</h2><p id="chatSubtitle" class="muted"></p></div><button id="closeChat" class="secondary" type="button">Cerrar</button></div>
+<div class="chat-head"><span class="ou-group-mark"><img src="assets/odontoudec-logo.svg" alt="OdontoUdeC"></span><button id="backGroups" class="secondary" type="button">← Grupos</button><div><h2 id="chatTitle">Conversación del grupo</h2><p id="chatSubtitle" class="muted"></p></div><button id="closeChat" class="secondary" type="button">Cerrar</button></div>
 <div id="chatLog" class="chat-log" aria-live="polite"><p class="empty">Selecciona un grupo para ver sus mensajes.</p></div>
 <form id="messageForm"><div class="row"><input id="messageInput" maxlength="2000" required placeholder="Escribe un mensaje para el grupo…"><button type="submit">Enviar</button></div></form>
 <div id="chatStatus" class="status" role="status"></div>
