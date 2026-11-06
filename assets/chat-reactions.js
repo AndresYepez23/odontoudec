@@ -83,6 +83,15 @@
         chip.title = option.label;
         const img = document.createElement("img");
         img.src = asset(option.file); img.alt = ""; img.width = 18; img.height = 18;
+        img.onerror = () => {
+          if (option.key === "sad" && img.dataset.fallback !== "1") {
+            img.dataset.fallback = "1";
+            img.src = asset("sad.svg");
+            return;
+          }
+          img.onerror = null;
+          if (option.key === "sad") img.replaceWith(document.createTextNode("😢"));
+        };
         const number = document.createElement("span"); number.textContent = String(count);
         chip.append(img, number); summary.append(chip);
       });
@@ -102,6 +111,15 @@
         button.title = option.label;
         const img = document.createElement("img");
         img.src = asset(option.file); img.alt = ""; img.width = 30; img.height = 30;
+        img.onerror = () => {
+          if (option.key === "sad" && img.dataset.fallback !== "1") {
+            img.dataset.fallback = "1";
+            img.src = asset("sad.svg");
+            return;
+          }
+          img.onerror = null;
+          if (option.key === "sad") img.replaceWith(document.createTextNode("😢"));
+        };
         const count = document.createElement("span");
         count.className = "ou-reaction-option-count";
         count.textContent = matching.length ? String(matching.length) : "";
