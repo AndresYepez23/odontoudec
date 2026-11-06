@@ -17,7 +17,7 @@ const ALL_FIELDS = [...Object.keys(OPTIONS), ...TEXT_FIELDS];
 const cors = (req: Request) => {
   const origin = req.headers.get("Origin") || "";
   const allowed = origin === "https://odontoudec.online" ||
-    /^https:\/\/deploy-preview-\d+--odontoudec(?:1)?\.netlify\.app$/.test(origin);
+    /^https:\/\/deploy-preview-\d+--odontoudec\.netlify\.app$/.test(origin);
   return {
     "Access-Control-Allow-Origin": allowed ? origin : "https://odontoudec.online",
     "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
