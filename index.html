@@ -98,6 +98,10 @@ let currentUser=null;
 function notify(msg){toast.textContent=msg;toast.style.display='block';setTimeout(()=>toast.style.display='none',3500)}
 function safe(s){return String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 let authMode='signin';
+function getSafeReturnTo(){
+ const value=new URLSearchParams(window.location.search).get('returnTo')||'';
+ return value.startsWith('/')&&!value.startsWith('//')&&!value.includes('\\\\')?value:'';
+}
 function setAuthMode(mode){
  authMode=mode;
  const signup=mode==='signup';
@@ -244,7 +248,7 @@ async function handleAuth(mode){
   const emailInput=document.getElementById('authEmail');
   if(!emailInput.checkValidity()){notify('Revisa el formato del correo electrónico.');emailInput.focus();return;}
   if(displayName.length<2){notify('Escribe un nombre o alias de al menos 2 caracteres.');return;}
-  result=await supabaseClient.auth.signUp({email,password,options:{data:{display_name:displayName},emailRedirectTo:window.location.origin+'/verificacion.html'}});
+  result=await supabaseClient.auth.signUp({email,password,options:{data:{display_name:displayName},emailRedirectTo:window.location.origin+'/verificacion.html'+(getSafeReturnTo()?'?returnTo='+encodeURIComponent(getSafeReturnTo()):'')}});
   if(result.data?.user && Array.isArray(result.data.user.identities) && result.data.user.identities.length===0){notify('Ese correo ya tiene una cuenta. Inicia sesión en lugar de registrarte de nuevo.');return;}
   if(result.error){
    const message=result.error.message||'';
@@ -262,7 +266,7 @@ async function handleAuth(mode){
  }
  currentUser=result.data.user||result.data.session?.user;
  try{if(currentUser)await ensureProfile(currentUser);}catch(err){notify('La sesión se creó, pero hubo un problema con el perfil: '+err.message);}
- setAuthUI();await loadPosts();await showFirstVisitGuide(currentUser);notify(mode==='signup'?'¡Cuenta creada!':'Sesión iniciada.');
+ setAuthUI();await loadPosts();await showFirstVisitGuide(currentUser);const returnTo=getSafeReturnTo();if(returnTo){window.location.assign(returnTo);return;}notify(mode==='signup'?'¡Cuenta creada!':'Sesión iniciada.');
 }
 document.getElementById('signInBtn').addEventListener('click',()=>handleAuth('signin').catch(e=>notify(e.message)));
 document.getElementById('signUpBtn').addEventListener('click',()=>handleAuth('signup').catch(e=>notify(e.message)));
