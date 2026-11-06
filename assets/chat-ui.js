@@ -422,7 +422,6 @@
         throw new Error("Con una fotografía puedes añadir un texto de hasta 300 caracteres.");
       }
 
-      setBusy(true);
       report("Optimizando fotografía…");
       let uploaded = null;
       try {
@@ -440,8 +439,6 @@
       } catch (error) {
         if (uploaded?.path) await removeAttachment(db, uploaded.path);
         throw error;
-      } finally {
-        setBusy(false);
       }
     }
 
