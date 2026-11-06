@@ -22,7 +22,35 @@ button.secondary{background:var(--mint);color:var(--teal)}button.danger{backgrou
 .message{max-width:85%;padding:10px 12px;border-radius:13px;background:#eaf7f5;align-self:flex-start;overflow-wrap:anywhere}.message.mine{background:#32105f;color:white;align-self:flex-end}.message small{display:block;opacity:.85;font-size:.74rem;font-weight:800;margin-bottom:4px}.message.mine small{color:#f4d978}
 .auth{padding:20px}.empty{padding:22px;text-align:center;color:var(--muted)}.fine{font-size:.78rem;color:var(--muted);margin-top:12px}
 @media(max-width:760px){header{align-items:flex-start;flex-direction:column}header nav{display:flex;flex-wrap:wrap;gap:7px}header nav a{font-size:.82rem}main{margin:16px auto}.hero{padding:20px}.grid{grid-template-columns:1fr}.chat-log{height:48vh;min-height:300px}header{padding:13px 16px}}
-.site-nav{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}.site-nav a{display:inline-flex;align-items:center;padding:8px 10px;border-radius:10px;color:#54218b;text-decoration:none;font-size:.86rem;font-weight:750;white-space:nowrap}.site-nav a:hover,.site-nav a:focus-visible{background:#f3edf9;outline-color:#d7a928}.site-nav a[aria-current="page"]{background:#f3edf9;color:#32105f}@media(max-width:760px){header .site-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:5px}header .site-nav a{justify-content:center;padding:8px 5px;background:#faf8fc;font-size:.78rem}}@media(max-width:390px){header .site-nav{grid-template-columns:repeat(2,minmax(0,1fr))}}html.ou-embedded header,html.ou-embedded .hero,html.ou-embedded .fine{display:none!important}html.ou-embedded,html.ou-embedded body{height:100%;min-height:0;overflow:hidden;background:#fff}html.ou-embedded main{width:100%;height:100%;max-width:none;margin:0;padding:7px;overflow:hidden}html.ou-embedded #app:not(.hidden){height:100%;min-height:0;display:flex;flex-direction:column}html.ou-embedded .grid{flex:1;min-height:0;grid-template-columns:1fr;grid-template-rows:minmax(0,1fr);gap:7px;overflow:hidden}html.ou-embedded .grid>.panel{min-height:0;border-radius:10px;padding:9px;overflow:auto}html.ou-embedded .chat-log{height:100%;min-height:0;max-height:none;overflow:auto}html.ou-embedded #chatPanel{flex:1;min-height:0;margin:0!important;display:flex;flex-direction:column;overflow:hidden}html.ou-embedded #chatLog{flex:1;min-height:0;height:auto;max-height:none;overflow:auto}html.ou-embedded #messageForm{flex-shrink:0}html.ou-embedded #app:not(.hidden):has(#chatPanel:not(.hidden)) .grid{display:none}</style>
+.site-nav{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}.site-nav a{display:inline-flex;align-items:center;padding:8px 10px;border-radius:10px;color:#54218b;text-decoration:none;font-size:.86rem;font-weight:750;white-space:nowrap}.site-nav a:hover,.site-nav a:focus-visible{background:#f3edf9;outline-color:#d7a928}.site-nav a[aria-current="page"]{background:#f3edf9;color:#32105f}@media(max-width:760px){header .site-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:5px}header .site-nav a{justify-content:center;padding:8px 5px;background:#faf8fc;font-size:.78rem}}@media(max-width:390px){header .site-nav{grid-template-columns:repeat(2,minmax(0,1fr))}}html.ou-embedded header,html.ou-embedded .hero,html.ou-embedded .fine{display:none!important}
+html.ou-embedded,html.ou-embedded body{width:100%;height:100%;min-height:0;margin:0;padding:0;overflow:hidden;background:#fff}
+html.ou-embedded main{width:100%;height:100%;max-width:none;margin:0;padding:9px;overflow:hidden}
+html.ou-embedded #app:not(.hidden){width:100%;height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+html.ou-embedded #app>.grid{width:100%;height:100%;min-height:0;flex:1;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:0;overflow:hidden}
+html.ou-embedded #app>.grid>section:first-child{display:none}
+html.ou-embedded #app>.grid>section:last-child{min-width:0;min-height:0;display:flex;flex-direction:column;border:0;border-radius:0;padding:8px;box-shadow:none;overflow:hidden}
+html.ou-embedded #app>.grid>section:last-child .chat-head{flex-shrink:0;gap:8px}
+html.ou-embedded #app>.grid>section:last-child .chat-head h2{font-size:17px}
+html.ou-embedded #app>.grid>section:last-child .chat-head p{display:none}
+html.ou-embedded #groupSearch{flex-shrink:0;margin-top:8px}
+html.ou-embedded #groupList{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 3px 2px 0}
+html.ou-embedded .group{padding:11px;margin:7px 0}
+html.ou-embedded #chatPanel{display:none}
+html.ou-embedded #app.ou-group-chat #appGrid{display:none}
+html.ou-embedded #app.ou-group-chat>.grid{display:none}
+html.ou-embedded #app.ou-group-chat>#chatPanel:not(.hidden){width:100%;height:100%;min-height:0;flex:1;display:flex;flex-direction:column;gap:0;margin:0!important;padding:9px;border:0;border-radius:0;box-shadow:none;overflow:hidden}
+html.ou-embedded #chatPanel .chat-head{flex-shrink:0;display:flex;align-items:center;padding-bottom:9px;border-bottom:1px solid var(--line)}
+html.ou-embedded #chatPanel .chat-head h2{font-size:17px}
+html.ou-embedded #chatPanel .chat-head p{display:none}
+html.ou-embedded #backGroups{display:inline-flex;flex-shrink:0;padding:7px 9px;font-size:12px}
+html.ou-embedded #chatLog{width:100%;height:auto;min-height:0;max-height:none;flex:1;margin:8px 0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+html.ou-embedded #messageForm{flex-shrink:0;margin:0;padding-top:8px;border-top:1px solid var(--line)}
+html.ou-embedded #messageForm .row{display:flex;flex-wrap:nowrap;margin:0}
+html.ou-embedded #messageForm input{height:44px;min-height:44px}
+html.ou-embedded #messageForm button{height:44px}
+html.ou-embedded #chatStatus{flex-shrink:0;min-height:0;margin:3px 0 0}
+@media(max-width:600px){html.ou-embedded main{padding:6px}html.ou-embedded #app>.grid>section:last-child{padding:7px}html.ou-embedded #chatPanel{padding:7px}}
+</style>
 <link rel="stylesheet" href="assets/community-dock.css">
 </head>
 <body>
@@ -46,7 +74,7 @@ button.secondary{background:var(--mint);color:var(--teal)}button.danger{backgrou
 </section>
 </div>
 <section id="chatPanel" class="panel hidden" style="margin-top:16px">
-<div class="chat-head"><div><h2 id="chatTitle">Conversación del grupo</h2><p id="chatSubtitle" class="muted"></p></div><button id="closeChat" class="secondary" type="button">Cerrar</button></div>
+<div class="chat-head"><button id="backGroups" class="secondary" type="button">← Grupos</button><div><h2 id="chatTitle">Conversación del grupo</h2><p id="chatSubtitle" class="muted"></p></div><button id="closeChat" class="secondary" type="button">Cerrar</button></div>
 <div id="chatLog" class="chat-log" aria-live="polite"><p class="empty">Selecciona un grupo para ver sus mensajes.</p></div>
 <form id="messageForm"><div class="row"><input id="messageInput" maxlength="2000" required placeholder="Escribe un mensaje para el grupo…"><button type="submit">Enviar</button></div></form>
 <div id="chatStatus" class="status" role="status"></div>
@@ -91,12 +119,12 @@ $("groupList").addEventListener("click",async e=>{
  if(b.dataset.toggle){const g=groups.find(x=>x.id===b.dataset.toggle);if(!g)return;const {error}=await db.from("study_groups").update({is_open:!g.is_open}).eq("id",g.id).eq("created_by",user.id);if(error){say("createStatus","No se pudo actualizar: "+error.message);return;}await loadGroups();}
  if(b.dataset.open)await openChat(b.dataset.open);
 });
-function closeChat(){activeGroup=null;$("chatPanel").classList.add("hidden");}
-$("closeChat").addEventListener("click",closeChat);
+function closeChat(){activeGroup=null;$("chatPanel").classList.add("hidden");$("app").classList.remove("ou-group-chat");}
+$("closeChat").addEventListener("click",closeChat);$("backGroups").addEventListener("click",closeChat);
 async function openChat(id){
  const g=groups.find(x=>x.id===id);if(!g||!memberships.has(id))return;
- activeGroup=id;$("chatPanel").classList.remove("hidden");$("chatTitle").textContent=g.name;$("chatSubtitle").textContent=(g.subject||"Grupo de estudio")+(g.semester?" · "+g.semester+"° semestre":"");$("chatLog").innerHTML='<p class="empty">Cargando mensajes…</p>';
- await loadMessages();$("chatPanel").scrollIntoView({behavior:"smooth",block:"start"});
+ activeGroup=id;$("app").classList.add("ou-group-chat");$("chatPanel").classList.remove("hidden");$("chatTitle").textContent=g.name;$("chatSubtitle").textContent=(g.subject||"Grupo de estudio")+(g.semester?" · "+g.semester+"° semestre":"");$("chatLog").innerHTML='<p class="empty">Cargando mensajes…</p>';
+ await loadMessages();
 }
 async function loadMessages(){
  if(!activeGroup)return;
