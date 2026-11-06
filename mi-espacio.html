@@ -21,7 +21,7 @@
 <script>window.OneSignalDeferred=window.OneSignalDeferred||[];OneSignalDeferred.push(async function(OneSignal){await OneSignal.init({appId:"64e9045a-6129-4f50-aa9a-03cfbe70bfae"});});</script>
 <script src="/assets/onesignal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8");
+const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8");window.ouSupabaseClient=db;
 const $=id=>document.getElementById(id);let user=null,notes=[],resources=[],collections=[],saved=[];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const say=t=>$("status").textContent=t;
