@@ -1,0 +1,10 @@
+/* Reacciones compartidas: publicaciones, chat comunitario, privados y grupos. */
+.reaction-bar{display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-width:0}
+.reaction-chip{display:inline-flex!important;align-items:center;justify-content:center;gap:4px;min-width:34px;min-height:29px;padding:4px 8px!important;border:1px solid #e6dcef!important;border-radius:999px!important;background:#fff!important;color:#554766!important;font:inherit!important;font-size:12px!important;line-height:1!important;box-shadow:none!important;cursor:pointer;transition:background .16s,border-color .16s,transform .16s}
+.reaction-chip:hover{background:#f7f1fc!important;border-color:#c9b4dc!important;transform:translateY(-1px)}
+.reaction-chip.is-active{background:#f0e7fb!important;border-color:#9b78bc!important;color:#32105f!important;box-shadow:inset 0 0 0 1px #9b78bc!important}
+.reaction-chip:disabled{opacity:.82;cursor:default;transform:none}
+.post-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.post-actions>.reaction-bar{flex:1 1 100%;width:100%}
+.post-reactions{width:100%;min-width:0}
+.message-reactions{margin-top:8px}
