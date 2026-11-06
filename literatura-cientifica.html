@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#32105f">
-  <meta name="description" content="Busca literatura científica odontológica y biomédica en PubMed desde OdontoUdeC.">
+  <meta name="description" content="Busca literatura científica odontológica y biomédica en varias bases académicas desde OdontoUdeC.">
   <title>Literatura científica · OdontoUdeC</title>
   <link rel="icon" type="image/png" href="/assets/download-removebg-preview%20(2).png">
-  <link rel="preconnect" href="https://eutils.ncbi.nlm.nih.gov">
+  <link rel="preconnect" href="https://eutils.ncbi.nlm.nih.gov"><link rel="preconnect" href="https://www.ebi.ac.uk"><link rel="preconnect" href="https://api.openalex.org"><link rel="preconnect" href="https://api.crossref.org">
   <link rel="stylesheet" href="assets/literatura-cientifica.css">
 </head>
 <body>
@@ -37,9 +37,9 @@
         <div class="hero-copy">
           <span class="eyebrow"><span class="eyebrow-dot"></span> Investigación y evidencia científica</span>
           <h1>Encuentra evidencia para respaldar tu <em>aprendizaje.</em></h1>
-          <p>Explora publicaciones biomédicas y odontológicas indexadas en PubMed. Busca por tema, identifica revisiones y consulta los registros originales.</p>
+          <p>Explora literatura odontológica y biomédica en PubMed, Europe PMC, OpenAlex y Crossref. Compara resultados, consulta resúmenes y localiza versiones de acceso abierto.</p>
           <div class="hero-points">
-            <span>✓ Búsqueda directa en NCBI</span>
+            <span>✓ Cuatro fuentes científicas</span>
             <span>✓ Sin cuenta universitaria</span>
             <span>✓ Acceso abierto cuando esté disponible</span>
           </div>
@@ -49,7 +49,7 @@
           <span class="hero-card-kicker">De la pregunta a la evidencia</span>
           <h2>Investiga con mejores preguntas.</h2>
           <p>Encuentra literatura científica para tus asignaturas, seminarios, casos clínicos y proyectos académicos.</p>
-          <div class="hero-card-footer"><span class="pulse"></span> Fuente bibliográfica: PubMed · NCBI</div>
+          <div class="hero-card-footer"><span class="pulse"></span> Fuentes bibliográficas: PubMed · Europe PMC · OpenAlex · Crossref</div>
         </aside>
       </div>
     </section>
@@ -60,13 +60,17 @@
           <div>
             <span class="kicker">Explorador científico</span>
             <h2>Buscar publicaciones</h2>
-            <p>Escribe un tema en español o inglés. PubMed suele recuperar más resultados usando términos científicos en inglés.</p>
+            <p>Elige una fuente y busca por tema, enfermedad, procedimiento, autor o DOI. Para temas odontológicos, los términos científicos en inglés suelen ampliar los resultados.</p>
           </div>
-          <a class="plain-link" href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">Abrir PubMed ↗</a>
+          <a class="plain-link" id="sourceWebsiteLink" href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">Abrir fuente ↗</a>
         </div>
 
         <div class="search-panel">
           <form id="pubmedForm">
+            <label class="source-picker" for="sourceFilter">Buscar en
+              <select id="sourceFilter" name="source"><option value="pubmed">PubMed · NCBI</option><option value="europepmc">Europe PMC</option><option value="openalex">OpenAlex</option><option value="crossref">Crossref</option></select>
+              <small id="sourceDescription">Referencias biomédicas, resúmenes y enlaces a texto completo cuando están disponibles.</small>
+            </label>
             <label class="sr-only" for="pubmedQuery">Tema, enfermedad, procedimiento o palabra clave</label>
             <div class="search-row">
               <div class="query-wrap">
@@ -117,7 +121,7 @@
 
         <div class="results-toolbar">
           <div>
-            <span class="kicker">Resultados de PubMed</span>
+            <span class="kicker" id="resultsSourceLabel">Resultados de PubMed · NCBI</span>
             <h2>Publicaciones encontradas</h2>
           </div>
           <p id="resultsSummary" class="results-summary">Los resultados aparecerán aquí.</p>
@@ -139,7 +143,7 @@
           <div class="access-note-icon" aria-hidden="true">ⓘ</div>
           <div>
             <strong>Sobre el acceso a los artículos</strong>
-            <p>PubMed permite consultar referencias y resúmenes disponibles, pero no garantiza el texto completo gratuito de cada publicación. Cuando el registro tenga un identificador de PubMed Central (PMC), mostraremos el enlace al texto disponible allí. Los demás artículos pueden requerir acceso del editor.</p>
+            <p>Estas fuentes ofrecen metadatos, referencias y, en algunos casos, resúmenes o enlaces a texto completo. Que una publicación aparezca en el buscador no significa que su texto completo sea gratuito. Priorizaremos enlaces de acceso abierto cuando la fuente los identifique.</p>
           </div>
         </aside>
       </div>
@@ -150,7 +154,7 @@
         <div>
           <span class="kicker">Una herramienta de apoyo</span>
           <h2>Encuentra artículos. Después, evalúa la evidencia.</h2>
-          <p>Los resultados provienen de PubMed, un recurso de la National Library of Medicine. La indexación en PubMed no significa, por sí sola, que un artículo sea de alta calidad ni que sus conclusiones sean aplicables a todos los pacientes.</p>
+          <p>Los resultados provienen directamente de la fuente seleccionada. La inclusión en una base de datos no garantiza que un artículo sea de alta calidad ni que sus conclusiones sean aplicables a todos los pacientes.</p>
         </div>
         <div class="how-card">
           <strong>Recuerda al leer una publicación</strong>
@@ -174,10 +178,13 @@
       <div class="footer-links">
         <a href="index.html">Inicio</a>
         <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubMed ↗</a>
+        <a href="https://europepmc.org/" target="_blank" rel="noopener noreferrer">Europe PMC ↗</a>
+        <a href="https://openalex.org/" target="_blank" rel="noopener noreferrer">OpenAlex ↗</a>
+        <a href="https://www.crossref.org/" target="_blank" rel="noopener noreferrer">Crossref ↗</a>
         <a href="https://www.ncbi.nlm.nih.gov/About/disclaimer.html" target="_blank" rel="noopener noreferrer">Aviso de NCBI ↗</a>
       </div>
     </div>
-    <div class="wrap footer-note">Los datos bibliográficos se consultan en NCBI. PubMed® es un servicio de la U.S. National Library of Medicine.</div>
+    <div class="wrap footer-note">Los metadatos se consultan en las APIs oficiales de cada proveedor. OdontoUdeC no aloja ni distribuye los artículos.</div>
   </footer>
 
   <script src="assets/literatura-cientifica.js"></script>
