@@ -17,7 +17,7 @@ main{width:min(100% - 32px,820px);margin:38px auto 70px}.intro{padding:clamp(23p
 .auth-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.btn{display:inline-flex;justify-content:center;align-items:center;padding:12px 17px;border-radius:12px;background:var(--purple);color:#fff;text-decoration:none;font-weight:800;border:1px solid var(--purple)}.btn.alt{background:#fff;color:var(--purple);border-color:#dfd1eb}
 #survey{display:grid;gap:15px;margin-top:20px}#questions{display:grid;gap:15px}.question{padding:21px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 5px 18px #32105f06}.q-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}.q-num{flex:0 0 32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#f2eafa;color:var(--purple);font-weight:900}.question h2{margin:2px 0 0;color:var(--purple);font-size:1.05rem}.hint{font-size:.83rem;color:var(--muted);margin:5px 0 0}
 .options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.option{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid #eee8f2;border-radius:11px;background:#fdfcfe;cursor:pointer;font-size:.91rem}.option:hover{border-color:#cbb5dd;background:#faf6fd}.option input{accent-color:var(--purple);margin:4px 0 0;flex:0 0 auto}.question textarea{width:100%;min-height:105px;resize:vertical;padding:12px 13px;border:1px solid #ddd2e8;border-radius:11px;font:inherit;outline-color:var(--purple2)}.question textarea:focus,.option:focus-within{border-color:var(--purple2);box-shadow:0 0 0 3px #54218b14}
-.notice{padding:16px 18px;border:1px solid #f0dfae;border-radius:14px;background:#fff9e9;color:#69521c;font-size:.9rem;margin-top:20px}.notice strong{display:block;margin-bottom:3px}
+.notice{padding:16px 18px;border:1px solid #f0dfae;border-radius:14px;background:#fff9e9;color:#69521c;font-size:.9rem;margin-top:20px}.notice strong{display:block;margin-bottom:3px}.hidden{display:none!important}
 footer{text-align:center;padding:25px;color:#82778b;font-size:.8rem}
 @media(max-width:600px){main{margin-top:20px}.options{grid-template-columns:1fr}.question{padding:17px}.nav{padding:12px 16px}}
 </style>
@@ -64,9 +64,9 @@ function renderQuestions(){
  host.innerHTML=window.ODONTOUDEC_SURVEY.categories.map((category,index)=>{
   const head='<div class="q-head"><span class="q-num">'+(index+1)+'</span><div><h2>'+esc(category.title)+'</h2><p class="hint">'+(category.type==="free_text"?"Escribe el nombre o tu respuesta.":"Selecciona una sola opción.")+'</p></div></div>';
   if(category.type==="free_text"){
-   return '<section class="question">'+head+'<textarea name="'+esc(category.id)+'" maxlength="500" placeholder="Escribe tu respuesta…"></textarea></section>';
+   return '<section class="question">'+head+'<textarea name="'+esc(category.id)+'" maxlength="500" required placeholder="Escribe tu respuesta…" aria-label="'+esc(category.title)+'"></textarea></section>';
   }
-  return '<fieldset class="question" style="border:1px solid var(--line);min-width:0"><legend class="hidden">'+esc(category.title)+'</legend>'+head+'<div class="options">'+category.options.map((option,i)=>'<label class="option"><input type="radio" name="'+esc(category.id)+'" value="'+esc(option)+'"><span>'+esc(option)+'</span></label>').join("")+'</div></fieldset>';
+  return '<fieldset class="question" style="border:1px solid var(--line);min-width:0"><legend class="hidden">'+esc(category.title)+'</legend>'+head+'<div class="options">'+category.options.map((option,i)=>'<label class="option"><input type="radio" name="'+esc(category.id)+'" value="'+esc(option)+'" required><span>'+esc(option)+'</span></label>').join("")+'</div></fieldset>';
  }).join("");
 }
 async function init(){
