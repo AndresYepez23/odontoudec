@@ -203,3 +203,14 @@ Base auditada: main
 
 - Se reorganizó la navegación principal: Inicio, Calendario, Biblioteca, Academia, Comunidad y Mi espacio quedan como accesos directos; Novedades, Recursos, Tarifario, Convivencia, Grupos de estudio y Mi perfil académico quedan agrupados en «Más».
 - No se añadió «Oportunidades» porque la portada actual no contiene una sección o destino funcional para esa opción; se deja como bloque pendiente de producto, no como enlace vacío.
+
+
+## Avance técnico — encuesta estudiantil
+- Se añadió una migración versionada para `public.survey_submissions`, con RLS activado, privilegios de tabla revocados para `anon` y `authenticated`, y acceso de tabla reservado a `service_role`.
+- Se creó la Edge Function `survey-submissions`: valida sesión con Auth, exige perfil existente, valida las 15 respuestas contra el catálogo del servidor, limita textos libres a 500 caracteres y evita duplicados mediante la restricción única de base de datos.
+- Se implementó consulta de resultados protegida por el rol `admin`; entrega respuestas atribuidas al perfil del estudiante, únicamente tras comprobar el rol desde `user_roles` en el servidor.
+- Se conectó el formulario a la función y se incorporó una vista administrativa. El botón de envío permanece deshabilitado y se muestra una advertencia hasta que la migración se aplique y la función se despliegue y pruebe en un entorno controlado.
+- Se adaptó la lectura de secretos de Edge Functions tanto a la variable legacy `SUPABASE_SERVICE_ROLE_KEY` como al mapa `SUPABASE_SECRET_KEYS`; ningún secreto se guarda en el repositorio.
+- Verificaciones estáticas realizadas: existencia de RLS, ausencia de privilegios directos para roles de navegador, validación del JWT, control de administrador, detección de duplicados, configuración de función y bloqueo del envío mientras no esté activado.
+- Pendiente antes de habilitar: ejecutar migración en entorno de prueba, desplegar función, probar con dos cuentas estudiantiles y una administrativa, verificar rechazo de duplicados y acceso denegado a estudiantes, revisar CORS/secretos y probar retorno desde confirmación de correo. SMTP sigue pendiente.
+- Todo lo anterior permanece en la rama de rediseño. No se aplicó SQL en Supabase ni se desplegó la Edge Function en el proyecto conectado.
