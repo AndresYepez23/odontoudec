@@ -34,3 +34,6 @@
 }
 
 .message-body{white-space:pre-wrap;overflow-wrap:anywhere}
+
+.chat-compose-form{display:block!important;width:100%}
+.chat-compose-form>.chat-attachment-preview{width:100%;box-sizing:border-box}
