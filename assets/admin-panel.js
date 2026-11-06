@@ -39,6 +39,60 @@
     button.addEventListener("click", handler);
     return button;
   };
+  async function refreshAnalytics() {
+    const status = document.getElementById("adminAnalyticsStatus");
+    const pageviews = document.getElementById("phPageviews");
+    const unique = document.getElementById("phUniqueVisitors");
+    const active = document.getElementById("phActiveVisitors");
+    const chart = document.getElementById("phDailyChart");
+    const pages = document.getElementById("phTopPages");
+    const range = document.getElementById("adminAnalyticsRange");
+    const button = document.getElementById("refreshAdminAnalytics");
+    if (!status || !pageviews || !unique || !active || !chart || !pages) return;
+    if (button) { button.disabled = true; button.textContent = "Consultando…"; }
+    status.textContent = "Consultando las métricas de PostHog…";
+    try {
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+      const token = data && data.session && data.session.access_token;
+      if (!token) throw new Error("Tu sesión no está activa. Inicia sesión nuevamente.");
+      const days = range && range.value === "7" ? "7" : "30";
+      const response = await fetch("/.netlify/functions/posthog-analytics?range=" + days, { method: "GET", headers: { Authorization: "Bearer " + token, Accept: "application/json" }, cache: "no-store" });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "No se pudieron consultar las métricas (HTTP " + response.status + ").");
+      pageviews.textContent = formatNumber(result.metrics && result.metrics.pageviews);
+      unique.textContent = formatNumber(result.metrics && result.metrics.uniqueVisitors);
+      active.textContent = formatNumber(result.metrics && result.metrics.activeVisitors7d);
+      chart.replaceChildren();
+      const daily = Array.isArray(result.daily) ? result.daily : [];
+      if (!daily.length) { chart.textContent = "Aún no hay visitas registradas en este periodo."; }
+      else {
+        const max = Math.max(1, ...daily.map(item => Number(item.views) || 0));
+        daily.forEach(item => {
+          const day = make("div", "ph-day");
+          day.title = String(item.day || "") + ": " + formatNumber(item.views) + " visitas";
+          const slot = make("div", "ph-bar-slot");
+          const bar = make("div", "ph-bar");
+          bar.style.height = Math.max(2, (Number(item.views) || 0) / max * 100) + "%";
+          bar.setAttribute("aria-label", formatNumber(item.views) + " visitas");
+          slot.appendChild(bar);
+          day.append(slot, make("small", "", String(item.day || "").slice(5)));
+          chart.appendChild(day);
+        });
+      }
+      pages.replaceChildren();
+      const topPages = Array.isArray(result.topPages) ? result.topPages : [];
+      if (!topPages.length) pages.appendChild(make("li", "", "Aún no hay secciones consultadas."));
+      else topPages.forEach(item => { const li = make("li", "", item.page || "Otra página"); li.appendChild(make("span", "", formatNumber(item.views))); pages.appendChild(li); });
+      status.textContent = "Datos recibidos de PostHog · Últimos " + days + " días · Actualizado " + new Date().toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" }) + ".";
+    } catch (error) {
+      status.textContent = error.message || "No se pudieron cargar las métricas de PostHog.";
+      pageviews.textContent = "—"; unique.textContent = "—"; active.textContent = "—";
+      chart.textContent = "No fue posible cargar las visitas.";
+      pages.replaceChildren(make("li", "", "No fue posible cargar las secciones."));
+      console.error("[OdontoUdeC analytics]", error);
+    } finally { if (button) { button.disabled = false; button.textContent = "Actualizar métricas"; } }
+  }
   const safeHttpUrl = (value) => {
     try {
       const url = new URL(String(value || ""));
@@ -201,6 +255,10 @@
       button.addEventListener("click", () => setTab(button.dataset.adminOpen));
     });
     shell.querySelector("#ouAdminRefresh").addEventListener("click", refreshAll);
+    const analyticsButton = document.getElementById("refreshAdminAnalytics");
+    const analyticsRange = document.getElementById("adminAnalyticsRange");
+    if (analyticsButton) analyticsButton.addEventListener("click", refreshAnalytics);
+    if (analyticsRange) analyticsRange.addEventListener("change", refreshAnalytics);
     shell.querySelector("#ouAdminPostForm").addEventListener("submit", savePost);
     shell.querySelector("#ouAdminPostCancel").addEventListener("click", resetPostForm);
     shell.querySelector("#ouAdminEventForm").addEventListener("submit", saveEvent);
@@ -221,10 +279,7 @@
       pane.classList.toggle("is-active", active);
       pane.hidden = !active;
     });
-    if (name === "analytics") {
-      const refresh = document.getElementById("refreshAdminAnalytics");
-      if (refresh) refresh.click();
-    }
+    if (name === "analytics") refreshAnalytics();
   }
 
   function toast(message, isError) {
