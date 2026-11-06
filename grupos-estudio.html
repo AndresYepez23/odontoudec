@@ -50,6 +50,16 @@ html.ou-embedded #messageForm input{height:44px;min-height:44px}
 html.ou-embedded #messageForm button{height:44px}
 html.ou-embedded #chatStatus{flex-shrink:0;min-height:0;margin:3px 0 0}
 @media(max-width:600px){html.ou-embedded main{padding:6px}html.ou-embedded #app>.grid>section:last-child{padding:7px}html.ou-embedded #chatPanel{padding:7px}}
+
+/* Embedded groups: independently scroll group listings and message history. */
+html.ou-embedded #app>.grid{min-height:0;height:100%}
+html.ou-embedded #app>.grid>section:last-child{height:100%;min-height:0}
+html.ou-embedded #groupList{display:block;flex:1 1 0;height:0;max-height:none;min-height:0;overflow-y:auto!important;overflow-x:hidden;overscroll-behavior:contain;padding:2px 4px 10px 0}
+html.ou-embedded .group{min-width:0;overflow-wrap:anywhere}
+html.ou-embedded #chatPanel{min-height:0}
+html.ou-embedded #chatLog{height:0;min-height:0;max-height:none;flex:1 1 0;overflow-y:auto!important;overscroll-behavior:contain}
+html.ou-embedded #messageForm{flex-shrink:0}
+
 </style>
 <link rel="stylesheet" href="assets/community-dock.css">
 </head>
