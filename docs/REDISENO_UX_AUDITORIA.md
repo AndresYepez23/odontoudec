@@ -235,3 +235,8 @@ Base auditada: main
 - Se añadió `scripts/validate-survey-contract.mjs` para comprobar automáticamente el contrato frontend/backend: 15 categorías, 8 listas idénticas, 7 campos abiertos, validación JWT, autorización admin y control de duplicados.
 - Se documentó una secuencia de release que concentra las correcciones en un único deploy de sitio: primero preparar/aplicar backend y verificarlo; después publicar el frontend habilitado. El segundo deploy queda reservado únicamente para corregir defectos descubiertos durante las pruebas reales.
 - No se ha habilitado el botón de envío ni se ha publicado la rama. No se ha ejecutado SQL ni se ha desplegado la función.
+
+- Se verificaron los ocho enlaces HTML locales encontrados en la portada contra la rama: Academia, Mi espacio, Grupos de estudio, Perfil académico, Banco de pacientes, Restablecer contraseña, Chat y Mensajes existen en el repositorio.
+- El formulario de registro de portada dejó de ofrecer «alias» y ahora pide nombre completo, con atributo de autocompletado `name`.
+- La página de encuesta ahora intenta extraer el mensaje JSON del error HTTP devuelto por Supabase, por lo que podrá distinguir con más claridad duplicados y validaciones fallidas durante el QA real.
+- Se incorporó un validador Node sin dependencias externas para detectar divergencias futuras entre el catálogo del frontend y la validación del servidor: `node scripts/validate-survey-contract.mjs`.
