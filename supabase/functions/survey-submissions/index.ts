@@ -57,7 +57,13 @@ Deno.serve(async (req: Request) => {
     if (!token) return reply(req,{error:"Inicia sesión para continuar."},401);
 
     const url = Deno.env.get("SUPABASE_URL");
-    const secret = Deno.env.get("SUPABASE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    let secret = Deno.env.get("SUPABASE_SECRET_KEY") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!secret) {
+      const secretMap = Deno.env.get("SUPABASE_SECRET_KEYS");
+      if (secretMap) {
+        try { secret = JSON.parse(secretMap).default || ""; } catch { secret = ""; }
+      }
+    }
     if (!url || !secret) throw new Error("Falta configuración segura de Supabase.");
     const admin = createClient(url,secret,{auth:{persistSession:false,autoRefreshToken:false}});
     const {data:{user},error:authError} = await admin.auth.getUser(token);
