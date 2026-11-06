@@ -253,9 +253,18 @@
       throw new Error("No se pudo preparar el envío de fotografías.");
     }
 
-    const row = input.closest(".compose, .row") || input.parentElement;
+    let row = input.closest(".compose, .row") || input.parentElement;
     if (!row) throw new Error("No se encontró el área de escritura.");
-    row.classList.add("chat-compose-row");
+    if (row === form) {
+      const composerRow = document.createElement("div");
+      composerRow.className = "chat-compose-row";
+      form.insertBefore(composerRow, input);
+      composerRow.append(input, sendButton);
+      row = composerRow;
+      form.classList.add("chat-compose-form");
+    } else {
+      row.classList.add("chat-compose-row");
+    }
 
     const originalRequired = input.required;
     let available = !input.disabled;
@@ -316,7 +325,7 @@
     const preview = document.createElement("div");
     preview.className = "chat-attachment-preview";
     preview.hidden = true;
-    form.insertBefore(preview, row === form ? controls : row);
+    form.insertBefore(preview, row);
 
     function report(message) {
       if (status) status.textContent = message || "";
