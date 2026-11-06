@@ -53,12 +53,12 @@ html.ou-embedded #threadHead{min-width:0}
  html.ou-embedded body.ou-private-open #app>.thread{height:100%;min-height:0}
 }
 
-</style><link rel="stylesheet" href="assets/community-dock.css"><link rel="stylesheet" href="assets/chat-ui.css">
+</style><link rel="stylesheet" href="assets/community-dock.css"><link rel="stylesheet" href="assets/chat-ui.css"><link rel="stylesheet" href="assets/reactions.css">
 
 <link rel="icon" type="image/png" href="/assets/download-removebg-preview%20(2).png">
 <link rel="apple-touch-icon" href="/assets/download-removebg-preview%20(2).png">
 </head><body><header><div class="ou-header-brand"><img src="assets/odontoudec-logo.svg" alt="Logo OdontoUdeC"><strong>OdontoUdeC · Mensajes</strong></div><a href="/#comunidad">← Volver a la comunidad</a></header><main><section class="intro"><h1>Conversaciones privadas</h1><p>Conecta directamente con compañeros. Solo los participantes pueden leer sus mensajes.</p></section><div id="authRequired" class="panel hidden"><h3>Inicia sesión para continuar</h3><p class="muted">Puedes entrar con tu correo o nombre de usuario desde la página principal.</p><a class="btn" href="/#comunidad">Ir al inicio de sesión</a></div><div id="app" class="layout hidden"><aside class="panel"><h3 style="margin:0">Buscar estudiantes y perfiles</h3><p class="muted" style="margin:5px 0 10px">Busca compañeros por nombre o ID. No necesitas escribir tildes ni respetar mayúsculas; aquí solo aparecen perfiles públicos.</p><form id="searchForm" class="search"><input id="searchInput" maxlength="40" placeholder="Nombre o ID (ej. OD-A1B2C3D4)…" required><button>Buscar</button></form><div id="searchResults" class="list hidden" aria-live="polite"></div><hr style="border:0;border-top:1px solid var(--line);margin:16px 0"><h3 style="margin:0">Tus conversaciones</h3><div id="inbox" class="list"><p class="muted">Cargando…</p></div></aside><section class="panel thread"><div class="thread-head"><span class="ou-thread-brand"><img src="assets/odontoudec-logo.svg" alt="OdontoUdeC"><span>OdontoUdeC</span></span><button id="backInbox" class="secondary" type="button" aria-label="Volver a conversaciones">←</button><strong id="threadTitle">Selecciona una conversación</strong><div id="threadStatus" class="muted">Tus mensajes son privados.</div></div><div id="messages"><div class="empty">Elige un compañero o inicia una conversación nueva.</div></div><form id="sendForm" class="compose"><input id="messageInput" maxlength="2000" placeholder="Escribe un mensaje…" autocomplete="off" disabled required><button id="sendButton" disabled>Enviar</button></form></section></div><div id="status" class="status" role="status" aria-live="polite"></div></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/chat-ui.js"></script><script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/chat-ui.js"></script><script src="assets/chat-reactions.js"></script><script>
 const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8"),$=id=>document.getElementById(id);let user=null,activeConversation=null,poll=null;
 const composer=OdontoChatUI.mountComposer({form:$("sendForm"),input:$("messageInput"),sendButton:$("sendButton"),status:$("status"),db,getScope:()=>({type:"private",id:activeConversation}),getUser:()=>user});
 const say=t=>$("status").textContent=t,esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -88,14 +88,24 @@ async function loadMessages(){
  if(!activeConversation)return;
  const {data,error}=await db.from("private_messages").select("id,sender_id,content,created_at").eq("conversation_id",activeConversation).order("created_at",{ascending:true}).limit(150);
  if(error){say("No se pudieron cargar los mensajes.");return;}
+ const messages=data||[],ids=messages.map(m=>m.id);
+ let reactionRows=[];
+ if(ids.length){
+  const result=await db.from("chat_message_reactions").select("id,private_message_id,user_id,reaction").in("private_message_id",ids);
+  if(result.error)say("No se pudieron cargar las reacciones.");
+  else reactionRows=result.data||[];
+ }
  const box=$("messages"),bottom=box.scrollHeight-box.scrollTop-box.clientHeight<80;box.replaceChildren();
- for(const m of data||[]){
+ for(const m of messages){
   const bubble=document.createElement("div");bubble.className="bubble"+(m.sender_id===user.id?" mine":"");
   await OdontoChatUI.renderMessageContent(bubble,m.content,db);
   const time=document.createElement("time");time.textContent=new Date(m.created_at).toLocaleString("es-CO",{dateStyle:"short",timeStyle:"short"});
-  bubble.append(time);box.append(bubble);
+  const reactionSlot=document.createElement("div");reactionSlot.className="message-reactions";
+  bubble.append(time,reactionSlot);
+  OdontoReactions.mount(reactionSlot,{db,table:"chat_message_reactions",targetColumn:"private_message_id",targetId:m.id,userId:user?.id,rows:reactionRows.filter(r=>r.private_message_id===m.id),onStatus:say});
+  box.append(bubble);
  }
- if(!data?.length){const empty=document.createElement("div");empty.className="empty";empty.textContent="Esta conversación está lista. Envía el primer mensaje.";box.append(empty);}
+ if(!messages.length){const empty=document.createElement("div");empty.className="empty";empty.textContent="Esta conversación está lista. Envía el primer mensaje.";box.append(empty);}
  if(bottom)box.scrollTop=box.scrollHeight;
 }
 $("backInbox").onclick=()=>{composer.clear();composer.setAvailable(false);document.body.classList.remove("ou-private-open");activeConversation=null;};$("searchForm").onsubmit=e=>{e.preventDefault();const q=$("searchInput").value.trim();if(q.length>=2)searchStudents(q);};
@@ -112,7 +122,7 @@ $("sendForm").onsubmit=async e=>{
  }catch(error){say(error?.message||"No se pudo enviar la fotografía.");}
  finally{send.disabled=false;composer.setBusy(false);}
 };
-(async()=>{const {data}=await db.auth.getSession();user=data.session?.user||null;render();if(user){await refreshInbox();const target=new URLSearchParams(location.search).get("student");if(target&&target!==user.id){const {data:person}=await db.from("profiles").select("id,display_name,public_id,semester").eq("id",target).maybeSingle();if(person)await openConversation(person);}poll=setInterval(async()=>{refreshInbox();await loadMessages();await markConversationRead();},5000);}})();db.auth.onAuthStateChange((event,session)=>{user=session?.user||null;render();if(!user&&poll){clearInterval(poll);poll=null;activeConversation=null;composer.clear();}});
+(async()=>{const {data}=await db.auth.getSession();user=data.session?.user||null;render();if(user){await refreshInbox();const target=new URLSearchParams(location.search).get("student");if(target&&target!==user.id){const {data:person}=await db.from("profiles").select("id,display_name,public_id,semester").eq("id",target).maybeSingle();if(person)await openConversation(person);}poll=setInterval(async()=>{refreshInbox();await loadMessages();await markConversationRead();},5000);}})();db.auth.onAuthStateChange((event,session)=>{user=session?.user||null;render();if(!user&&poll){clearInterval(poll);poll=null;activeConversation=null;composer.clear();composer.setAvailable(false);document.body.classList.remove("ou-private-open");}});
 </script><script src="assets/community-dock.js"></script>
 
 <script src="/assets/posthog.js" defer></script>
