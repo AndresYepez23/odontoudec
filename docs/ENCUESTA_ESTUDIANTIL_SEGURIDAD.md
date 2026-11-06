@@ -46,3 +46,11 @@ Una tabla de envíos, por ejemplo `survey_submissions`:
 
 ## SMTP aplazado
 No es un bloqueo para diseñar la encuesta. Antes de la prueba real de registro y recuperación con tráfico se retomará SMTP personalizado de Supabase Auth (Resend recomendado; Brevo alternativa), con SPF/DKIM y pruebas de confirmación y recuperación.
+
+
+## Hallazgos de esquema verificados (lectura solamente)
+- `public.user_roles` tiene columnas `user_id` y `role`; el rol admite `admin` y `student`, con `student` como valor por defecto. En la inspección actual aparecen dos registros administrativos y ningún registro estudiantil.
+- Por lo anterior, no se debe implementar todavía una condición que exija una fila `role = 'student'`: bloquearía a las cuentas estudiantiles existentes que no tengan esa fila. La regla de elegibilidad debe resolverse explícitamente antes de activar la encuesta.
+- La tabla `public.profiles` tiene 9 perfiles en la inspección; no todos tienen semestre informado, por lo que tampoco se debe usar el semestre como requisito implícito.
+- Supabase anunció que las tablas nuevas de `public` dejaron de exponerse automáticamente a Data API en 2026. La futura migración debe declarar de forma explícita los privilegios necesarios y comprobar la configuración de esquemas expuestos; RLS por sí sola no habilita el acceso a Data API.
+- No se ejecutó SQL, no se creó tabla ni se modificaron roles o permisos en el proyecto.
