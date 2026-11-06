@@ -98,6 +98,18 @@ async function functionErrorMessage(error,fallback){
  }
  return fallback;
 }
+function showCompleted({redirect=false}={}){
+ const form=document.getElementById("survey");
+ form.classList.add("hidden");
+ document.getElementById("guest").classList.add("hidden");
+ statusEl.innerHTML='<strong>✓ Encuesta completada.</strong> Tu participación ya está registrada. Gracias por aportar a OdontoUdeC.';
+ if(redirect){statusEl.innerHTML+='<p class="hint">Volverás al inicio en unos segundos…</p>';window.setTimeout(()=>location.replace("/"),2600);}
+}
+async function checkParticipation(){
+ const {data,error}=await client.functions.invoke("survey-submissions",{body:{action:"status"}});
+ if(error||!data?.ok) throw error||new Error("No se pudo comprobar tu participación.");
+ return data;
+}
 async function loadAdminResults(){
  const {data,error}=await client.functions.invoke("survey-submissions",{body:{action:"admin_results"}});
  if(!error&&data?.ok){
@@ -118,14 +130,14 @@ document.getElementById("survey").addEventListener("submit",async event=>{
  statusEl.textContent="Validando y registrando tu participación…";
  const {data,error}=await client.functions.invoke("survey-submissions",{body:{action:"submit",answers:collectAnswers()}});
  if(error||!data?.ok){
+  if(error?.context?.status===409){showCompleted();return;}
   statusEl.textContent=data?.error||await functionErrorMessage(error,"No pudimos registrar tu respuesta. Inténtalo nuevamente.");
   button.disabled=false;button.textContent="Enviar mi participación";
   return;
  }
- statusEl.innerHTML="<strong>✓ Participación registrada.</strong> Tu respuesta quedó guardada correctamente. Gracias por participar.";
- button.textContent="Participación registrada ✓";
  form.querySelectorAll("input,textarea,button").forEach(el=>el.disabled=true);
- if(!document.getElementById("adminPanel").classList.contains("hidden")) await loadAdminResults();
+ button.textContent="Encuesta completada ✓";
+ showCompleted({redirect:true});
 });
 document.getElementById("refreshResults").addEventListener("click",loadAdminResults);
 async function init(){
@@ -133,9 +145,12 @@ async function init(){
  const {data,error}=await client.auth.getSession();
  if(error){statusEl.innerHTML="<strong>No pudimos comprobar tu sesión.</strong> Recarga la página o vuelve a iniciar sesión.";return;}
  if(data.session?.user){
-  statusEl.innerHTML="<strong>Sesión iniciada.</strong> Ya puedes revisar las categorías de la encuesta.";
+  let participation;
+  try{participation=await checkParticipation();}catch(error){statusEl.innerHTML="<strong>No pudimos comprobar tu participación.</strong> Recarga la página o inténtalo nuevamente.";return;}
+  if(participation.submitted){showCompleted();if(participation.is_admin)await loadAdminResults();return;}
+  statusEl.innerHTML="<strong>Sesión iniciada.</strong> Ya puedes completar las categorías de la encuesta.";
   document.getElementById("survey").classList.remove("hidden");
-  await loadAdminResults();
+  if(participation.is_admin)await loadAdminResults();
  }else{
   statusEl.innerHTML="<strong>Tu participación requiere iniciar sesión.</strong> La invitación y las categorías son visibles, pero las respuestas están reservadas para estudiantes con cuenta.";
   document.getElementById("guest").classList.remove("hidden");
