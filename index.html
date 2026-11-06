@@ -293,38 +293,67 @@ document.getElementById('forgotPasswordLink')?.addEventListener('click',async e=
  notify('Si el correo corresponde a una cuenta, recibirás instrucciones para restablecer la contraseña.');
 });
 async function handleAuth(mode){
- let result;
- if(mode==='signup'){
-  const email=document.getElementById('authEmail').value.trim().toLowerCase();
-  const password=document.getElementById('authPassword').value;
-  const displayName=document.getElementById('authName').value.trim();
-  if(!email||!password||!displayName){notify('Completa tu nombre, correo y contraseña para crear tu cuenta.');return;}
-  if(password.length<6){notify('La contraseña debe tener al menos 6 caracteres.');return;}
-  const emailInput=document.getElementById('authEmail');
-  if(!emailInput.checkValidity()){notify('Revisa el formato del correo electrónico.');emailInput.focus();return;}
-  if(displayName.length<2){notify('Escribe un nombre o alias de al menos 2 caracteres.');return;}
-  result=await supabaseClient.auth.signUp({email,password,options:{data:{display_name:displayName},emailRedirectTo:window.location.origin+'/verificacion.html'+(getSafeReturnTo()?'?returnTo='+encodeURIComponent(getSafeReturnTo()):'')}});
-  if(result.data?.user && Array.isArray(result.data.user.identities) && result.data.user.identities.length===0){notify('Ese correo ya tiene una cuenta. Inicia sesión en lugar de registrarte de nuevo.');return;}
-  if(result.error){
-   const message=result.error.message||'';
-   if(/already registered|already been registered|user already registered|email.*exists|duplicate key/i.test(message))notify('Ese correo ya tiene una cuenta. Inicia sesión en lugar de registrarte de nuevo.');
-   else notify('No se pudo crear la cuenta: '+message);
-   return;
+  const button=document.getElementById(mode==='signup'?'signUpBtn':'signInBtn');
+  const originalLabel=button.textContent;
+  let timeoutId=null;
+  const setBusy=(busy,label)=>{
+    button.disabled=busy;
+    button.textContent=busy?label:originalLabel;
+    if(busy)authStatus.textContent=mode==='signup'?'Creando tu cuenta…':'Conectando con tu cuenta…';
+  };
+  try{
+    let result;
+    if(mode==='signup'){
+      const email=document.getElementById('authEmail').value.trim().toLowerCase();
+      const password=document.getElementById('authPassword').value;
+      const displayName=document.getElementById('authName').value.trim();
+      if(!email||!password||!displayName){notify('Completa tu nombre, correo y contraseña para crear tu cuenta.');return;}
+      if(password.length<6){notify('La contraseña debe tener al menos 6 caracteres.');return;}
+      const emailInput=document.getElementById('authEmail');
+      if(!emailInput.checkValidity()){notify('Revisa el formato del correo electrónico.');emailInput.focus();return;}
+      if(displayName.length<2){notify('Escribe un nombre o alias de al menos 2 caracteres.');return;}
+      setBusy(true,'Creando cuenta…');
+      const request=supabaseClient.auth.signUp({email,password,options:{data:{display_name:displayName},emailRedirectTo:window.location.origin+'/verificacion.html'+(getSafeReturnTo()?'?returnTo='+encodeURIComponent(getSafeReturnTo()):'')}});
+      result=await Promise.race([request,new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(new Error('La conexión con el servicio de cuentas está tardando demasiado. Comprueba tu conexión e inténtalo nuevamente.')),18000);})]);
+      if(result.data?.user&&Array.isArray(result.data.user.identities)&&result.data.user.identities.length===0){notify('Ese correo ya tiene una cuenta. Inicia sesión en lugar de registrarte de nuevo.');return;}
+      if(result.error){
+        const message=result.error.message||'';
+        if(/already registered|already been registered|user already registered|email.*exists|duplicate key/i.test(message))notify('Ese correo ya tiene una cuenta. Inicia sesión en lugar de registrarte de nuevo.');
+        else notify('No se pudo crear la cuenta: '+message);
+        return;
+      }
+      if(!result.data.session){notify('Cuenta creada. Revisa tu correo para confirmar la cuenta y luego inicia sesión.');setAuthMode('signin');return;}
+    }else{
+      const identifier=document.getElementById('loginIdentifier').value.trim();
+      const password=document.getElementById('loginPassword').value;
+      if(!identifier||!password){notify('Escribe tu correo y tu contraseña.');return;}
+      setBusy(true,'Iniciando sesión…');
+      const request=supabaseClient.auth.signInWithPassword({email:identifier.toLowerCase(),password});
+      result=await Promise.race([request,new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(new Error('La conexión con el servicio de inicio de sesión está tardando demasiado. No se ha confirmado el acceso. Comprueba tu conexión e inténtalo nuevamente.')),18000);})]);
+      if(result.error){notify('No se pudo iniciar sesión: '+result.error.message);return;}
+    }
+
+    // La autenticación ya fue aceptada: mostrar el acceso sin esperar consultas secundarias.
+    currentUser=result.data.user||result.data.session?.user||null;
+    if(!currentUser){notify('El servicio respondió, pero no devolvió una sesión de usuario. Inténtalo nuevamente.');return;}
+    setAuthUI();
+    notify(mode==='signup'?'¡Cuenta creada!':'Sesión iniciada.');
+    const returnTo=getSafeReturnTo();
+    if(returnTo){window.location.assign(returnTo);return;}
+
+    // Perfil, publicaciones y bienvenida se preparan en segundo plano.
+    ensureProfile(currentUser).catch(err=>notify('Accediste correctamente, pero no se pudo completar tu perfil: '+err.message));
+    loadPosts().catch(err=>console.warn('No se pudieron actualizar las publicaciones:',err));
+    showFirstVisitGuide(currentUser).catch(err=>console.warn('No se pudo abrir la guía de bienvenida:',err));
+  }finally{
+    if(timeoutId!==null)clearTimeout(timeoutId);
+    button.disabled=false;
+    button.textContent=originalLabel;
+    if(!currentUser)authStatus.textContent='No has iniciado sesión.';
   }
-  if(!result.data.session){notify('Cuenta creada. Revisa tu correo para confirmar la cuenta y luego inicia sesión.');setAuthMode('signin');return;}
- }else{
-  const identifier=document.getElementById('loginIdentifier').value.trim();
-  const password=document.getElementById('loginPassword').value;
-  if(!identifier||!password){notify('Escribe tu correo y tu contraseña.');return;}
-  result=await supabaseClient.auth.signInWithPassword({email:identifier.toLowerCase(),password});
-  if(result.error){notify('No se pudo iniciar sesión: '+result.error.message);return;}
- }
- currentUser=result.data.user||result.data.session?.user;
- try{if(currentUser)await ensureProfile(currentUser);}catch(err){notify('La sesión se creó, pero hubo un problema con el perfil: '+err.message);}
- setAuthUI();await loadPosts();await showFirstVisitGuide(currentUser);const returnTo=getSafeReturnTo();if(returnTo){window.location.assign(returnTo);return;}notify(mode==='signup'?'¡Cuenta creada!':'Sesión iniciada.');
 }
-document.getElementById('signInBtn').addEventListener('click',()=>handleAuth('signin').catch(e=>notify(e.message)));
-document.getElementById('signUpBtn').addEventListener('click',()=>handleAuth('signup').catch(e=>notify(e.message)));
+document.getElementById('signInBtn').addEventListener('click',()=>handleAuth('signin').catch(e=>notify('Error al iniciar sesión: '+e.message)));
+document.getElementById('signUpBtn').addEventListener('click',()=>handleAuth('signup').catch(e=>notify('Error al crear la cuenta: '+e.message)));
 document.getElementById('signOutBtn').addEventListener('click',async()=>{const {error}=await supabaseClient.auth.signOut();if(error){notify(error.message);return;}currentUser=null;setAuthUI();notify('Sesión cerrada.');});
 const changePasswordForm=document.getElementById('changePasswordForm');
 document.getElementById('changePasswordBtn').addEventListener('click',()=>{
