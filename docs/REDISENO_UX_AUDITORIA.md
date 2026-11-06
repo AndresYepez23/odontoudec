@@ -77,9 +77,10 @@ Base auditada: main
 - Perfil y configuración como acciones de cuenta, no mezcladas con recursos.
 
 ## Principios de experiencia
-- El visitante debe entender qué ofrece la plataforma y llegar a encuestas públicas sin registrarse si la encuesta no exige identidad.
-- Si una encuesta requiere identidad, mostrar claramente iniciar sesión/crear cuenta y conservar el retorno a la encuesta.
-- No solicitar registro para navegar contenido público.
+- El visitante puede ver la convocatoria y los detalles de la encuesta estudiantil, pero debe iniciar sesión para responder.
+- Si no tiene cuenta, ofrecer registro de forma explícita desde la misma invitación; después de confirmar el correo e iniciar sesión, devolverlo a la encuesta pendiente.
+- Si ya tiene cuenta, ofrecer inicio de sesión y conservar igualmente el destino de retorno.
+- No solicitar registro para navegar el resto del contenido público.
 - En móvil: navegación corta, objetivos prioritarios visibles y acciones táctiles claras.
 - Mantener estados vacíos, carga, éxito y error con lenguaje claro.
 - No mostrar nombres/correos/teléfonos privados en áreas públicas.
@@ -110,3 +111,40 @@ Base auditada: main
 - No publicar deploy de producción desde esta rama.
 - No alterar esquema, RLS, funciones SQL ni credenciales de Supabase como parte del rediseño visual.
 - No retirar funcionalidades sin decisión explícita y alternativa definida.
+
+
+## Hallazgos de segunda pasada — autenticación y páginas internas
+
+### Encuesta estudiantil: requisito confirmado por el usuario
+- Responder la encuesta requiere una sesión autenticada. No debe existir envío anónimo.
+- La convocatoria debe poder verse desde el dashboard incluso antes de iniciar sesión: título, propósito, plazo/estado y CTA claro.
+- Visitante sin cuenta: CTA principal «Regístrate para responder» y alternativa «Ya tengo cuenta · Iniciar sesión».
+- Visitante con cuenta: al intentar responder, dirigir al acceso y luego regresar a la encuesta.
+- Usuario autenticado: CTA «Responder encuesta» abre el formulario.
+- El retorno debe sobrevivir tanto al login como al flujo de registro + confirmación de correo. La página actual `verificacion.html` termina en el inicio; habrá que admitir un destino interno de retorno validado y no una URL externa arbitraria.
+- Evitar formularios duplicados: la encuesta debe tener un único punto de entrada y comprobar sesión también en el lado servidor/RLS o en el mecanismo de persistencia, no solo ocultar el botón.
+- En la inspección de `index.html` no se encontró todavía una implementación funcional de encuesta; por ahora se trata como módulo nuevo del dashboard, pendiente de identificar dónde se administrarán preguntas, vigencia y respuestas. No inventar una tabla ni alterar Supabase dentro de la etapa visual.
+
+### Flujo de autenticación actual observado
+- El registro solicita nombre, correo y contraseña, y usa `signUp` con redirección a `verificacion.html`.
+- Cuando Supabase no crea sesión inmediata, la interfaz indica revisar el correo y cambia al modo de inicio de sesión.
+- `verificacion.html` verifica sesión y confirmación, pero su CTA conduce al inicio; no conserva contexto de una tarea pendiente.
+- `restablecer-contrasena.html` ya maneja sesión de recuperación, OTP expirado y reenvío; sus mensajes y límites de correo deben mantenerse y probarse.
+- El formulario de registro conserva texto heredado que pide «nombre o alias»; alinear el lenguaje con el criterio vigente de nombre real/visible definido para el perfil, sin crear un campo de apodo.
+- No exponer errores internos crudos de Supabase al usuario cuando se traduzcan a mensajes comprensibles; mantener detalle técnico solo en consola/logs seguros.
+
+### Banco de pacientes y acceso
+- La pestaña de estudiantes ya muestra una puerta de acceso cuando no hay sesión; la carga de casos se activa al iniciar sesión.
+- La recepción de solicitudes de pacientes permanece separada de la zona privada de gestión estudiantil.
+- `assets/patient-bank.js` usa RPC para listar, reclamar, liberar y finalizar casos; el contacto privado se consulta solo para el caso gestionado por la cuenta actual. No modificar esa lógica al unificar encabezados.
+
+### Comunidad y navegación transversal
+- `assets/community-dock.js` crea un chat flotante compartido con pestañas Comunidad/Privados/Grupos y un contador de mensajes privados no leídos.
+- Para visitantes, el dock sustituye el iframe por una invitación a iniciar sesión o registrarse. Mantener esa puerta de acceso.
+- El contador consulta conversaciones y mensajes periódicamente; conservar la lógica y probar que no se duplique el dock al navegar/embeber páginas.
+- Academia tiene cabecera con varios enlaces; Mi espacio tiene navegación de seis destinos y Perfil/Banco de pacientes tienen cabeceras reducidas. La unificación debe hacerse como componente/fragmento compartido o patrón equivalente, sin romper rutas relativas ni anchors.
+
+### Decisiones de implementación pendientes
+1. Definir si la encuesta tendrá una página propia (recomendado: `encuesta-estudiantil.html`) o un formulario expandible dentro del inicio. La página propia facilita conservar el destino de retorno y evita saturar el dashboard.
+2. Definir el origen de preguntas, fechas de apertura/cierre y respuestas (administración actual o futura). Requiere revisión separada de Supabase antes de diseñar persistencia.
+3. Validar el flujo exacto de confirmación de correo y el retorno a encuesta en preview, antes de producción.
