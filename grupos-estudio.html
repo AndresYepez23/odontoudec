@@ -122,7 +122,7 @@ body.ou-group-chat-open #messageForm{flex:0 0 auto}
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>window.OneSignalDeferred=window.OneSignalDeferred||[];OneSignalDeferred.push(async function(OneSignal){await OneSignal.init({appId:"64e9045a-6129-4f50-aa9a-03cfbe70bfae"});});</script>
 <script src="/assets/onesignal.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/assets/onesignal-push.js"></script>
 <script src="assets/chat-ui.js"></script>
 <script src="assets/chat-reactions.js"></script>
 <script>
@@ -196,8 +196,9 @@ async function loadMessages(){
  let prepared=null;
  try{
   prepared=await composer.prepare({text,scope:{type:"groups",id:activeGroup},userId:user.id});
-  const {error}=await db.from("study_group_messages").insert({group_id:activeGroup,sender_id:user.id,content:prepared.content});
+  const {data:createdMessage,error}=await db.from("study_group_messages").insert({group_id:activeGroup,sender_id:user.id,content:prepared.content}).select("id").single();
   if(error){if(prepared.path)await composer.rollback(prepared.path);say("chatStatus","No se pudo enviar: "+error.message);return;}
+  if(createdMessage?.id)void window.OdontoPush?.notify(db,"group_message",createdMessage.id);
   input.value="";composer.clear();say("chatStatus","Mensaje enviado.");await loadMessages();
  }catch(error){say("chatStatus",error?.message||"No se pudo enviar la fotografía.");}
  finally{input.disabled=false;send.disabled=false;composer.setBusy(false);}
