@@ -64,3 +64,17 @@ node scripts/validate-survey-contract.mjs
 ```
 
 El validador comprueba que el frontend y la Edge Function mantengan los mismos 15 campos, las ocho listas de candidatos y los siete campos abiertos, además de detectar la ausencia de validación JWT, control administrativo o manejo de duplicados. Debe ejecutarse después de cualquier cambio al formulario o al catálogo del servidor.
+
+
+## Estado comprobado antes de la ventana de publicación — 2026-11-05
+- Netlify site: `odontoudec`; dominio primario: `https://odontoudec.online`.
+- Último deploy de producción revisado: rama `main`, estado `ready`. La rama de preparación aún no está publicada.
+- Variables Netlify comprobadas por nombre y contexto, sin exponer valores: `SUPABASE_URL` y `SUPABASE_ANON_KEY` en contexto all; `SUPABASE_SERVICE_ROLE_KEY` secreta en production, deploy-preview, branch-deploy y dev-server.
+- Supabase correcto: `jqbrheonqqsiijrprsqs`, estado ACTIVE_HEALTHY.
+- Migraciones remotas: última `20261103141223`. La migración de encuesta `20261105230000` sigue pendiente.
+- Edge Functions activas: `odonto-bot`, `patient-bank-intake`. La función `survey-submissions` sigue pendiente de despliegue.
+- La encuesta continúa protegida: aviso de validación técnica y botón deshabilitado. No enlazarla desde la portada ni habilitar envíos hasta que tabla y función estén verificadas.
+- QA estática de portada: 100 IDs sin duplicados; 9 anclas internas sin destinos faltantes; los ocho destinos HTML internos revisados existen.
+- La revisión de seguridad de Supabase detecta alertas preexistentes (8 tablas RLS sin políticas, 12 funciones SECURITY DEFINER ejecutables por authenticated y protección contra contraseñas filtradas desactivada). No son cambios de esta entrega; no hacer cambios masivos de permisos como parte del deploy de UX.
+- Comparación actual: rama 45 commits ahead / 0 behind de `main`, 12 archivos modificados. No se ha abierto PR ni se ha iniciado un deploy desde esta rama.
+- No se ejecutaron operaciones remotas de escritura. La activación de la migración, el despliegue de la función y el primer deploy de producción requieren confirmación explícita de la ventana.
