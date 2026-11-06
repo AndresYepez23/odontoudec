@@ -74,11 +74,15 @@
   control.addEventListener("click", async () => {
     state.audioReady = true;
     state.sound = !state.sound;
-    if ("Notification" in window && Notification.permission === "default") {
-      try { await Notification.requestPermission(); } catch (_) {}
+    let pushResult = null;
+    if (window.OdontoOneSignal?.requestPermission) {
+      pushResult = await window.OdontoOneSignal.requestPermission();
     }
-    const granted = "Notification" in window && Notification.permission === "granted";
-    control.textContent = (state.sound ? "♪ Sonido activo" : "♪ Sonido apagado") + (granted ? " · Push permitido" : " · Avisos en pantalla");
+    const optedIn = Boolean(pushResult?.optedIn);
+    const granted = Boolean(pushResult?.permission);
+    control.textContent =
+      (state.sound ? "♪ Sonido activo" : "♪ Sonido apagado") +
+      (optedIn ? " · Push activo" : granted ? " · Permiso concedido; push pendiente" : " · Push no activado");
     if (state.sound) beep();
   });
   document.addEventListener("pointerdown", () => { state.audioReady = true; }, { once: true, passive: true });
