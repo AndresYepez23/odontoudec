@@ -148,3 +148,28 @@ Base auditada: main
 1. Definir si la encuesta tendrá una página propia (recomendado: `encuesta-estudiantil.html`) o un formulario expandible dentro del inicio. La página propia facilita conservar el destino de retorno y evita saturar el dashboard.
 2. Definir el origen de preguntas, fechas de apertura/cierre y respuestas (administración actual o futura). Requiere revisión separada de Supabase antes de diseñar persistencia.
 3. Validar el flujo exacto de confirmación de correo y el retorno a encuesta en preview, antes de producción.
+
+
+### Inconsistencias adicionales detectadas en páginas internas
+- `mi-espacio.html` tiene seis enlaces de navegación; `academia.html` usa otra combinación; `perfil-academico.html` solo ofrece «Volver a Academia»; `banco-pacientes.html` solo ofrece «Volver al inicio».
+- `chat.html` y `mensajes.html` utilizan enlaces de retorno a `/#comunidad` incluso en pantallas cuyo texto invita a iniciar sesión o crear cuenta. La entrada de autenticación de la portada está en `#acceso`; corregir los destinos durante la unificación, conservando el contexto de la página cuando corresponda.
+- `grupos-estudio.html`, `chat.html` y `mensajes.html` soportan el modo `?embed=1`; el dock depende de ese comportamiento para incrustarlos. No eliminarlo ni alterar sus dimensiones sin probar el chat flotante.
+- La página de mensajes permite buscar únicamente perfiles públicos y utiliza el ID público; preservar esa separación entre datos públicos y privados.
+- El Banco de pacientes diferencia correctamente el acceso público para pacientes de la zona autenticada para estudiantes. La navegación unificada debe mantener esa distinción visible.
+
+### Wireframe funcional recomendado para el dashboard
+1. **Cabecera compacta:** marca OdontoUdeC, navegación por áreas y acción de cuenta; en móvil, menú breve y accesible.
+2. **Saludo/contexto:** nombre del estudiante si inició sesión; invitación a iniciar sesión/crear cuenta si es visitante, sin bloquear la lectura pública.
+3. **Encuesta estudiantil activa (prioridad superior):** estado y fecha límite; visitante ve «Regístrate para responder» + «Ya tengo cuenta»; autenticado ve «Responder encuesta». Si no hay encuesta activa, el módulo no ocupa espacio vacío.
+4. **Avisos importantes:** novedades recientes y avisos oficiales, con fecha y categoría.
+5. **Accesos frecuentes:** Calendario, Biblioteca, Academia, Tarifario y recursos clínicos/Drive, con jerarquía clara y no una cuadrícula forzada a cuatro columnas.
+6. **Comunidad:** actividad reciente y acceso a grupos/chat.
+7. **Oportunidades clínicas:** Banco de pacientes, sin exponer datos privados.
+8. **Pie institucional:** lema y enlaces secundarios; retirar por completo el bloque de Oración que el usuario ya indicó que no desea conservar.
+
+### Reglas de retorno para encuesta y autenticación
+- Mantener el destino como una ruta interna explícita (por ejemplo `/encuesta-estudiantil.html`) a través de login y confirmación de correo.
+- Validar el destino contra una lista de rutas internas permitidas; nunca aceptar una URL externa arbitraria como parámetro de retorno.
+- Después de login exitoso, regresar al formulario. Si el registro requiere confirmación, conservar el destino hasta que el usuario confirme el correo y complete el inicio de sesión.
+- Si la encuesta ya cerró o el usuario ya respondió, mostrar ese estado y no volver a ofrecer el envío.
+- La autorización real de insertar respuestas debe imponerse en Supabase (políticas/RPC según el diseño aprobado); una comprobación visual de sesión no es control de seguridad suficiente.
