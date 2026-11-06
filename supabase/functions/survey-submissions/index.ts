@@ -73,7 +73,7 @@ Deno.serve(async (req: Request) => {
       if (profileError) throw profileError;
       if (!profile) return reply(req,{error:"Completa primero tu perfil de estudiante para participar."},403);
 
-      const {error:insertError} = await admin.schema("private").from("survey_submissions").insert({
+      const {error:insertError} = await admin.from("survey_submissions").insert({
         survey_key:SURVEY_KEY,user_id:user.id,answers:checked.answers
       });
       if (insertError?.code === "23505") return reply(req,{error:"Tu cuenta ya registró una respuesta en esta encuesta."},409);
@@ -85,7 +85,7 @@ Deno.serve(async (req: Request) => {
       const {data:role,error:roleError} = await admin.from("user_roles").select("role").eq("user_id",user.id).maybeSingle();
       if (roleError) throw roleError;
       if (role?.role !== "admin") return reply(req,{error:"No tienes permisos para consultar los resultados."},403);
-      const {data:rows,error:readError} = await admin.schema("private").from("survey_submissions")
+      const {data:rows,error:readError} = await admin.from("survey_submissions")
         .select("id,user_id,answers,submitted_at").eq("survey_key",SURVEY_KEY)
         .order("submitted_at",{ascending:false}).limit(5000);
       if (readError) throw readError;
