@@ -99,6 +99,10 @@ html.ou-embedded #chatPanel .chat-head{gap:8px}
 <p class="fine">Usa estos grupos para estudiar. No compartas datos personales, historias clínicas ni información identificable de pacientes. Los mensajes son visibles para los integrantes del grupo.</p>
 </div>
 </main>
+<!-- OneSignal: notificaciones push -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>window.OneSignalDeferred=window.OneSignalDeferred||[];OneSignalDeferred.push(async function(OneSignal){await OneSignal.init({appId:"64e9045a-6129-4f50-aa9a-03cfbe70bfae"});});</script>
+<script src="/assets/onesignal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8");window.ouSupabaseClient=db;
@@ -164,10 +168,11 @@ $("messageForm").addEventListener("submit",async e=>{
 $("refreshGroups").addEventListener("click",loadGroups);$("groupSearch").addEventListener("input",renderGroups);
 async function init(){
  const {data:{session},error}=await db.auth.getSession();
- if(error||!session){$("auth").classList.remove("hidden");return;}
- user=session.user;$("app").classList.remove("hidden");await loadGroups();
+ if(error||!session){window.OdontoOneSignal?.syncUser(null);$("auth").classList.remove("hidden");return;}
+ user=session.user;window.OdontoOneSignal?.syncUser(user);$("app").classList.remove("hidden");await loadGroups();
 }
 db.auth.onAuthStateChange((_event,session)=>{
+ window.OdontoOneSignal?.syncUser(session?.user||null);
  if(session&&!user){user=session.user;$("auth").classList.add("hidden");$("app").classList.remove("hidden");loadGroups();}
  else if(!session){user=null;groups=[];memberships.clear();closeChat();$("app").classList.add("hidden");$("auth").classList.remove("hidden");}
 });
