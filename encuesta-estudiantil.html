@@ -122,9 +122,10 @@ document.getElementById("survey").addEventListener("submit",async event=>{
   button.disabled=false;button.textContent="Enviar mi participación";
   return;
  }
- statusEl.textContent=data.message||"Tu participación quedó registrada.";
+ statusEl.innerHTML="<strong>✓ Participación registrada.</strong> Tu respuesta quedó guardada correctamente. Gracias por participar.";
+ button.textContent="Participación registrada ✓";
  form.querySelectorAll("input,textarea,button").forEach(el=>el.disabled=true);
- await loadAdminResults();
+ if(!document.getElementById("adminPanel").classList.contains("hidden")) await loadAdminResults();
 });
 document.getElementById("refreshResults").addEventListener("click",loadAdminResults);
 async function init(){
