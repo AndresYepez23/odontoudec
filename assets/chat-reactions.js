@@ -59,9 +59,13 @@
       menu.hidden ? openMenu() : closeMenu();
     });
     menu.addEventListener("click", event => event.stopPropagation());
-    container.addEventListener("keydown", event => {
+    if (container.__ouReactionsKeydownHandler) {
+      container.removeEventListener("keydown", container.__ouReactionsKeydownHandler);
+    }
+    container.__ouReactionsKeydownHandler = event => {
       if (event.key === "Escape") { closeMenu(); toggle.focus(); }
-    });
+    };
+    container.addEventListener("keydown", container.__ouReactionsKeydownHandler);
 
     function normalized(key) { return LEGACY[key] || key; }
     function drawSummary() {
