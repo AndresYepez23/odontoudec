@@ -1,5 +1,5 @@
 -- Survey submissions for OdontoUdeC.
--- Keep the table in a non-exposed schema; all access is mediated by the Edge Function.
+-- The table remains in public; browser roles receive no table privileges. Access is mediated by the Edge Function.
 create table if not exists public.survey_submissions (
   id uuid primary key default gen_random_uuid(),
   survey_key text not null,
