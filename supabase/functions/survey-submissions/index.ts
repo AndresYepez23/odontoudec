@@ -89,7 +89,17 @@ Deno.serve(async (req: Request) => {
         .select("id,user_id,answers,submitted_at").eq("survey_key",SURVEY_KEY)
         .order("submitted_at",{ascending:false}).limit(5000);
       if (readError) throw readError;
-      return reply(req,{ok:true,results:rows || []});
+      const ids = [...new Set((rows || []).map(row => row.user_id))];
+      const {data:profiles,error:profilesError} = ids.length
+        ? await admin.from("profiles").select("id,display_name,semester,public_id").in("id",ids)
+        : {data:[],error:null};
+      if (profilesError) throw profilesError;
+      const byId = new Map((profiles || []).map(profile => [profile.id,profile]));
+      const results = (rows || []).map(row => ({
+        ...row,
+        student: byId.get(row.user_id) || {display_name:"Perfil no disponible",semester:null,public_id:null}
+      }));
+      return reply(req,{ok:true,results});
     }
     return reply(req,{error:"Acción no reconocida."},400);
   } catch (error) {
