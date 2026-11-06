@@ -57,18 +57,32 @@ root.querySelector('#ouDockExpand').addEventListener('click',()=>panel.classList
 tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(x=>x.setAttribute('aria-selected',String(x===t)));frame.src=t.dataset.page+'?embed=1';}));
 async function init(){
  try{
-  const client=window.supabase?.createClient?.('https://jqbrheonqqsiijrprsqs.supabase.co','sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8');
+  const client=window.ouSupabaseClient||window.supabase?.createClient?.('https://jqbrheonqqsiijrprsqs.supabase.co','sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8');
   if(!client){guest.style.display='block';frame.style.display='none';tabbar.style.display='none';return;}
-  const {data}=await client.auth.getSession();logged=!!data.session;
-  syncOnboardingShortcut();
-  if(logged){await refreshUnread(client,data.session.user.id);unreadTimer=setInterval(()=>refreshUnread(client,data.session.user.id),30000);}
-  if(!logged){guest.style.display='block';frame.style.display='none';tabbar.style.display='none';}
-  client.auth.onAuthStateChange(async(_event,session)=>{
-   logged=!!session;syncOnboardingShortcut();guest.style.display=logged?'none':'block';frame.style.display=logged?'block':'none';tabbar.style.display=logged?'grid':'none';
+  const applySession=(session)=>{
+   logged=!!session;
+   syncOnboardingShortcut();
+   guest.style.display=logged?'none':'block';
+   frame.style.display=logged?'block':'none';
+   tabbar.style.display=logged?'grid':'none';
    if(logged&&!frame.hasAttribute('src'))frame.src='chat.html?embed=1';
-   if(logged){if(unreadTimer)clearInterval(unreadTimer);await refreshUnread(client,session.user.id);unreadTimer=setInterval(()=>refreshUnread(client,session.user.id),30000);}
-   if(!logged){if(unreadTimer)clearInterval(unreadTimer);frame.removeAttribute('src');const badge=root.querySelector('#ouDockUnread');badge.classList.remove('ou-visible');badge.textContent='0';}
-  });
+   if(!logged){
+    if(unreadTimer)clearInterval(unreadTimer);
+    unreadTimer=null;
+    frame.removeAttribute('src');
+    const badge=root.querySelector('#ouDockUnread');
+    badge.classList.remove('ou-visible');badge.textContent='0';
+   }else{
+    if(unreadTimer)clearInterval(unreadTimer);
+    unreadTimer=setInterval(()=>refreshUnread(client,session.user.id),30000);
+    window.setTimeout(()=>refreshUnread(client,session.user.id),0);
+   }
+  };
+  // Subscribe before reading storage so startup cannot miss a concurrent sign-in.
+  client.auth.onAuthStateChange((_event,session)=>applySession(session));
+  const {data,error}=await client.auth.getSession();
+  if(error)throw error;
+  applySession(data.session||null);
  }catch(_){guest.style.display='block';frame.style.display='none';tabbar.style.display='none';}
 }
 init();
