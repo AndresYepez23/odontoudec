@@ -187,3 +187,9 @@ Base auditada: main
 - Se pospone la configuración SMTP para una etapa posterior, sin bloquear el avance del rediseño ni de la encuesta.
 - Plan acordado para retomarlo: configurar SMTP personalizado en Supabase Auth, preferiblemente con Resend (Brevo como alternativa), verificar el dominio remitente con SPF/DKIM y revisar DMARC; luego configurar Authentication → Emails → SMTP Settings y probar registro, confirmación y recuperación.
 - Antes de la prueba real de tráfico/registro/recuperación, SMTP sí será requisito operativo. El límite integrado de Supabase ya produjo errores 429 y no es adecuado para pruebas de volumen.
+
+
+### Corrección de la vista previa de encuesta
+- Se corrigió la clase `.hidden` en `encuesta-estudiantil.html`; ahora los estados de invitado, formulario y aviso pendiente sí se muestran de forma excluyente.
+- Se marcaron como obligatorias las 15 respuestas en el HTML de vista previa (8 selecciones únicas y 7 campos abiertos), con etiquetas accesibles para los campos de texto.
+- Se verificó el fragmento renderizador actualizado en GitHub. El formulario continúa sin persistencia ni envío hasta implementar y probar el backend seguro.
