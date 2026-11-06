@@ -76,5 +76,5 @@ El validador comprueba que el frontend y la Edge Function mantengan los mismos 1
 - La encuesta continúa protegida: aviso de validación técnica y botón deshabilitado. No enlazarla desde la portada ni habilitar envíos hasta que tabla y función estén verificadas.
 - QA estática de portada: 100 IDs sin duplicados; 9 anclas internas sin destinos faltantes; los ocho destinos HTML internos revisados existen.
 - La revisión de seguridad de Supabase detecta alertas preexistentes (8 tablas RLS sin políticas, 12 funciones SECURITY DEFINER ejecutables por authenticated y protección contra contraseñas filtradas desactivada). No son cambios de esta entrega; no hacer cambios masivos de permisos como parte del deploy de UX.
-- Comparación actual: rama 47 commits ahead / 0 behind de `main`, 12 archivos modificados. No se ha abierto PR ni se ha iniciado un deploy desde esta rama.
+- Comparación actual: rama por delante de main, sin retrasos de `main`, 12 archivos modificados. No se ha abierto PR ni se ha iniciado un deploy desde esta rama.
 - No se ejecutaron operaciones remotas de escritura. La activación de la migración, el despliegue de la función y el primer deploy de producción requieren confirmación explícita de la ventana.
