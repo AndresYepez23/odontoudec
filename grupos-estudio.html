@@ -138,11 +138,11 @@ $("groupList").addEventListener("click",async e=>{
  if(b.dataset.toggle){const g=groups.find(x=>x.id===b.dataset.toggle);if(!g)return;const {error}=await db.from("study_groups").update({is_open:!g.is_open}).eq("id",g.id).eq("created_by",user.id);if(error){say("createStatus","No se pudo actualizar: "+error.message);return;}await loadGroups();}
  if(b.dataset.open)await openChat(b.dataset.open);
 });
-function closeChat(){composer.clear();activeGroup=null;$("chatPanel").classList.add("hidden");$("app").classList.remove("ou-group-chat");}
+function closeChat(){composer.clear();composer.setAvailable(false);activeGroup=null;$("chatPanel").classList.add("hidden");$("app").classList.remove("ou-group-chat");}
 $("closeChat").addEventListener("click",closeChat);$("backGroups").addEventListener("click",closeChat);
 async function openChat(id){
  const g=groups.find(x=>x.id===id);if(!g||!memberships.has(id))return;
- composer.clear();activeGroup=id;$("app").classList.add("ou-group-chat");$("chatPanel").classList.remove("hidden");$("chatTitle").textContent=g.name;$("chatSubtitle").textContent=(g.subject||"Grupo de estudio")+(g.semester?" · "+g.semester+"° semestre":"");$("chatLog").innerHTML='<p class="empty">Cargando mensajes…</p>';
+ composer.clear();activeGroup=id;composer.setAvailable(true);$("app").classList.add("ou-group-chat");$("chatPanel").classList.remove("hidden");$("chatTitle").textContent=g.name;$("chatSubtitle").textContent=(g.subject||"Grupo de estudio")+(g.semester?" · "+g.semester+"° semestre":"");$("chatLog").innerHTML='<p class="empty">Cargando mensajes…</p>';
  await loadMessages();
 }
 async function loadMessages(){
