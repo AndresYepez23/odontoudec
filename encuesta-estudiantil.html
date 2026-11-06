@@ -92,12 +92,21 @@ function renderAdminResults(rows){
   return '<details class="question"><summary><strong>'+esc(student.display_name||"Estudiante")+'</strong> · '+esc(student.public_id||row.user_id)+' · '+esc(student.semester?student.semester+" semestre":"Semestre no registrado")+' · '+esc(new Date(row.submitted_at).toLocaleString("es-CO"))+'</summary><div style="padding-top:12px">'+answers+'</div></details>';
  }).join("");
 }
+async function functionErrorMessage(error,fallback){
+ if(error?.context&&typeof error.context.json==="function"){
+  try{const payload=await error.context.json();if(payload?.error)return payload.error;}catch{}
+ }
+ return fallback;
+}
 async function loadAdminResults(){
  const {data,error}=await client.functions.invoke("survey-submissions",{body:{action:"admin_results"}});
  if(!error&&data?.ok){
   document.getElementById("adminPanel").classList.remove("hidden");
   renderAdminResults(data.results||[]);
   return true;
+ }
+ if(error&&error.context?.status!==403){
+  document.getElementById("adminSummary").textContent=await functionErrorMessage(error,"No se pudieron cargar los resultados. Inténtalo nuevamente.");
  }
  return false;
 }
@@ -109,7 +118,7 @@ document.getElementById("survey").addEventListener("submit",async event=>{
  statusEl.textContent="Validando y registrando tu participación…";
  const {data,error}=await client.functions.invoke("survey-submissions",{body:{action:"submit",answers:collectAnswers()}});
  if(error||!data?.ok){
-  statusEl.textContent=data?.error||"No pudimos registrar tu respuesta. Inténtalo nuevamente.";
+  statusEl.textContent=data?.error||await functionErrorMessage(error,"No pudimos registrar tu respuesta. Inténtalo nuevamente.");
   button.disabled=false;button.textContent="Enviar mi participación";
   return;
  }
