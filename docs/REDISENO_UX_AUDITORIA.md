@@ -193,3 +193,10 @@ Base auditada: main
 - Se corrigió la clase `.hidden` en `encuesta-estudiantil.html`; ahora los estados de invitado, formulario y aviso pendiente sí se muestran de forma excluyente.
 - Se marcaron como obligatorias las 15 respuestas en el HTML de vista previa (8 selecciones únicas y 7 campos abiertos), con etiquetas accesibles para los campos de texto.
 - Se verificó el fragmento renderizador actualizado en GitHub. El formulario continúa sin persistencia ni envío hasta implementar y probar el backend seguro.
+
+
+## Avance — limpieza de portada
+- Se retiró del menú principal el enlace «Oración» y se eliminó de la portada el bloque de video asociado a Herencia Divina.
+- La intervención se hizo únicamente en `redesign/ux-audit-2026-11-05`; no afecta `main` ni producción.
+- Se conservó el resto de la estructura de portada y navegación.
+- La encuesta continúa siendo una vista previa sin persistencia. La arquitectura de envío y consulta administrativa sigue pendiente de implementar y probar antes de activarla.
