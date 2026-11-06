@@ -36,7 +36,7 @@
   <script>
     const SUPABASE_URL = "https://jqbrheonqqsiijrprsqs.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8";
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);window.ouSupabaseClient=client;
     const statusEl = document.getElementById('status');
     const params = new URLSearchParams(window.location.search);
     const requestedReturn = params.get('returnTo') || '';
@@ -67,7 +67,7 @@
     client.auth.onAuthStateChange(()=>verify());
     verify();
   </script>
-<script src="assets/community-dock.js"></script>
+<script src="/assets/notifications.js"></script><script src="assets/community-dock.js"></script>
 <script src="/assets/posthog.js" defer></script>
 </body>
 </html>
