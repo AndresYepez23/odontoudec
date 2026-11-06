@@ -110,6 +110,10 @@
 #odonto-bot .odonto-side .bot-topic{background:#faf7ff!important;border:1px solid #e9e0f1!important;color:#543477!important}
 #odonto-bot .odonto-side .bot-topic:hover{background:#f0e7fb!important;border-color:#d8c5e9!important}
 #odonto-bot .odonto-disclaimer{color:#706879!important;border-top:1px solid #ece6f2!important}
+/* Evita que el panel del chat se estire y deje un bloque vacío debajo del compositor. */
+#odonto-bot .odonto-shell{align-items:start!important}
+#odonto-bot .odonto-main{min-height:0!important;height:auto!important}
+#odonto-bot .odonto-log{height:240px!important;min-height:180px!important;max-height:none!important;flex:0 0 auto!important}
 @media(max-width:760px){#odonto-bot }
 </style>
 <div class="head"><span class="kicker">Tu asistente académico</span><h2>Conoce a OdontoBot</h2><p>Un compañero de estudio para resolver dudas, comprender conceptos y repasar odontología paso a paso.</p></div>
