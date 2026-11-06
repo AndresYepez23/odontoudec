@@ -392,11 +392,20 @@ form.addEventListener('submit',async e=>{e.preventDefault();if(!currentUser){not
 // consultas concurrentes vuelvan a pintar la misma lista y creen duplicados visuales.
 supabaseClient.auth.onAuthStateChange((event,session)=>{
  if(event==='PASSWORD_RECOVERY'){sessionStorage.setItem('ou-password-recovery','1');window.location.replace('/restablecer-contrasena.html');return;}
+ // No ejecutar consultas Supabase dentro de este callback: Auth mantiene un lock
+ // durante la notificación y las consultas anidadas pueden dejar la sesión bloqueada.
  currentUser=session?.user||null;
  window.OdontoOneSignal?.syncUser(currentUser);
  setAuthUI();
- checkAdmin();
- if(event!=='INITIAL_SESSION'){loadPosts();if(currentUser)showFirstVisitGuide(currentUser);}
+ const eventUser=currentUser;
+ setTimeout(()=>{
+   if(currentUser?.id!==eventUser?.id)return;
+   checkAdmin().catch(err=>console.warn('[Auth] No se pudo comprobar administración:',err));
+   if(event!=='INITIAL_SESSION'){
+     loadPosts().catch(err=>console.warn('[Auth] No se pudieron cargar publicaciones:',err));
+     if(eventUser)showFirstVisitGuide(eventUser).catch(err=>console.warn('[Auth] No se pudo abrir bienvenida:',err));
+   }
+ },0);
 });
 (async()=>{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;window.OdontoOneSignal?.syncUser(currentUser);setAuthUI();await checkAdmin();await loadPosts();if(currentUser)await showFirstVisitGuide(currentUser);})();
 
