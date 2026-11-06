@@ -5,7 +5,7 @@
     { key: "love", file: "love.svg", label: "Me encanta" },
     { key: "laughing", file: "laughing.svg", label: "Me divierte" },
     { key: "soaked", file: "soaked.svg", label: "Me sorprende" },
-    { key: "sad", file: "sad.svg", label: "Me entristece" },
+    { key: "sad", file: "sad-face.svg", label: "Me entristece" },
     { key: "angry", file: "angry.svg", label: "Me enoja" }
   ];
   const LEGACY = {
