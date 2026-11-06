@@ -123,7 +123,7 @@ Base auditada: main
 - Usuario autenticado: CTA «Responder encuesta» abre el formulario.
 - El retorno debe sobrevivir tanto al login como al flujo de registro + confirmación de correo. La página actual `verificacion.html` termina en el inicio; habrá que admitir un destino interno de retorno validado y no una URL externa arbitraria.
 - Evitar formularios duplicados: la encuesta debe tener un único punto de entrada y comprobar sesión también en el lado servidor/RLS o en el mecanismo de persistencia, no solo ocultar el botón.
-- En la inspección de `index.html` no se encontró todavía una implementación funcional de encuesta; por ahora se trata como módulo nuevo del dashboard, pendiente de identificar dónde se administrarán preguntas, vigencia y respuestas. No inventar una tabla ni alterar Supabase dentro de la etapa visual.
+- En la inspección de `index.html` no se encontró todavía una implementación funcional de encuesta; se trata como módulo nuevo del dashboard. Las 8 categorías con candidatos usan selección única; las 7 categorías sin lista de opciones son campos abiertos de texto. En «Mejor Cirujano» se eliminó «Opción 10» porque fue confirmado como un error. La persistencia, vigencia y seguridad de respuestas se definirán antes de conectar envíos. No alterar Supabase dentro de la etapa visual.
 
 ### Flujo de autenticación actual observado
 - El registro solicita nombre, correo y contraseña, y usa `signUp` con redirección a `verificacion.html`.
