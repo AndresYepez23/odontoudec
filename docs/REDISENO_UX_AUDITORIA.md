@@ -173,3 +173,17 @@ Base auditada: main
 - Después de login exitoso, regresar al formulario. Si el registro requiere confirmación, conservar el destino hasta que el usuario confirme el correo y complete el inicio de sesión.
 - Si la encuesta ya cerró o el usuario ya respondió, mostrar ese estado y no volver a ofrecer el envío.
 - La autorización real de insertar respuestas debe imponerse en Supabase (políticas/RPC según el diseño aprobado); una comprobación visual de sesión no es control de seguridad suficiente.
+
+
+### Decisiones confirmadas — encuesta estudiantil
+- La encuesta exige autenticación: una cuenta puede participar una sola vez.
+- Las respuestas estarán vinculadas al estudiante que las envió.
+- Solo los administradores podrán consultar respuestas individuales y resultados generales. Los estudiantes no podrán leer respuestas ajenas ni consultar resultados.
+- La autorización administrativa debe comprobarse en backend/base de datos; no basta con ocultar la pantalla.
+- La tabla de respuestas y sus políticas se implementarán primero como propuesta/migración versionada en esta rama. No ejecutar cambios en el proyecto Supabase de producción sin revisión y aprobación explícita.
+- La tabla actual `user_roles` contiene administradores, pero no se observó una asignación de rol estudiante. Antes de restringir el envío por rol, definir la regla de elegibilidad; no asumir que existe un rol estudiante.
+
+### SMTP — pendiente deliberadamente
+- Se pospone la configuración SMTP para una etapa posterior, sin bloquear el avance del rediseño ni de la encuesta.
+- Plan acordado para retomarlo: configurar SMTP personalizado en Supabase Auth, preferiblemente con Resend (Brevo como alternativa), verificar el dominio remitente con SPF/DKIM y revisar DMARC; luego configurar Authentication → Emails → SMTP Settings y probar registro, confirmación y recuperación.
+- Antes de la prueba real de tráfico/registro/recuperación, SMTP sí será requisito operativo. El límite integrado de Supabase ya produjo errores 429 y no es adecuado para pruebas de volumen.
