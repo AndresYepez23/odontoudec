@@ -46,4 +46,5 @@ async function init(){const {data:{session},error}=await db.auth.getSession();if
 db.auth.onAuthStateChange((_event,session)=>{window.OdontoOneSignal?.syncUser(session?.user||null);if(session&&!user){user=session.user;$("auth").classList.add("hidden");$("workspace").classList.remove("hidden");loadNotes();loadCollections();}else if(!session){user=null;$("workspace").classList.add("hidden");$("auth").classList.remove("hidden");}});
 init();
 </script><script src="assets/community-dock.js"></script>
+<script src="/assets/posthog.js" defer></script>
 </body></html>
