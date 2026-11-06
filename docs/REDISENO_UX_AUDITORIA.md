@@ -240,3 +240,17 @@ Base auditada: main
 - El formulario de registro de portada dejó de ofrecer «alias» y ahora pide nombre completo, con atributo de autocompletado `name`.
 - La página de encuesta ahora intenta extraer el mensaje JSON del error HTTP devuelto por Supabase, por lo que podrá distinguir con más claridad duplicados y validaciones fallidas durante el QA real.
 - Se incorporó un validador Node sin dependencias externas para detectar divergencias futuras entre el catálogo del frontend y la validación del servidor: `node scripts/validate-survey-contract.mjs`.
+
+
+## Verificación de preparación para lanzamiento — 2026-11-05
+- Portada: los cinco accesos directos ahora están agrupados bajo el rótulo «Accesos directos», con distribución 5/3/2 para escritorio/tablet/móvil.
+- Navegación de inicio: 100 IDs analizados, sin duplicados; 9 destinos internos por ancla y ninguno roto.
+- Los ocho destinos HTML internos usados por la portada existen en la rama.
+- La hoja `enhancements.css` está enlazada desde la portada y contiene las reglas responsive del panel.
+- La página de encuesta permanece deliberadamente en modo de validación: aviso visible para usuarios autenticados y botón de envío deshabilitado hasta activar el backend.
+- No se encontró un enlace desde la portada a la encuesta; no se añade hasta que la activación de backend esté autorizada para evitar invitar a enviar una encuesta que aún no recibe respuestas.
+- Netlify `odontoudec`: dominio primario `https://odontoudec.online`; último deploy de producción observado en rama `main`, estado ready. Variables `SUPABASE_URL`, `SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` presentes; la clave de servicio es secreta y no se registró su valor.
+- Supabase `jqbrheonqqsiijrprsqs`: proyecto ACTIVE_HEALTHY; las migraciones remotas llegan hasta `20261103141223`; la migración `20261105230000_create_survey_submissions` aún no está aplicada. Funciones activas observadas: `odonto-bot` y `patient-bank-intake`; `survey-submissions` aún no está desplegada.
+- La revisión de seguridad remota mantiene alertas preexistentes: 8 tablas con RLS sin políticas, 12 funciones SECURITY DEFINER ejecutables por authenticated y protección de contraseñas filtradas desactivada. No se modificaron estas áreas fuera del alcance de la encuesta para evitar romper funciones existentes; deben revisarse en una auditoría de seguridad separada.
+- Rama de preparación comparada con `main`: 45 commits ahead, 0 behind; 12 archivos afectados en el diff actual.
+- No se ejecutó SQL remoto, no se desplegó ninguna Edge Function y no se publicó un deploy de Netlify.
