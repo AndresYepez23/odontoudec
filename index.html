@@ -84,7 +84,7 @@
 const SUPABASE_URL = "https://jqbrheonqqsiijrprsqs.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8";
 const RECOVERY_REDIRECT_URL = "https://odontoudec.online/restablecer-contrasena.html";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);\nwindow.ouSupabaseClient = supabaseClient;
 const incomingAuthParams=new URLSearchParams(window.location.hash.slice(1));
 if(incomingAuthParams.get("error_code")==="otp_expired"){sessionStorage.removeItem("ou-password-recovery");window.location.replace("/restablecer-contrasena.html"+window.location.hash);}
 const menuBtn=document.getElementById('menuBtn'),navlinks=document.getElementById('navlinks');
