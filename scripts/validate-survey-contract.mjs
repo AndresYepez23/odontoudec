@@ -6,7 +6,7 @@ const backend = readFileSync(new URL("../supabase/functions/survey-submissions/i
 
 function frontendCategories(source) {
   const categories = [];
-  const re = /\{ id: "([^"]+)", title: "([^"]+)", required: true,([^]*?)\n    \}\},?/g;
+  const re = /\{ id: "([^"]+)", title: "([^"]+)", required: true,([^]*?)\}/g;
   for (const match of source.matchAll(re)) {
     const optionsBlock = match[3].match(/options: \[([^]*?)\]/);
     categories.push({
