@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#32105f">
+  <meta name="description" content="Busca literatura científica odontológica y biomédica en PubMed desde OdontoUdeC.">
+  <title>Literatura científica · OdontoUdeC</title>
+  <link rel="icon" type="image/png" href="/assets/download-removebg-preview%20(2).png">
+  <link rel="preconnect" href="https://eutils.ncbi.nlm.nih.gov">
+  <link rel="stylesheet" href="assets/literatura-cientifica.css">
+</head>
+<body>
+  <div class="topbar">OdontoUdeC <span>·</span> Herramientas para aprender, investigar y crecer</div>
+  <header class="site-header">
+    <div class="nav-wrap">
+      <a class="brand" href="index.html#inicio" aria-label="OdontoUdeC, inicio">
+        <span class="brand-mark">Odonto<span>UdeC</span></span>
+        <span class="brand-subtitle">Universidad de Cartagena</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="primaryNav" aria-label="Abrir menú">☰</button>
+      <nav class="nav-links" id="primaryNav" aria-label="Navegación principal">
+        <a href="index.html#inicio">Inicio</a>
+        <a href="academia.html">Academia</a>
+        <a href="index.html#biblioteca">Biblioteca</a>
+        <a href="grupos-estudio.html">Grupos</a>
+        <a href="mi-espacio.html">Mi espacio</a>
+        <a class="current" href="literatura-cientifica.html" aria-current="page">Literatura científica</a>
+      </nav>
+      <a class="nav-account" href="index.html#acceso">Acceso de estudiantes ↗</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="eyebrow-dot"></span> Investigación y evidencia científica</span>
+          <h1>Encuentra evidencia para respaldar tu <em>aprendizaje.</em></h1>
+          <p>Explora publicaciones biomédicas y odontológicas indexadas en PubMed. Busca por tema, identifica revisiones y consulta los registros originales.</p>
+          <div class="hero-points">
+            <span>✓ Búsqueda directa en NCBI</span>
+            <span>✓ Sin cuenta universitaria</span>
+            <span>✓ Acceso abierto cuando esté disponible</span>
+          </div>
+        </div>
+        <aside class="hero-card">
+          <div class="hero-card-icon" aria-hidden="true">⌕</div>
+          <span class="hero-card-kicker">De la pregunta a la evidencia</span>
+          <h2>Investiga con mejores preguntas.</h2>
+          <p>Encuentra literatura científica para tus asignaturas, seminarios, casos clínicos y proyectos académicos.</p>
+          <div class="hero-card-footer"><span class="pulse"></span> Fuente bibliográfica: PubMed · NCBI</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="search-section">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <span class="kicker">Explorador científico</span>
+            <h2>Buscar publicaciones</h2>
+            <p>Escribe un tema en español o inglés. PubMed suele recuperar más resultados usando términos científicos en inglés.</p>
+          </div>
+          <a class="plain-link" href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">Abrir PubMed ↗</a>
+        </div>
+
+        <div class="search-panel">
+          <form id="pubmedForm">
+            <label class="sr-only" for="pubmedQuery">Tema, enfermedad, procedimiento o palabra clave</label>
+            <div class="search-row">
+              <div class="query-wrap">
+                <span class="search-icon" aria-hidden="true">⌕</span>
+                <input id="pubmedQuery" name="q" type="search" minlength="2" maxlength="180" placeholder="Ej. dental implants, periodontitis, dental caries..." autocomplete="off" required>
+              </div>
+              <button class="search-button" id="searchButton" type="submit">Buscar artículos <span aria-hidden="true">↗</span></button>
+            </div>
+
+            <div class="topic-row" aria-label="Búsquedas sugeridas">
+              <span>Explora:</span>
+              <button type="button" data-query="dental caries">Caries dental</button>
+              <button type="button" data-query="periodontitis">Periodontitis</button>
+              <button type="button" data-query="dental implants">Implantes dentales</button>
+              <button type="button" data-query="oral cancer">Cáncer oral</button>
+            </div>
+
+            <div class="filter-grid">
+              <label>Fecha de publicación
+                <select id="dateFilter" name="date">
+                  <option value="all">Cualquier fecha</option>
+                  <option value="1">Último año</option>
+                  <option value="5">Últimos 5 años</option>
+                  <option value="10">Últimos 10 años</option>
+                </select>
+              </label>
+              <label>Tipo de publicación
+                <select id="typeFilter" name="type">
+                  <option value="">Cualquier tipo</option>
+                  <option value="systematic">Revisión sistemática</option>
+                  <option value="meta">Metaanálisis</option>
+                  <option value="rct">Ensayo controlado aleatorizado</option>
+                  <option value="clinical">Ensayo clínico</option>
+                  <option value="review">Artículo de revisión</option>
+                  <option value="case">Reporte de caso</option>
+                  <option value="guideline">Guía de práctica clínica</option>
+                </select>
+              </label>
+              <label>Ordenar resultados
+                <select id="sortFilter" name="sort">
+                  <option value="relevance">Más relevantes</option>
+                  <option value="pub_date">Más recientes</option>
+                </select>
+              </label>
+            </div>
+          </form>
+        </div>
+
+        <div class="results-toolbar">
+          <div>
+            <span class="kicker">Resultados de PubMed</span>
+            <h2>Publicaciones encontradas</h2>
+          </div>
+          <p id="resultsSummary" class="results-summary">Los resultados aparecerán aquí.</p>
+        </div>
+
+        <div id="searchStatus" class="search-status" role="status" aria-live="polite">Escribe un tema y selecciona «Buscar artículos» para comenzar.</div>
+        <div id="resultsList" class="results-list" aria-live="polite">
+          <div class="empty-state">
+            <div class="empty-icon" aria-hidden="true">⌕</div>
+            <h3>Tu próxima búsqueda comienza aquí</h3>
+            <p>Prueba con un procedimiento, una patología o un concepto de odontología.</p>
+          </div>
+        </div>
+        <div class="load-more-wrap">
+          <button class="load-more" id="loadMoreButton" type="button" hidden>Cargar 10 artículos más</button>
+        </div>
+
+        <aside class="access-note">
+          <div class="access-note-icon" aria-hidden="true">ⓘ</div>
+          <div>
+            <strong>Sobre el acceso a los artículos</strong>
+            <p>PubMed permite consultar referencias y resúmenes disponibles, pero no garantiza el texto completo gratuito de cada publicación. Cuando el registro tenga un identificador de PubMed Central (PMC), mostraremos el enlace al texto disponible allí. Los demás artículos pueden requerir acceso del editor.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="how-section">
+      <div class="wrap how-grid">
+        <div>
+          <span class="kicker">Una herramienta de apoyo</span>
+          <h2>Encuentra artículos. Después, evalúa la evidencia.</h2>
+          <p>Los resultados provienen de PubMed, un recurso de la National Library of Medicine. La indexación en PubMed no significa, por sí sola, que un artículo sea de alta calidad ni que sus conclusiones sean aplicables a todos los pacientes.</p>
+        </div>
+        <div class="how-card">
+          <strong>Recuerda al leer una publicación</strong>
+          <ul>
+            <li>Identifica el diseño del estudio y su pregunta.</li>
+            <li>Revisa la fecha, la muestra y los posibles sesgos.</li>
+            <li>Lee el texto completo cuando esté disponible.</li>
+            <li>Contrasta los hallazgos con otras fuentes.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>
+        <strong>OdontoUdeC</strong>
+        <p>Empatía · Liderazgo · Sabiduría</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Inicio</a>
+        <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener noreferrer">PubMed ↗</a>
+        <a href="https://www.ncbi.nlm.nih.gov/About/disclaimer.html" target="_blank" rel="noopener noreferrer">Aviso de NCBI ↗</a>
+      </div>
+    </div>
+    <div class="wrap footer-note">Los datos bibliográficos se consultan en NCBI. PubMed® es un servicio de la U.S. National Library of Medicine.</div>
+  </footer>
+
+  <script src="assets/literatura-cientifica.js"></script>
+</body>
+</html>
