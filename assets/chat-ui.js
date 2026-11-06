@@ -30,7 +30,11 @@
 
   async function loadBitmap(file) {
     if (typeof window.createImageBitmap === "function") {
-      return window.createImageBitmap(file, { imageOrientation: "from-image" });
+      try {
+        return await window.createImageBitmap(file, { imageOrientation: "from-image" });
+      } catch (_) {
+        return window.createImageBitmap(file);
+      }
     }
     const objectUrl = URL.createObjectURL(file);
     try {
@@ -44,10 +48,11 @@
         width: image.naturalWidth,
         height: image.naturalHeight,
         draw: image,
-        close() {}
+        close() { URL.revokeObjectURL(objectUrl); }
       };
-    } finally {
+    } catch (error) {
       URL.revokeObjectURL(objectUrl);
+      throw error;
     }
   }
 
@@ -95,6 +100,9 @@
         output = await canvasBlob(canvas, "image/webp", plan.quality);
         if (output.type !== "image/webp") {
           output = await canvasBlob(canvas, "image/jpeg", plan.quality);
+        }
+        if (output.type !== "image/jpeg" && output.type !== "image/webp") {
+          throw new Error("Este navegador no pudo convertir la fotografía a un formato compatible.");
         }
         if (output.size <= MAX_OUTPUT) break;
       }
@@ -250,6 +258,7 @@
     row.classList.add("chat-compose-row");
 
     const originalRequired = input.required;
+    let available = !input.disabled;
     const originalMaxLength = input.maxLength;
     let pendingFile = null;
     let previewUrl = null;
@@ -307,7 +316,7 @@
     const preview = document.createElement("div");
     preview.className = "chat-attachment-preview";
     preview.hidden = true;
-    form.insertBefore(preview, row);
+    form.insertBefore(preview, row === form ? controls : row);
 
     function report(message) {
       if (status) status.textContent = message || "";
@@ -393,9 +402,17 @@
 
     function setBusy(value) {
       busy = Boolean(value);
-      trigger.disabled = busy;
-      galleryButton.disabled = busy;
-      cameraButton.disabled = busy;
+      trigger.disabled = busy || !available;
+      galleryButton.disabled = busy || !available;
+      cameraButton.disabled = busy || !available;
+    }
+
+    function setAvailable(value) {
+      available = Boolean(value);
+      trigger.disabled = busy || !available;
+      galleryButton.disabled = busy || !available;
+      cameraButton.disabled = busy || !available;
+      if (!available) menu.hidden = true;
     }
 
     async function prepare({ text, scope, scopeId, userId }) {
@@ -434,6 +451,7 @@
       clear,
       rollback: path => removeAttachment(db, path),
       setBusy,
+      setAvailable,
       report
     };
   }
