@@ -120,7 +120,7 @@
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>window.OneSignalDeferred=window.OneSignalDeferred||[];OneSignalDeferred.push(async function(OneSignal){await OneSignal.init({appId:"64e9045a-6129-4f50-aa9a-03cfbe70bfae"});});</script>
 <script src="/assets/onesignal.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/assets/onesignal-push.js"></script>
 <script>
 const SUPABASE_URL = "https://jqbrheonqqsiijrprsqs.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8";
@@ -387,7 +387,7 @@ changePasswordForm.addEventListener('submit',async e=>{
  changePasswordForm.reset();changePasswordForm.classList.add('hidden');
  notify('Tu contraseña se actualizó correctamente.');
 });
-form.addEventListener('submit',async e=>{e.preventDefault();if(!currentUser){notify('Inicia sesión para publicar.');return;}const category=document.getElementById('postCategory').value,title=document.getElementById('postTitle').value.trim(),content=document.getElementById('postBody').value.trim();if(!title||!content)return;const {error}=await supabaseClient.from('posts').insert({author_id:currentUser.id,title,content,category});if(error){notify('No se pudo publicar: '+error.message);return;}form.reset();await loadPosts();notify('¡Publicación compartida con la comunidad!');});
+form.addEventListener('submit',async e=>{e.preventDefault();if(!currentUser){notify('Inicia sesión para publicar.');return;}const category=document.getElementById('postCategory').value,title=document.getElementById('postTitle').value.trim(),content=document.getElementById('postBody').value.trim();if(!title||!content)return;const {data:createdPost,error}=await supabaseClient.from('posts').insert({author_id:currentUser.id,title,content,category}).select('id').single();if(error){notify('No se pudo publicar: '+error.message);return;}if(createdPost?.id)void window.OdontoPush?.notify(supabaseClient,'post',createdPost.id);form.reset();await loadPosts();notify('¡Publicación compartida con la comunidad!');});
 // Mantener los cambios de sesión sincronizados. El control de versión impide que
 // consultas concurrentes vuelvan a pintar la misma lista y creen duplicados visuales.
 supabaseClient.auth.onAuthStateChange((event,session)=>{
