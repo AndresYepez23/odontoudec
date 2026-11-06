@@ -54,3 +54,11 @@ No es un bloqueo para diseñar la encuesta. Antes de la prueba real de registro 
 - La tabla `public.profiles` tiene 9 perfiles en la inspección; no todos tienen semestre informado, por lo que tampoco se debe usar el semestre como requisito implícito.
 - Supabase anunció que las tablas nuevas de `public` dejaron de exponerse automáticamente a Data API en 2026. La futura migración debe declarar de forma explícita los privilegios necesarios y comprobar la configuración de esquemas expuestos; RLS por sí sola no habilita el acceso a Data API.
 - No se ejecutó SQL, no se creó tabla ni se modificaron roles o permisos en el proyecto.
+
+
+## Implementación propuesta en rama (no desplegada)
+- El diseño de almacenamiento se ajustó a una tabla en `public` con RLS activado y privilegios revocados para `anon`, `authenticated` y `PUBLIC`; solo `service_role` tendrá permisos de tabla. Así la Edge Function puede consultarla mediante la API estándar sin exponer el esquema privado en Data API.
+- La función `survey-submissions` valida el JWT con `auth.getUser(token)`, valida las 15 respuestas contra el catálogo del servidor, exige perfil existente, inserta con clave única por usuario/encuesta y devuelve resultados solo si `user_roles.role = 'admin'`.
+- La consulta administrativa devuelve nombre, identificador público, semestre (si está informado), fecha y respuestas para atribución individual, según la decisión del propietario del proyecto.
+- La función tiene `verify_jwt = false` para admitir la publishable key nueva; por eso valida obligatoriamente el token de sesión dentro del código antes de cualquier acción. La clave secreta solo se lee desde variables de entorno del servidor.
+- La migración y la función son archivos de la rama; no se aplicaron ni desplegaron. Antes de activar: revisar permisos Data API, ejecutar migración en entorno controlado, desplegar función y probar con cuentas separadas.
