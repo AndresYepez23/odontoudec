@@ -156,3 +156,5 @@ button, input, select { font: inherit; }
   .footer-inner { align-items: flex-start; flex-direction: column; }
   .footer-links { gap: 10px 14px; }
 }
+/* Reduce el encabezado de resultados: el título dominaba visualmente la página. */
+.results-toolbar h2 { font-size: clamp(1.25rem, 2vw, 1.65rem); line-height: 1.2; letter-spacing: -.035em; }
