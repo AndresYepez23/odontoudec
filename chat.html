@@ -41,7 +41,8 @@ html.ou-embedded #room>.rules{display:none!important}
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>window.OneSignalDeferred=window.OneSignalDeferred||[];OneSignalDeferred.push(async function(OneSignal){await OneSignal.init({appId:"64e9045a-6129-4f50-aa9a-03cfbe70bfae"});});</script>
 <script src="/assets/onesignal.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/chat-ui.js"></script><script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/chat-ui.js"></script>
+<script src="assets/chat-reactions.js"></script><script>
 const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8"),$=id=>document.getElementById(id);window.ouSupabaseClient=db;let user=null,known=new Set(),poll=null,authReady=false;
 const composer=OdontoChatUI.mountComposer({form:$("sendForm"),input:$("message"),sendButton:$("send"),status:$("status"),db,getScope:()=>({type:"community"}),getUser:()=>user});
 function say(t){$("status").textContent=t}
