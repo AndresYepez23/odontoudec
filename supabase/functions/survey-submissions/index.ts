@@ -72,6 +72,16 @@ Deno.serve(async (req: Request) => {
     const body = await req.json().catch(()=>null);
     if (!body || typeof body !== "object" || Array.isArray(body)) return reply(req,{error:"Solicitud inválida."},400);
 
+    if (body.action === "status") {
+      const [{data:submission,error:submissionError},{data:role,error:roleError}] = await Promise.all([
+        admin.from("survey_submissions").select("id").eq("survey_key",SURVEY_KEY).eq("user_id",user.id).maybeSingle(),
+        admin.from("user_roles").select("role").eq("user_id",user.id).maybeSingle()
+      ]);
+      if (submissionError) throw submissionError;
+      if (roleError) throw roleError;
+      return reply(req,{ok:true,submitted:!!submission,is_admin:role?.role === "admin"});
+    }
+
     if (body.action === "submit") {
       const checked = validateAnswers(body.answers);
       if (!checked.ok) return reply(req,{error:checked.error},400);
