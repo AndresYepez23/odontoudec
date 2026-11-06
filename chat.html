@@ -47,4 +47,6 @@ function esc(t){return String(t??"")}async function loadMessages(){if(!user)retu
 $("sendForm").onsubmit=async e=>{e.preventDefault();if(!user)return;const input=$("message"),content=input.value.trim();if(!content)return;$("send").disabled=true;const {error}=await db.from("chat_messages").insert({user_id:user.id,display_name:user.user_metadata?.display_name||user.email?.split("@")[0]||"Estudiante",content});$("send").disabled=false;if(error){say(error.message.includes("CHAT_RATE")?"Espera unos segundos antes de enviar otro mensaje. Límite: 5 mensajes por minuto.":"No se pudo enviar. Puede que hayas alcanzado el límite anti-spam o falte configurar Supabase.");return}input.value="";say("Mensaje enviado.");await loadMessages();$("messages").scrollTop=$("messages").scrollHeight};
 (async()=>{const {data}=await db.auth.getSession();user=data.session?.user||null;view()})();db.auth.onAuthStateChange((event,session)=>{user=session?.user||null;view()});
 </script><script src="assets/community-dock.js"></script>
+
+<script src="/assets/posthog.js" defer></script>
 </body></html>

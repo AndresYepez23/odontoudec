@@ -206,4 +206,6 @@ function choose(i){if(answered)return;answered=true;const q=questions[qi],ok=i==
 next.addEventListener('click',()=>{if(qi<questions.length-1){qi++;loadQ()}else{qText.textContent='Terminaste la ronda';answers.innerHTML='';feedback.textContent='Resultado: '+score+' de 100 puntos. '+(score>=80?'¡Excelente repaso!':score>=40?'Buen intento. Refuerza los temas que fallaste.':'Sigue practicando: cada ronda ayuda.');next.hidden=true;restart.hidden=false;}});restart.addEventListener('click',()=>{qi=0;score=0;restart.hidden=true;loadQ()});loadQ();
 </script>
 <script src="academia-enhancements.js"></script><script src="assets/community-dock.js"></script>
+
+<script src="/assets/posthog.js" defer></script>
 </body></html>
