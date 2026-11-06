@@ -89,7 +89,7 @@
           <div><span class="ou-admin-eyebrow">VISTA GENERAL</span><h3>Estado de la plataforma</h3><p>Indicadores generales de OdontoUdeC. Se muestran cifras agregadas, no datos personales.</p></div>
         </div>
         <div class="ou-admin-metrics">
-          <article class="ou-admin-metric"><span>Estudiantes registrados</span><strong data-admin-stat="students">—</strong><small>Perfiles creados</small></article>
+          <article class="ou-admin-metric"><span>Perfiles de estudiante</span><strong data-admin-stat="students">—</strong><small>Perfiles creados</small></article>
           <article class="ou-admin-metric"><span>Publicaciones</span><strong data-admin-stat="posts">—</strong><small>En la comunidad</small></article>
           <article class="ou-admin-metric"><span>Recursos académicos</span><strong data-admin-stat="resources">—</strong><small>En la biblioteca</small></article>
           <article class="ou-admin-metric"><span>Fechas académicas</span><strong data-admin-stat="events">—</strong><small>En el calendario</small></article>
@@ -615,6 +615,10 @@
       renderEvents();
       renderResources();
       renderGroups();
+      if (panel.querySelector('[data-admin-pane="analytics"]')?.classList.contains("is-active")) {
+        const analyticsRefresh = document.getElementById("refreshAdminAnalytics");
+        if (analyticsRefresh) analyticsRefresh.click();
+      }
       connection.textContent = "Administrador activo · Datos actualizados";
     } catch (error) {
       connection.textContent = "No se pudo actualizar";
