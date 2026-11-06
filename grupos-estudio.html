@@ -65,7 +65,7 @@ html.ou-embedded .ou-group-mark{display:flex;align-items:center;flex-shrink:0}
 html.ou-embedded #chatPanel .chat-head{gap:8px}
 
 </style>
-<link rel="stylesheet" href="assets/community-dock.css"><link rel="stylesheet" href="assets/chat-ui.css">
+<link rel="stylesheet" href="assets/community-dock.css"><link rel="stylesheet" href="assets/chat-ui.css"><link rel="stylesheet" href="assets/reactions.css">
 
 <link rel="icon" type="image/png" href="/assets/download-removebg-preview%20(2).png">
 <link rel="apple-touch-icon" href="/assets/download-removebg-preview%20(2).png">
@@ -101,6 +101,7 @@ html.ou-embedded #chatPanel .chat-head{gap:8px}
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/chat-ui.js"></script>
+<script src="assets/chat-reactions.js"></script>
 <script>
 const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8");
 const $=id=>document.getElementById(id);let user=null,groups=[],memberships=new Set(),activeGroup=null;
@@ -138,28 +139,33 @@ $("groupList").addEventListener("click",async e=>{
  if(b.dataset.toggle){const g=groups.find(x=>x.id===b.dataset.toggle);if(!g)return;const {error}=await db.from("study_groups").update({is_open:!g.is_open}).eq("id",g.id).eq("created_by",user.id);if(error){say("createStatus","No se pudo actualizar: "+error.message);return;}await loadGroups();}
  if(b.dataset.open)await openChat(b.dataset.open);
 });
-function closeChat(){composer.clear();composer.setAvailable(false);activeGroup=null;$("chatPanel").classList.add("hidden");$("app").classList.remove("ou-group-chat");}
+function closeChat(){composer.clear();composer.setAvailable(false);activeGroup=null;document.body.classList.remove("ou-group-chat-open");$("chatPanel").classList.add("hidden");$("app").classList.remove("ou-group-chat");}
 $("closeChat").addEventListener("click",closeChat);$("backGroups").addEventListener("click",closeChat);
 async function openChat(id){
  const g=groups.find(x=>x.id===id);if(!g||!memberships.has(id))return;
- composer.clear();activeGroup=id;composer.setAvailable(true);$("app").classList.add("ou-group-chat");$("chatPanel").classList.remove("hidden");$("chatTitle").textContent=g.name;$("chatSubtitle").textContent=(g.subject||"Grupo de estudio")+(g.semester?" · "+g.semester+"° semestre":"");$("chatLog").innerHTML='<p class="empty">Cargando mensajes…</p>';
+ composer.clear();activeGroup=id;composer.setAvailable(true);document.body.classList.add("ou-group-chat-open");$("app").classList.add("ou-group-chat");$("chatPanel").classList.remove("hidden");$("chatTitle").textContent=g.name;$("chatSubtitle").textContent=(g.subject||"Grupo de estudio")+(g.semester?" · "+g.semester+"° semestre":"");$("chatLog").innerHTML='<p class="empty">Cargando mensajes…</p>';
  await loadMessages();
 }
 async function loadMessages(){
  if(!activeGroup)return;
  const {data,error}=await db.from("study_group_messages").select("id,sender_id,content,created_at").eq("group_id",activeGroup).order("created_at",{ascending:true}).limit(150);
  if(error){$("chatLog").textContent="No se pudieron cargar los mensajes. Verifica la política de miembros.";return;}
- const senderIds=[...new Set((data||[]).map(m=>m.sender_id))];
- let names={};
+ const messages=data||[],senderIds=[...new Set(messages.map(m=>m.sender_id))],ids=messages.map(m=>m.id);
+ let names={},reactionRows=[];
  if(senderIds.length){const {data:profiles}=await db.from("profiles").select("id,display_name").in("id",senderIds);(profiles||[]).forEach(p=>{names[p.id]=p.display_name||"Estudiante";});}
+ if(ids.length){const result=await db.from("chat_message_reactions").select("id,group_message_id,user_id,reaction").in("group_message_id",ids);if(result.error)say("chatStatus","No se pudieron cargar las reacciones.");else reactionRows=result.data||[];}
  const box=$("chatLog");box.replaceChildren();
- for(const m of data||[]){
+ for(const m of messages){
   const article=document.createElement("article");article.className="message"+(m.sender_id===user.id?" mine":"");
   const meta=document.createElement("small");meta.textContent=(m.sender_id===user.id?"Tú":(names[m.sender_id]||"Estudiante"))+" · "+new Date(m.created_at).toLocaleString("es-CO",{dateStyle:"short",timeStyle:"short"});
   const body=document.createElement("div");body.className="message-body";
-  article.append(meta,body);await OdontoChatUI.renderMessageContent(body,m.content,db);box.append(article);
+  await OdontoChatUI.renderMessageContent(body,m.content,db);
+  const reactionSlot=document.createElement("div");reactionSlot.className="message-reactions";
+  article.append(meta,body,reactionSlot);
+  OdontoReactions.mount(reactionSlot,{db,table:"chat_message_reactions",targetColumn:"group_message_id",targetId:m.id,userId:user?.id,rows:reactionRows.filter(r=>r.group_message_id===m.id),onStatus:s=>say("chatStatus",s)});
+  box.append(article);
  }
- if(!data?.length){const empty=document.createElement("p");empty.className="empty";empty.textContent="Este grupo aún no tiene mensajes. ¡Inicia la conversación!";box.append(empty);}
+ if(!messages.length){const empty=document.createElement("p");empty.className="empty";empty.textContent="Este grupo aún no tiene mensajes. ¡Inicia la conversación!";box.append(empty);}
  box.scrollTop=box.scrollHeight;
 }
 $("messageForm").addEventListener("submit",async e=>{
