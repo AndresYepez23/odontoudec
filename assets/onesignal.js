@@ -5,7 +5,10 @@
     window.OneSignalDeferred || [];
 
   let desiredId = null;
-  let appliedId = undefined;
+  // null significa que todavía no hay ningún usuario asociado.
+  // No llamar logout() en una sesión anónima: el SDK puede fallar
+  // si nunca se ejecutó login() en esta instancia.
+  let appliedId = null;
   let scheduled = false;
 
   function syncUser(user) {
@@ -21,7 +24,7 @@
 
           if (target) {
             await OneSignal.login(target);
-          } else {
+          } else if (appliedId !== null) {
             await OneSignal.logout();
           }
 
@@ -31,6 +34,9 @@
         console.warn("[OneSignal] No se pudo sincronizar la sesión:", error);
       } finally {
         scheduled = false;
+        // Si llegó un cambio de sesión durante una operación fallida,
+        // vuelve a programar la sincronización con el estado más reciente.
+        if (appliedId !== desiredId) syncUser({ id: desiredId });
       }
     });
   }
