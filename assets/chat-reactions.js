@@ -13,6 +13,15 @@
     sorprendido: "soaked"
   };
   const asset = file => "/assets/reactions/" + file;
+  document.addEventListener("click", event => {
+    if (event.target.closest(".ou-reactions-shell")) return;
+    document.querySelectorAll(".ou-reactions-menu:not([hidden])").forEach(menu => {
+      menu.hidden = true;
+      const toggle = menu.closest(".ou-reactions-shell")?.querySelector(".ou-reactions-toggle");
+      toggle?.setAttribute("aria-expanded", "false");
+      toggle?.classList.remove("is-open");
+    });
+  });
 
   function mount(container, config) {
     if (!container || !config?.db || !config.table || !config.targetColumn || !config.targetId) return;
@@ -50,9 +59,6 @@
       menu.hidden ? openMenu() : closeMenu();
     });
     menu.addEventListener("click", event => event.stopPropagation());
-    document.addEventListener("click", event => {
-      if (!container.contains(event.target)) closeMenu();
-    });
     container.addEventListener("keydown", event => {
       if (event.key === "Escape") { closeMenu(); toggle.focus(); }
     });
