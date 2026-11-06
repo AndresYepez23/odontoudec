@@ -61,4 +61,5 @@ $("resetForm").addEventListener("submit",async e=>{
  finished=true;$("resetForm").classList.add("hidden");$("success").classList.remove("hidden");$("loading").classList.add("hidden");
  await db.auth.signOut({scope:"local"});
 });
-</script></body></html>
+</script><script src="/assets/posthog.js" defer></script>
+</body></html>
