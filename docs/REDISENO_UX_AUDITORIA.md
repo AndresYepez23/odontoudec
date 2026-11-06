@@ -252,5 +252,5 @@ Base auditada: main
 - Netlify `odontoudec`: dominio primario `https://odontoudec.online`; último deploy de producción observado en rama `main`, estado ready. Variables `SUPABASE_URL`, `SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` presentes; la clave de servicio es secreta y no se registró su valor.
 - Supabase `jqbrheonqqsiijrprsqs`: proyecto ACTIVE_HEALTHY; las migraciones remotas llegan hasta `20261103141223`; la migración `20261105230000_create_survey_submissions` aún no está aplicada. Funciones activas observadas: `odonto-bot` y `patient-bank-intake`; `survey-submissions` aún no está desplegada.
 - La revisión de seguridad remota mantiene alertas preexistentes: 8 tablas con RLS sin políticas, 12 funciones SECURITY DEFINER ejecutables por authenticated y protección de contraseñas filtradas desactivada. No se modificaron estas áreas fuera del alcance de la encuesta para evitar romper funciones existentes; deben revisarse en una auditoría de seguridad separada.
-- Rama de preparación comparada con `main`: 45 commits ahead, 0 behind; 12 archivos afectados en el diff actual.
+- Rama de preparación comparada con `main`: 47 commits ahead, 0 behind; 12 archivos afectados en el diff actual.
 - No se ejecutó SQL remoto, no se desplegó ninguna Edge Function y no se publicó un deploy de Netlify.
