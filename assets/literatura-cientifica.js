@@ -312,7 +312,8 @@
 
   function normalizeEuropePMC(item) {
     const pmcid = item.pmcid || "";
-    const fullText = (item.fullTextUrlList && item.fullTextUrlList.fullTextUrl || []).find(link => link.url);
+    const fullTextLinks = item.fullTextUrlList && item.fullTextUrlList.fullTextUrl;
+    const fullText = Array.isArray(fullTextLinks) ? fullTextLinks.find(link => link.url) : (fullTextLinks && fullTextLinks.url ? fullTextLinks : null);
     const pmid = item.pmid || "";
     const doi = item.doi || "";
     return {
