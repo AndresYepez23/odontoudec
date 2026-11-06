@@ -1,0 +1,136 @@
+/* OdontoUdeC · Centro de administración */
+#adminPanel{
+  margin-top:26px!important;
+  padding:clamp(16px,2.6vw,28px)!important;
+  border:1px solid #e8e0ef!important;
+  border-radius:24px!important;
+  background:#fff!important;
+  box-shadow:0 16px 44px rgba(39,15,68,.08);
+  color:#241a30;
+}
+#adminPanel.hidden{display:none!important}
+#adminPanel .ou-admin-shell{width:100%;min-width:0}
+#adminPanel .ou-admin-head{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;padding:2px 0 22px;border-bottom:1px solid #eee8f3}
+#adminPanel .ou-admin-title{min-width:0}
+#adminPanel .ou-admin-eyebrow{display:block;color:#8765a0;font-size:.68rem;font-weight:900;letter-spacing:.13em}
+#adminPanel .ou-admin-head h2{margin:7px 0 5px;color:#32105f;font-size:clamp(1.55rem,3vw,2rem);line-height:1.15}
+#adminPanel .ou-admin-head p{margin:0;max-width:650px;color:#756b7e;font-size:.9rem}
+#adminPanel .ou-admin-head-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+#adminPanel .ou-admin-connection{display:flex;align-items:center;gap:8px;color:#4f455a;font-size:.78rem;font-weight:700}
+#adminPanel #adminStatus{margin:0;color:#4f455a;font-size:.78rem;font-weight:700}
+#adminPanel .ou-admin-live-dot{width:8px;height:8px;border-radius:50%;background:#27966c;box-shadow:0 0 0 4px #e7f5ee;flex:0 0 auto}
+#adminPanel .ou-admin-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:9px 13px;border:1px solid transparent;border-radius:11px;font:inherit;font-size:.82rem;font-weight:800;line-height:1.2;cursor:pointer;transition:background .16s,border-color .16s,transform .16s}
+#adminPanel .ou-admin-btn:hover{transform:translateY(-1px)}
+#adminPanel .ou-admin-btn:focus-visible,#adminPanel .ou-admin-tab:focus-visible,#adminPanel [data-admin-open]:focus-visible{outline:3px solid #d7a928;outline-offset:3px}
+#adminPanel .ou-admin-btn-primary{background:#32105f;color:#fff;border-color:#32105f}
+#adminPanel .ou-admin-btn-primary:hover{background:#4b2180}
+#adminPanel .ou-admin-btn-light{background:#faf8fc;color:#4a3760;border-color:#e8e0ef}
+#adminPanel .ou-admin-btn-light:hover{background:#f2ecf7;border-color:#d9cbe5}
+#adminPanel .ou-admin-btn-danger{background:#fff7f7;color:#a33d45;border-color:#f0d6d8}
+#adminPanel .ou-admin-btn-danger:hover{background:#ffeded;border-color:#e8bfc3}
+#adminPanel .ou-admin-btn-small{min-height:32px;padding:7px 10px;font-size:.75rem;border-radius:9px}
+#adminPanel .ou-admin-tabs{display:flex;gap:5px;overflow-x:auto;padding:15px 0 13px;border-bottom:1px solid #eee8f3;scrollbar-width:thin}
+#adminPanel .ou-admin-tab{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;border:1px solid transparent;border-radius:11px;background:transparent;color:#71667b;padding:10px 13px;font:inherit;font-size:.82rem;font-weight:800;cursor:pointer;white-space:nowrap}
+#adminPanel .ou-admin-tab:hover{background:#f8f4fb;color:#32105f}
+#adminPanel .ou-admin-tab.is-active{background:#f1eaf7;border-color:#e5d8ef;color:#32105f}
+#adminPanel .ou-admin-tab-count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:#fff;color:#6d4a8a;font-size:.68rem;font-weight:900}
+#adminPanel .ou-admin-toast{display:none;margin:13px 0 0;padding:10px 13px;border:1px solid #d9eadf;border-radius:11px;background:#f2faf5;color:#246c4b;font-size:.82rem;font-weight:700}
+#adminPanel .ou-admin-toast.is-visible{display:block}
+#adminPanel .ou-admin-toast.is-error{border-color:#efd3d6;background:#fff5f5;color:#a33d45}
+#adminPanel .ou-admin-pane{padding-top:22px;min-width:0}
+#adminPanel .ou-admin-pane[hidden]{display:none!important}
+#adminPanel .ou-admin-section-heading{display:flex;justify-content:space-between;gap:16px;margin:0 0 17px}
+#adminPanel .ou-admin-section-heading h3{margin:5px 0 4px;color:#32105f;font-size:1.22rem}
+#adminPanel .ou-admin-section-heading p{margin:0;color:#786e80;font-size:.85rem}
+#adminPanel .ou-admin-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+#adminPanel .ou-admin-metric{min-width:0;padding:15px 16px;border:1px solid #ebe4f1;border-radius:15px;background:linear-gradient(145deg,#fff,#fbf9fd)}
+#adminPanel .ou-admin-metric>span{display:block;color:#756a7e;font-size:.78rem;font-weight:700}
+#adminPanel .ou-admin-metric strong{display:block;margin:7px 0 2px;color:#32105f;font-size:1.75rem;line-height:1.05;font-variant-numeric:tabular-nums}
+#adminPanel .ou-admin-metric small{color:#91879a;font-size:.72rem}
+#adminPanel .ou-admin-metric-alert{border-color:#f0e3d7;background:linear-gradient(145deg,#fff,#fffaf6)}
+#adminPanel .ou-admin-metric-alert strong{color:#a65b2d}
+#adminPanel .ou-admin-overview-grid{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:13px;margin-top:14px}
+#adminPanel .ou-admin-card{min-width:0;padding:17px;border:1px solid #ebe4f1;border-radius:16px;background:#fff}
+#adminPanel .ou-admin-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px}
+#adminPanel .ou-admin-card-heading h4{margin:0 0 3px;color:#39224e;font-size:.98rem}
+#adminPanel .ou-admin-card-heading p{margin:0;color:#897f91;font-size:.76rem}
+#adminPanel .ou-admin-quick-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#adminPanel .ou-admin-quick-actions button{display:grid;grid-template-columns:30px 1fr;grid-template-rows:auto auto;align-items:center;gap:1px 9px;min-width:0;padding:11px;border:1px solid #eee7f3;border-radius:12px;background:#fcfbfd;text-align:left;cursor:pointer}
+#adminPanel .ou-admin-quick-actions button:hover{background:#f6f0fa;border-color:#ddcfe9}
+#adminPanel .ou-admin-quick-actions button>span{grid-row:1/3;display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#eee6f5;color:#4d2774;font-size:1.05rem;font-weight:900}
+#adminPanel .ou-admin-quick-actions button b{color:#49325e;font-size:.77rem}
+#adminPanel .ou-admin-quick-actions button small{color:#8b8193;font-size:.68rem}
+#adminPanel .ou-admin-link-btn{padding:4px 0;border:0;background:none;color:#6b4787;font:inherit;font-size:.76rem;font-weight:800;cursor:pointer}
+#adminPanel .ou-admin-recent-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid #f0ebf4}
+#adminPanel .ou-admin-recent-item:first-child{border-top:0}
+#adminPanel .ou-admin-recent-item b{display:block;color:#40324e;font-size:.79rem;overflow-wrap:anywhere}
+#adminPanel .ou-admin-recent-item small{display:block;margin-top:3px;color:#958b9d;font-size:.69rem}
+#adminPanel .ou-admin-mini-arrow{color:#9b87ad}
+#adminPanel .ou-admin-privacy-note{display:flex;align-items:flex-start;gap:10px;margin-top:14px;padding:12px 14px;border:1px solid #e7e0ee;border-radius:13px;background:#faf8fc}
+#adminPanel .ou-admin-privacy-note>span{font-size:1.1rem}
+#adminPanel .ou-admin-privacy-note p{margin:0;color:#71677b;font-size:.76rem}
+#adminPanel .ou-admin-privacy-note b{color:#49335f}
+#adminPanel .ou-admin-content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;align-items:start}
+#adminPanel .ou-admin-form{display:grid;gap:7px}
+#adminPanel .ou-admin-form label{margin-top:5px;color:#594c65;font-size:.76rem;font-weight:800}
+#adminPanel .ou-admin-form input,#adminPanel .ou-admin-form select,#adminPanel .ou-admin-form textarea{width:100%;min-width:0;min-height:41px;padding:10px 11px;border:1px solid #e4dce9;border-radius:10px;background:#fff;color:#30233d;font:inherit;font-size:.83rem;outline:none}
+#adminPanel .ou-admin-form textarea{min-height:94px;resize:vertical}
+#adminPanel .ou-admin-form input:focus,#adminPanel .ou-admin-form select:focus,#adminPanel .ou-admin-form textarea:focus{border-color:#9c7ab6;box-shadow:0 0 0 3px #eee5f5}
+#adminPanel .ou-admin-form-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#adminPanel .ou-admin-form-row>div{min-width:0}
+#adminPanel .ou-admin-form-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+#adminPanel .ou-admin-list{display:grid;gap:9px;min-width:0}
+#adminPanel .ou-admin-item{min-width:0;padding:12px;border:1px solid #eee8f3;border-radius:12px;background:#fdfcfe}
+#adminPanel .ou-admin-item h5{margin:0 0 5px;color:#3b2850;font-size:.86rem;line-height:1.35;overflow-wrap:anywhere}
+#adminPanel .ou-admin-item-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+#adminPanel .ou-admin-tag{display:inline-block;margin:0 0 7px;color:#8b7c95;font-size:.68rem;font-weight:700}
+#adminPanel .ou-admin-item-copy{margin:5px 0 9px;color:#655b6d;font-size:.78rem;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+#adminPanel .ou-admin-muted{display:block;margin:4px 0 9px;color:#978d9e;font-size:.68rem}
+#adminPanel .ou-admin-item-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+#adminPanel .ou-admin-counter{display:inline-grid;place-items:center;min-width:25px;height:25px;padding:0 7px;border-radius:99px;background:#f1eaf7;color:#5e3b7b;font-size:.72rem;font-weight:900}
+#adminPanel .ou-admin-empty{margin:0;padding:15px 10px;color:#928899;text-align:center;font-size:.79rem}
+#adminPanel .ou-admin-report-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+#adminPanel .ou-admin-report-item{background:#fffdfc}
+#adminPanel .ou-admin-reasons{display:grid;gap:6px;margin:10px 0}
+#adminPanel .ou-admin-reason{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:7px;padding:8px;border-radius:9px;background:#f7f4f9}
+#adminPanel .ou-admin-reason>span{min-width:0;color:#66586f;font-size:.72rem;overflow-wrap:anywhere}
+#adminPanel .ou-admin-reason small{color:#9a8fa0;font-size:.64rem;white-space:nowrap}
+#adminPanel .ou-admin-resource-link{display:inline-block;margin:2px 0 6px;color:#67428a;font-size:.75rem;font-weight:800;text-decoration:none;overflow-wrap:anywhere}
+#adminPanel .ou-admin-resource-link:hover{text-decoration:underline}
+#adminPanel .ou-admin-academic-lists{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:14px}
+#adminPanel .ou-admin-status{display:inline-flex;align-items:center;align-self:flex-start;width:max-content;margin:8px 0;padding:5px 9px;border-radius:99px;font-size:.68rem;font-weight:850}
+#adminPanel .ou-admin-status.is-open{background:#eaf7ef;color:#27764d}
+#adminPanel .ou-admin-status.is-closed{background:#f4edf7;color:#74518b}
+#adminPanel #adminAnalytics{margin-top:0;padding-top:0;border-top:0}
+#adminPanel #adminAnalytics .ph-head{align-items:flex-start}
+#adminPanel #adminAnalytics .ph-head h3{display:none}
+#adminPanel #adminAnalytics .ph-head p{color:#897f91}
+#adminPanel #adminAnalytics .ph-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+#adminPanel #adminAnalytics .ph-metric{background:#fbf9fd}
+#adminPanel #adminAnalytics .ph-panels{grid-template-columns:1.2fr 1fr}
+#adminPanel #adminAnalytics .ph-status{margin-bottom:0}
+@media(max-width:850px){
+  #adminPanel .ou-admin-overview-grid{grid-template-columns:1fr}
+  #adminPanel .ou-admin-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:650px){
+  #adminPanel{padding:15px!important;border-radius:18px!important}
+  #adminPanel .ou-admin-head{display:block}
+  #adminPanel .ou-admin-head-actions{justify-content:space-between;margin-top:14px}
+  #adminPanel .ou-admin-connection{min-width:0}
+  #adminPanel .ou-admin-content-grid,#adminPanel .ou-admin-report-columns,#adminPanel .ou-admin-academic-lists{grid-template-columns:1fr}
+  #adminPanel .ou-admin-quick-actions{grid-template-columns:1fr 1fr}
+  #adminPanel .ou-admin-metrics{gap:8px}
+  #adminPanel .ou-admin-metric{padding:12px}
+  #adminPanel .ou-admin-metric strong{font-size:1.45rem}
+  #adminPanel .ou-admin-card{padding:13px}
+  #adminPanel .ou-admin-reason{grid-template-columns:minmax(0,1fr) auto}
+  #adminPanel .ou-admin-reason small{grid-column:1}
+  #adminPanel .ou-admin-reason button{grid-column:2;grid-row:1/3}
+  #adminPanel #adminAnalytics .ph-metrics,#adminPanel #adminAnalytics .ph-panels{grid-template-columns:1fr}
+}
+@media(max-width:390px){
+  #adminPanel .ou-admin-quick-actions{grid-template-columns:1fr}
+  #adminPanel .ou-admin-form-row{grid-template-columns:1fr}
+  #adminPanel .ou-admin-tab{padding:9px 10px;font-size:.75rem}
+}
