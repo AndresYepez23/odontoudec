@@ -200,3 +200,6 @@ Base auditada: main
 - La intervención se hizo únicamente en `redesign/ux-audit-2026-11-05`; no afecta `main` ni producción.
 - Se conservó el resto de la estructura de portada y navegación.
 - La encuesta continúa siendo una vista previa sin persistencia. La arquitectura de envío y consulta administrativa sigue pendiente de implementar y probar antes de activarla.
+
+- Se reorganizó la navegación principal: Inicio, Calendario, Biblioteca, Academia, Comunidad y Mi espacio quedan como accesos directos; Novedades, Recursos, Tarifario, Convivencia, Grupos de estudio y Mi perfil académico quedan agrupados en «Más».
+- No se añadió «Oportunidades» porque la portada actual no contiene una sección o destino funcional para esa opción; se deja como bloque pendiente de producto, no como enlace vacío.
