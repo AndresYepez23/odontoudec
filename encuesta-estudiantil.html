@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#32105f">
+<meta name="description" content="Participa en la encuesta estudiantil de OdontoUdeC.">
+<title>Encuesta estudiantil | OdontoUdeC</title>
+<style>
+:root{--purple:#32105f;--purple2:#54218b;--gold:#d7a928;--ink:#211a2b;--muted:#706879;--line:#e9e1ef;--paper:#faf8fc}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:inherit}.top{background:var(--purple);color:#fff;padding:9px 18px;text-align:center;font-size:.82rem}.top b{color:#f4d978}
+header{background:#fff;border-bottom:1px solid var(--line)}.nav{max-width:960px;margin:auto;padding:15px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--purple);font-weight:900;font-size:1.12rem}.brand-mark{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#f1eafa;color:var(--purple);font-size:1.3rem}.nav a:last-child{font-size:.9rem;color:var(--purple2);font-weight:750}
+main{width:min(100% - 32px,820px);margin:38px auto 70px}.intro{padding:clamp(23px,5vw,38px);border:1px solid #e5d8ef;border-radius:24px;background:radial-gradient(ellipse at 95% 0%,#d7a92822,transparent 35%),linear-gradient(130deg,#fff,#f8f3fc);box-shadow:0 12px 32px #32105f0b}
+.kicker{color:#9a7416;text-transform:uppercase;letter-spacing:.13em;font-size:.72rem;font-weight:900}.intro h1{margin:9px 0 10px;color:var(--purple);font-size:clamp(2rem,5vw,3rem);line-height:1.08;letter-spacing:-.045em}.intro p{max-width:650px;color:#665b70;margin:0}.meta{display:flex;gap:9px;flex-wrap:wrap;margin-top:19px}.pill{padding:6px 11px;border:1px solid #e7dcef;border-radius:99px;background:#fff;color:#63447e;font-size:.78rem;font-weight:750}
+#status{margin:18px 0;padding:17px 19px;border:1px solid var(--line);border-radius:16px;background:#fff;color:var(--muted)}#status strong{color:var(--purple)}
+.auth-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.btn{display:inline-flex;justify-content:center;align-items:center;padding:12px 17px;border-radius:12px;background:var(--purple);color:#fff;text-decoration:none;font-weight:800;border:1px solid var(--purple)}.btn.alt{background:#fff;color:var(--purple);border-color:#dfd1eb}
+#survey{display:grid;gap:15px;margin-top:20px}.question{padding:21px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 5px 18px #32105f06}.q-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}.q-num{flex:0 0 32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#f2eafa;color:var(--purple);font-weight:900}.question h2{margin:2px 0 0;color:var(--purple);font-size:1.05rem}.hint{font-size:.83rem;color:var(--muted);margin:5px 0 0}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.option{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid #eee8f2;border-radius:11px;background:#fdfcfe;cursor:pointer;font-size:.91rem}.option:hover{border-color:#cbb5dd;background:#faf6fd}.option input{accent-color:var(--purple);margin:4px 0 0;flex:0 0 auto}.question textarea{width:100%;min-height:105px;resize:vertical;padding:12px 13px;border:1px solid #ddd2e8;border-radius:11px;font:inherit;outline-color:var(--purple2)}.question textarea:focus,.option:focus-within{border-color:var(--purple2);box-shadow:0 0 0 3px #54218b14}
+.notice{padding:16px 18px;border:1px solid #f0dfae;border-radius:14px;background:#fff9e9;color:#69521c;font-size:.9rem;margin-top:20px}.notice strong{display:block;margin-bottom:3px}
+footer{text-align:center;padding:25px;color:#82778b;font-size:.8rem}
+@media(max-width:600px){main{margin-top:20px}.options{grid-template-columns:1fr}.question{padding:17px}.nav{padding:12px 16px}}
+</style>
+</head>
+<body>
+<div class="top"><b>OdontoUdeC</b> · Empatía · Liderazgo · Sabiduría</div>
+<header><nav class="nav"><a class="brand" href="/"><span class="brand-mark">✦</span><span>OdontoUdeC</span></a><a href="/">Volver al inicio ↗</a></nav></header>
+<main>
+<section class="intro">
+<span class="kicker">Voz estudiantil · Participación</span>
+<h1>Encuesta estudiantil</h1>
+<p>Un espacio para reconocer a quienes hacen parte de nuestra formación y comunidad. Responde con respeto y desde tu experiencia.</p>
+<div class="meta"><span class="pill">15 categorías</span><span class="pill">Una respuesta por categoría</span><span class="pill">Participación con cuenta</span></div>
+</section>
+<div id="status" role="status" aria-live="polite"><strong>Comprobando tu acceso…</strong></div>
+<div id="guest" class="question hidden">
+<strong style="color:var(--purple)">Para participar debes iniciar sesión.</strong>
+<p class="hint">Puedes consultar esta invitación sin cuenta. Para responder, necesitas una cuenta de estudiante en OdontoUdeC.</p>
+<div class="auth-actions">
+<a class="btn" id="registerLink" href="/#acceso">Registrarme para responder</a>
+<a class="btn alt" id="loginLink" href="/#acceso">Ya tengo cuenta · Iniciar sesión</a>
+</div>
+</div>
+<form id="survey" class="hidden" autocomplete="off">
+<div id="questions"></div>
+</form>
+<div id="pendingNotice" class="notice hidden"><strong>Vista previa del formulario</strong>La estructura y las preguntas ya están organizadas. El envío se habilitará cuando terminemos la configuración de almacenamiento y validación segura de respuestas. Tus selecciones no se están enviando ni guardando.</div>
+</main>
+<footer>OdontoUdeC · Comunidad estudiantil de Odontología</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/encuesta-estudiantil-data.js"></script>
+<script>
+const SUPABASE_URL="https://jqbrheonqqsiijrprsqs.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8";
+const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const statusEl=document.getElementById("status");
+const safeReturn="/encuesta-estudiantil.html";
+const authUrl="/?returnTo="+encodeURIComponent(safeReturn)+"#acceso";
+document.getElementById("registerLink").href=authUrl;
+document.getElementById("loginLink").href=authUrl;
+function esc(value){return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function renderQuestions(){
+ const host=document.getElementById("questions");
+ host.innerHTML=window.ODONTOUDEC_SURVEY.categories.map((category,index)=>{
+  const head='<div class="q-head"><span class="q-num">'+(index+1)+'</span><div><h2>'+esc(category.title)+'</h2><p class="hint">'+(category.type==="free_text"?"Escribe el nombre o tu respuesta.":"Selecciona una sola opción.")+'</p></div></div>';
+  if(category.type==="free_text"){
+   return '<section class="question">'+head+'<textarea name="'+esc(category.id)+'" maxlength="500" placeholder="Escribe tu respuesta…"></textarea></section>';
+  }
+  return '<fieldset class="question" style="border:1px solid var(--line);min-width:0"><legend class="hidden">'+esc(category.title)+'</legend>'+head+'<div class="options">'+category.options.map((option,i)=>'<label class="option"><input type="radio" name="'+esc(category.id)+'" value="'+esc(option)+'"><span>'+esc(option)+'</span></label>').join("")+'</div></fieldset>';
+ }).join("");
+}
+async function init(){
+ renderQuestions();
+ const {data,error}=await client.auth.getSession();
+ if(error){statusEl.innerHTML="<strong>No pudimos comprobar tu sesión.</strong> Recarga la página o vuelve a iniciar sesión.";return;}
+ if(data.session?.user){
+  statusEl.innerHTML="<strong>Sesión iniciada.</strong> Ya puedes revisar las categorías de la encuesta.";
+  document.getElementById("survey").classList.remove("hidden");
+  document.getElementById("pendingNotice").classList.remove("hidden");
+ }else{
+  statusEl.innerHTML="<strong>Tu participación requiere iniciar sesión.</strong> La invitación y las categorías son visibles, pero las respuestas están reservadas para estudiantes con cuenta.";
+  document.getElementById("guest").classList.remove("hidden");
+ }
+}
+init();
+</script>
+</body>
+</html>
