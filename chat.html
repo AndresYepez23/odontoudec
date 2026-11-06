@@ -42,7 +42,7 @@ html.ou-embedded #room>.rules{display:none!important}
 <script>window.OneSignalDeferred=window.OneSignalDeferred||[];OneSignalDeferred.push(async function(OneSignal){await OneSignal.init({appId:"64e9045a-6129-4f50-aa9a-03cfbe70bfae"});});</script>
 <script src="/assets/onesignal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
-const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8");window.ouSupabaseClient=db,$=id=>document.getElementById(id);let user=null,known=new Set(),poll=null,authReady=false;
+const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8"),$=id=>document.getElementById(id);window.ouSupabaseClient=db;let user=null,known=new Set(),poll=null,authReady=false;
 function say(t){$("status").textContent=t}
 function view(){
  $("authChecking").classList.toggle("hidden",authReady);
