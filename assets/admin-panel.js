@@ -123,7 +123,7 @@
               <label for="ouAdminPostTitle">Título</label><input id="ouAdminPostTitle" name="title" maxlength="120" minlength="3" required placeholder="Ej. Información importante">
               <label for="ouAdminPostCategory">Categoría</label><select id="ouAdminPostCategory" name="category"><option>Anuncio</option><option>Académico</option><option>General</option><option>Pregunta</option><option>No al abuso</option></select>
               <label for="ouAdminPostContent">Mensaje</label><textarea id="ouAdminPostContent" name="content" rows="5" maxlength="5000" required placeholder="Escribe el comunicado para los estudiantes…"></textarea>
-              <button class="ou-admin-btn ou-admin-btn-primary" type="submit">Publicar en la comunidad</button>
+              <div class="ou-admin-form-actions"><button class="ou-admin-btn ou-admin-btn-primary" type="submit" id="ouAdminPostSubmit">Publicar en la comunidad</button><button class="ou-admin-btn ou-admin-btn-light" type="button" id="ouAdminPostCancel" hidden>Cancelar edición</button></div>
             </form>
           </section>
           <section class="ou-admin-card">
@@ -202,6 +202,7 @@
     });
     shell.querySelector("#ouAdminRefresh").addEventListener("click", refreshAll);
     shell.querySelector("#ouAdminPostForm").addEventListener("submit", savePost);
+    shell.querySelector("#ouAdminPostCancel").addEventListener("click", resetPostForm);
     shell.querySelector("#ouAdminEventForm").addEventListener("submit", saveEvent);
     shell.querySelector("#ouAdminResourceForm").addEventListener("submit", saveResource);
     shell.querySelector("#ouAdminEventCancel").addEventListener("click", resetEventForm);
@@ -297,7 +298,9 @@
       header.append(titleWrap);
       card.append(header);
       card.append(make("p", "ou-admin-item-copy", post.content || ""));
-      card.append(makeButton("Eliminar publicación", "ou-admin-btn ou-admin-btn-danger ou-admin-btn-small", async () => {
+      const actions = make("div", "ou-admin-item-actions");
+      actions.append(makeButton("Editar", "ou-admin-btn ou-admin-btn-light ou-admin-btn-small", () => editPost(post)));
+      actions.append(makeButton("Eliminar", "ou-admin-btn ou-admin-btn-danger ou-admin-btn-small", async () => {
         if (!window.confirm("¿Eliminar esta publicación permanentemente?")) return;
         try {
           await api("delete-post", "POST", { id: post.id });
@@ -306,6 +309,7 @@
           if (typeof window.loadPosts === "function") await window.loadPosts();
         } catch (error) { toast(error.message, true); }
       }));
+      card.append(actions);
       list.append(card);
     });
   }
@@ -523,18 +527,40 @@
     document.getElementById("ouAdminResourceCancel").hidden = true;
   }
 
+  function editPost(post) {
+    const form = document.getElementById("ouAdminPostForm");
+    form.dataset.editId = post.id;
+    form.elements.title.value = post.title || "";
+    form.elements.category.value = post.category || "Anuncio";
+    form.elements.content.value = post.content || "";
+    document.getElementById("ouAdminPostFormTitle").textContent = "Editar publicación";
+    document.getElementById("ouAdminPostSubmit").textContent = "Guardar cambios";
+    document.getElementById("ouAdminPostCancel").hidden = false;
+    form.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function resetPostForm() {
+    const form = document.getElementById("ouAdminPostForm");
+    form.reset();
+    delete form.dataset.editId;
+    document.getElementById("ouAdminPostFormTitle").textContent = "Crear publicación";
+    document.getElementById("ouAdminPostSubmit").textContent = "Publicar en la comunidad";
+    document.getElementById("ouAdminPostCancel").hidden = true;
+  }
+
   async function savePost(event) {
     event.preventDefault();
     const form = event.currentTarget;
     const payload = {
+      id: form.dataset.editId || null,
       title: form.elements.title.value.trim(),
       category: form.elements.category.value,
       content: form.elements.content.value.trim()
     };
     try {
-      await api("create-post", "POST", payload);
-      form.reset();
-      toast("Publicación creada y añadida al feed.");
+      await api("save-post", "POST", payload);
+      resetPostForm();
+      toast(payload.id ? "Publicación actualizada." : "Publicación creada y añadida al feed.");
       await refreshAll();
       if (typeof window.loadPosts === "function") await window.loadPosts();
     } catch (error) { toast(error.message, true); }
