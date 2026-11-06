@@ -7,7 +7,7 @@
 
   const APP_ID = "odontoudec";
   const storageKey = userId => "ou-notifications-v1:" + userId;
-  const state = { user: null, cursor: null, seen: new Set(), timer: null, audioReady: false, sound: true, busy: false };
+  const state = { user: null, cursor: null, seen: new Set(), timer: null, audioReady: false, sound: false, busy: false };
   const routes = { private: "/mensajes.html", group: "/grupos-estudio.html", community: "/chat.html", post: "/#comunidad" };
 
   const style = document.createElement("style");
@@ -114,6 +114,7 @@
       ["private", "private_messages", q => q],
       ["groups", "study_group_messages", q => q],
       ["community", "chat_messages", q => q],
+      ["posts", "posts", q => q],
       ["comments", "post_comments", q => q],
       ["reactions", "post_reactions", q => q]
     ];
@@ -151,6 +152,10 @@
       m => notify("Nuevo mensaje en la comunidad", (m.display_name || "Un estudiante") + " escribió en el chat general.", routes.community, "cm:" + m.id));
   }
   async function checkPosts(user) {
+    state.cursor.posts = await pollTable("posts", "id,author_id,title,content,created_at", state.cursor.posts,
+      q => q.neq("author_id", user.id),
+      p => notify("Nueva publicación en la comunidad", p.title || (p.content || "Un estudiante compartió una publicación.").slice(0, 120), routes.post, "post:" + p.id));
+
     const { data: posts, error } = await db.from("posts").select("id").eq("author_id", user.id).limit(100);
     if (!error && posts?.length) {
       const ids = posts.map(p => p.id);
