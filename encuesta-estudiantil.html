@@ -41,9 +41,10 @@ footer{text-align:center;padding:25px;color:#82778b;font-size:.8rem}
 <a class="btn alt" id="loginLink" href="/#acceso">Ya tengo cuenta · Iniciar sesión</a>
 </div>
 </div>
+<div id="backendNotice" class="notice hidden"><strong>Fase de validación técnica</strong>El formulario y el backend ya están preparados en la rama de pruebas, pero aún no se han aplicado la migración ni desplegado la función. No registres respuestas reales hasta que se anuncie su activación.</div>
 <form id="survey" class="hidden" autocomplete="off">
 <div id="questions"></div>
-<div class="auth-actions"><button class="btn" id="submitSurvey" type="submit">Enviar mi participación</button></div>
+<div class="auth-actions"><button class="btn" id="submitSurvey" type="submit" disabled aria-disabled="true">Envío pendiente de activación</button></div>
 </form>
 <section id="adminPanel" class="question hidden" style="margin-top:18px"><div class="q-head"><span class="q-num">A</span><div><h2>Resultados administrativos</h2><p class="hint">Acceso restringido a administradores. Cada respuesta está asociada a la identidad del estudiante.</p></div></div><button class="btn alt" id="refreshResults" type="button">Actualizar resultados</button><p id="adminSummary" class="hint" aria-live="polite"></p><div id="adminResults"></div></section>
 
@@ -124,6 +125,7 @@ async function init(){
  if(data.session?.user){
   statusEl.innerHTML="<strong>Sesión iniciada.</strong> Ya puedes revisar las categorías de la encuesta.";
   document.getElementById("survey").classList.remove("hidden");
+  document.getElementById("backendNotice").classList.remove("hidden");
   await loadAdminResults();
  }else{
   statusEl.innerHTML="<strong>Tu participación requiere iniciar sesión.</strong> La invitación y las categorías son visibles, pero las respuestas están reservadas para estudiantes con cuenta.";
