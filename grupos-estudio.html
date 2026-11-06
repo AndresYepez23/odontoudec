@@ -173,21 +173,23 @@ async function loadMessages(){
  if(!activeGroup)return;
  const {data,error}=await db.from("study_group_messages").select("id,sender_id,content,created_at").eq("group_id",activeGroup).order("created_at",{ascending:true}).limit(150);
  if(error){$("chatLog").textContent="No se pudieron cargar los mensajes. Verifica la política de miembros.";return;}
- const messages=data||[],senderIds=[...new Set(messages.map(m=>m.sender_id))];
- let names={};
+ const messages=data||[],senderIds=[...new Set(messages.map(m=>m.sender_id))],ids=messages.map(m=>m.id);
+ let names={},reactionRows=[];
  if(senderIds.length){const {data:profiles}=await db.from("profiles").select("id,display_name").in("id",senderIds);(profiles||[]).forEach(p=>{names[p.id]=p.display_name||"Estudiante";});}
+ if(ids.length){const result=await db.from("chat_message_reactions").select("id,group_message_id,user_id,reaction").in("group_message_id",ids);if(!result.error)reactionRows=result.data||[];else console.warn("[OdontoUdeC reactions] No se pudieron cargar:",result.error);}
  const box=$("chatLog");box.replaceChildren();
  for(const m of messages){
   const article=document.createElement("article");article.className="message"+(m.sender_id===user.id?" mine":"");
   const meta=document.createElement("small");meta.textContent=(m.sender_id===user.id?"Tú":(names[m.sender_id]||"Estudiante"))+" · "+new Date(m.created_at).toLocaleString("es-CO",{dateStyle:"short",timeStyle:"short"});
   const body=document.createElement("div");body.className="message-body";
   await OdontoChatUI.renderMessageContent(body,m.content,db);
-  article.append(meta,body);box.append(article);
+  const host=document.createElement("div");host.className="message-reactions";
+  article.append(meta,body,host);box.append(article);
+  OdontoReactions.mount(host,{db,table:"chat_message_reactions",targetColumn:"group_message_id",targetId:m.id,userId:user.id,rows:reactionRows.filter(r=>String(r.group_message_id)===String(m.id)),onStatus:message=>say("chatStatus",message)});
  }
  if(!messages.length){const empty=document.createElement("p");empty.className="empty";empty.textContent="Este grupo aún no tiene mensajes. ¡Inicia la conversación!";box.append(empty);}
  box.scrollTop=box.scrollHeight;
-}
-$("messageForm").addEventListener("submit",async e=>{
+}$("messageForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!activeGroup)return;
  const input=$("messageInput"),text=input.value.trim();if(!text&&!composer.hasPending())return;
  const send=$("messageForm").querySelector('button[type="submit"]');input.disabled=true;send.disabled=true;composer.setBusy(true);
