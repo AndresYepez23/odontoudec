@@ -1,0 +1,33 @@
+/* Shared media and reaction controls for OdontoUdeC */
+.chat-compose-row{display:flex;align-items:center;gap:8px;min-width:0}
+.chat-compose-row input[type="text"],.chat-compose-row input:not([type]){flex:1;min-width:0}
+.chat-attach-btn{flex:0 0 auto!important;width:44px;min-width:44px;height:44px;padding:0!important;border:1px solid #e5d9ef!important;border-radius:12px!important;background:#f7f1fc!important;color:#32105f!important;box-shadow:none!important;font-size:20px!important}
+.chat-attach-btn:hover{background:#eee3f8!important}
+.chat-file-input{display:none!important}
+.chat-upload-status{min-height:0;margin:5px 0 0;color:#765d8d;font-size:12px}
+.chat-upload-status:empty{display:none}
+.chat-attachment-link{display:block;width:fit-content;max-width:min(100%,380px);margin:8px 0 4px;line-height:0;border-radius:13px;overflow:hidden;border:1px solid #e9e1f1;background:#faf8fc}
+.chat-attachment{display:block;width:auto;max-width:100%;max-height:280px;object-fit:contain;cursor:zoom-in}
+.reaction-bar{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin-top:8px}
+.reaction-chip{display:inline-flex!important;align-items:center;justify-content:center;gap:3px;min-width:29px;min-height:29px;padding:3px 5px!important;border:1px solid transparent!important;border-radius:999px!important;background:transparent!important;color:#65536f!important;box-shadow:none!important;cursor:pointer}
+.reaction-chip img{display:block;width:19px;height:19px;object-fit:contain}
+.reaction-count{font-size:11px;line-height:1;font-weight:750}
+.reaction-chip:hover:not(:disabled){background:#f5effa!important;border-color:#e4d7ee!important;transform:translateY(-1px)}
+.reaction-chip.is-active{background:#f0e7f8!important;border-color:#cbb4df!important;box-shadow:0 0 0 2px #f7f1fb!important}
+.reaction-chip:disabled{opacity:.75;cursor:default}
+.reaction-bar.compact{gap:2px}
+.reaction-bar.compact .reaction-chip{min-width:25px;min-height:25px;padding:2px 4px!important}
+.reaction-bar.compact .reaction-chip img{width:17px;height:17px}
+.post-reaction-host{margin:10px 0 2px;padding-top:8px;border-top:1px solid #eee6f4}
+.post-reaction-host .reaction-bar{gap:7px}
+.post-reaction-host .reaction-chip{min-width:38px;min-height:34px;padding:5px 8px!important;background:#faf7fd!important;border:1px solid #eee6f4!important}
+.post-reaction-host .reaction-chip img{width:21px;height:21px}
+.post-reaction-host .reaction-chip.is-active{background:#f0e7f8!important;border-color:#cbb4df!important}
+.message .chat-attachment-link,.bubble .chat-attachment-link,.msg .chat-attachment-link{max-width:min(100%,320px)}
+.message .reaction-bar,.bubble .reaction-bar,.msg .reaction-bar{align-self:flex-start}
+@media(max-width:600px){
+ .chat-attachment{max-height:230px}
+ .reaction-bar{gap:2px}
+ .reaction-chip{min-width:27px;min-height:27px}
+ .post-reaction-host .reaction-bar{gap:4px}
+}
