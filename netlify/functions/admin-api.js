@@ -272,16 +272,24 @@ async function getGroups() {
 async function handlePost(action, body, user) {
   if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error("invalid_body");
 
-  if (action === "create-post") {
+  if (action === "create-post" || action === "save-post") {
     const title = requireText(body.title, 3, 120, "title");
     const content = requireText(body.content, 1, 5000, "content");
     const categories = ["General", "Académico", "Pregunta", "Anuncio", "No al abuso"];
     const category = categories.includes(body.category) ? body.category : "Anuncio";
-    const result = await dbRequest("posts", {
-      method: "POST",
-      prefer: "return=representation",
-      body: [{ author_id: user.id, title, content, category }]
-    });
+    const id = body.id ? Number(body.id) : null;
+    if (id !== null && (!Number.isSafeInteger(id) || id < 1)) throw new Error("invalid_id");
+    const result = id
+      ? await dbRequest("posts?id=eq." + id, {
+          method: "PATCH",
+          prefer: "return=representation",
+          body: { title, content, category }
+        })
+      : await dbRequest("posts", {
+          method: "POST",
+          prefer: "return=representation",
+          body: [{ author_id: user.id, title, content, category }]
+        });
     return { ok: true, post: Array.isArray(result.data) ? result.data[0] : null };
   }
 
