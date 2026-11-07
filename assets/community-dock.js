@@ -1,11 +1,26 @@
 (()=>{
-if(new URLSearchParams(location.search).get('embed')==='1'||/\/(?:mensajes|chat|grupos-estudio)\.html$/i.test(location.pathname)||document.getElementById('ouCommunityDock'))return;
+if(new URLSearchParams(location.search).get('embed')==='1'||document.getElementById('ouCommunityDock'))return;
 const root=document.createElement('div');
 root.id='ouCommunityDock';
 root.innerHTML='<section id="ouDockPanel" aria-label="Centro de conversaciones"><header id="ouDockHead"><span class="ou-dock-brand"><img src="assets/download-removebg-preview%20(2).png" alt=""><strong>OdontoUdeC</strong></span><div style="display:flex;gap:6px"><button id="ouDockExpand" type="button" aria-label="Ampliar chat">↗</button><button id="ouDockClose" type="button" aria-label="Minimizar chat">—</button></div></header><nav id="ouDockTabs" aria-label="Conversaciones"><button type="button" data-page="chat.html" aria-selected="true">Comunidad</button><button type="button" data-page="mensajes.html" aria-selected="false">Privados</button><button type="button" data-page="grupos-estudio.html" aria-selected="false">Grupos</button></nav><iframe id="ouDockFrame" title="Conversaciones de OdontoUdeC" loading="lazy"></iframe><div id="ouDockGuest"><h3>Conecta con tu comunidad</h3><p>Inicia sesión o crea tu cuenta para participar en el chat general, enviar mensajes privados y entrar a grupos de estudio.</p><a href="index.html#acceso">Iniciar sesión o registrarme</a></div></section><button id="ouDockButton" type="button" aria-expanded="false"><span class="ou-icon">◉</span><span>Chat</span><span id="ouDockUnread" aria-label="Mensajes privados sin leer">0</span></button>';
 document.body.appendChild(root);
 const panel=root.querySelector('#ouDockPanel'),button=root.querySelector('#ouDockButton'),frame=root.querySelector('#ouDockFrame'),guest=root.querySelector('#ouDockGuest'),tabs=[...root.querySelectorAll('#ouDockTabs button')],tabbar=root.querySelector('#ouDockTabs');
-let logged=false,unreadTimer=null;
+let logged=false,unreadTimer=null,privateThreadInFrame=false;
+function syncPrivateThreadButton(){
+ // El botón flotante solo se oculta con un hilo privado abierto DENTRO del panel.
+ button.hidden=privateThreadInFrame&&panel.classList.contains('ou-open');
+}
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==frame.contentWindow)return;
+ if(!event.data||event.data.type!=='odontoudec:private-thread')return;
+ privateThreadInFrame=event.data.open===true;
+ syncPrivateThreadButton();
+});
+frame.addEventListener('load',()=>{
+ // Una navegación de pestaña no debe dejar el acceso al chat oculto.
+ if(!frame.src.includes('mensajes.html'))privateThreadInFrame=false;
+ syncPrivateThreadButton();
+});
 function setUnreadUnavailable(){const badge=root.querySelector('#ouDockUnread');badge.classList.remove('ou-visible');badge.removeAttribute('title');badge.setAttribute('aria-label','No se pudo consultar el contador de mensajes privados sin leer');}
 function syncOnboardingShortcut(){
  const menu=document.querySelector('.nav-more-menu'),existing=menu?.querySelector('[data-ou-onboarding-shortcut]');
@@ -49,12 +64,12 @@ async function refreshUnread(client,userId){
   badge.setAttribute('aria-label',total+' mensajes privados sin leer');
  }catch(e){setUnreadUnavailable();console.info('No se pudo actualizar el contador de mensajes:',e.message);}
 }
-function open(){panel.classList.add('ou-open');button.setAttribute('aria-expanded','true');if(logged&&!frame.hasAttribute('src'))frame.src='chat.html?embed=1';}
-function close(){panel.classList.remove('ou-open');panel.classList.remove('ou-expanded');button.setAttribute('aria-expanded','false');}
+function open(){panel.classList.add('ou-open');button.setAttribute('aria-expanded','true');if(logged&&!frame.hasAttribute('src'))frame.src='chat.html?embed=1';syncPrivateThreadButton();}
+function close(){panel.classList.remove('ou-open');panel.classList.remove('ou-expanded');button.setAttribute('aria-expanded','false');syncPrivateThreadButton();}
 button.addEventListener('click',()=>panel.classList.contains('ou-open')?close():open());
 root.querySelector('#ouDockClose').addEventListener('click',close);
 root.querySelector('#ouDockExpand').addEventListener('click',()=>panel.classList.toggle('ou-expanded'));
-tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(x=>x.setAttribute('aria-selected',String(x===t)));frame.src=t.dataset.page+'?embed=1';}));
+tabs.forEach(t=>t.addEventListener('click',()=>{privateThreadInFrame=false;syncPrivateThreadButton();tabs.forEach(x=>x.setAttribute('aria-selected',String(x===t)));frame.src=t.dataset.page+'?embed=1';}));
 async function init(){
  try{
   const client=window.ouSupabaseClient||window.supabase?.createClient?.('https://jqbrheonqqsiijrprsqs.supabase.co','sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8');
@@ -67,6 +82,7 @@ async function init(){
    tabbar.style.display=logged?'grid':'none';
    if(logged&&!frame.hasAttribute('src'))frame.src='chat.html?embed=1';
    if(!logged){
+    privateThreadInFrame=false;syncPrivateThreadButton();
     if(unreadTimer)clearInterval(unreadTimer);
     unreadTimer=null;
     frame.removeAttribute('src');
