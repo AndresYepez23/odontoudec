@@ -37,7 +37,8 @@ Deno.serve(pipeline(
         inputSchema:z.object({}),
         annotations:{readOnlyHint:true,openWorldHint:false}
       },async()=>{
-        const {data:{user},error}=await supabase.auth.getUser();
+        const jwt=(req.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');
+        const {data:{user},error}=await supabase.auth.getUser(jwt);
         if(error||!user) return result({error:"Debes conectar tu cuenta de OdontoUdeC mediante OAuth."});
         const [{data:profile},{data:admin,error:roleError}]=await Promise.all([
           supabase.from("profiles").select("display_name,username,semester,public_id,profile_visibility").eq("id",user.id).maybeSingle(),
