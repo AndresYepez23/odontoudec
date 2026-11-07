@@ -28,9 +28,12 @@ Se creó el bucket público `academic-library`.
 - Lectura de archivos: pública, para que los materiales publicados sean accesibles desde la Biblioteca.
 - Escritura, actualización y eliminación: solo cuentas con `public.is_admin()`.
 - Tipos: PDF, DOCX, PPTX, XLSX, JPEG, PNG y WebP.
-- Tamaño máximo: 4 MiB.
-- Herramienta `subir_archivo_biblioteca`: acepta contenido base64 y requiere `confirmar=true`. Valida extensión, MIME y firma básica del archivo, sube el objeto y registra su URL en `academic_resources`.
+- Tamaño máximo: 15 MiB.
+- `preparar_subida_archivo_biblioteca`: genera un enlace temporal de carga firmado (válido por 2 horas) y una página de selección de archivo en `/biblioteca-upload.html`. El token se conserva en el fragmento de la URL, no se envía al servidor web.
+- `confirmar_subida_archivo_biblioteca`: verifica que el objeto exista, comprueba tamaño y firma del contenido, muestra una vista previa y registra el recurso en `academic_resources` solo con `confirmar=true`.
+- El archivo queda en el bucket público, pero no aparece en el catálogo hasta que se confirme su ficha.
 - Los enlaces HTTPS externos pueden añadirse por cualquier usuario autenticado conforme a la política RLS preexistente; los archivos binarios se reservan a administradores.
+- El flujo evita enviar el archivo en base64 a través de MCP, lo que sería demasiado pesado para documentos habituales.
 
 ## Seguridad y auditoría
 - Todas las herramientas autenticadas requieren un usuario OAuth válido.
@@ -45,6 +48,7 @@ Se creó el bucket público `academic-library`.
 ## Migraciones aplicadas en Supabase
 - `20261107062958_odontoudec_mcp_community_actions_and_library_storage`
 - `20261107063014_expose_authenticated_mcp_audit_wrapper`
+- `20261107063701_increase_academic_library_upload_limit_15mb`
 
 ## Actualización del conector ChatGPT
 Tras desplegar nuevas herramientas, ChatGPT puede mantener en caché la lista anterior. Actualiza/reconecta el servidor **OdontoUdeC Cuentas** para que vuelva a ejecutar `tools/list` y descubra las nuevas operaciones. No elimines el plugin público **OdontoUdeC**.
