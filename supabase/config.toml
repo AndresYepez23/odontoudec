@@ -4,7 +4,11 @@ verify_jwt = false
 [functions.survey-submissions]
 verify_jwt = false
 
-# Servidor MCP público. Solo expone herramientas de lectura con datos no sensibles.
-# La autenticación de administrador deberá usar OAuth 2.1 en una fase separada.
+# MCP público: solo lectura pública.
 [functions.odontoudec-mcp]
+verify_jwt = false
+
+# MCP autenticado con OAuth; middleware propio verifica JWT y RLS.
+# Gateway no verifica JWT para permitir discovery OAuth sin sesión.
+[functions.odontoudec-mcp-cuentas]
 verify_jwt = false
