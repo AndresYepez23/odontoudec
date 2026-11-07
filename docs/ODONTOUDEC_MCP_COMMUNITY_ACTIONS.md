@@ -52,3 +52,5 @@ Se creó el bucket público `academic-library`.
 
 ## Actualización del conector ChatGPT
 Tras desplegar nuevas herramientas, ChatGPT puede mantener en caché la lista anterior. Actualiza/reconecta el servidor **OdontoUdeC Cuentas** para que vuelva a ejecutar `tools/list` y descubra las nuevas operaciones. No elimines el plugin público **OdontoUdeC**.
+
+- Al crear publicaciones y enviar mensajes generales, grupales o privados, el MCP invoca la Edge Function `onesignal-push` con el JWT del usuario para avisar a los destinatarios suscritos. Si OneSignal no tiene destinatarios, la acción de comunidad igualmente se conserva.
