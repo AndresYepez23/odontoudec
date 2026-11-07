@@ -1,8 +1,10 @@
-# OdontoUdeC MCP Cuentas — acciones de comunidad v0.3
+# OdontoUdeC MCP Cuentas — acciones de comunidad v0.4.1
 
 Endpoint: `https://jqbrheonqqsiijrprsqs.supabase.co/functions/v1/odontoudec-mcp-cuentas`
 
 El servidor requiere OAuth de Supabase y ejecuta operaciones con el JWT de la cuenta conectada. No usa una clave service-role en el MCP.
+
+El servidor registra 22 herramientas MCP entre consultas, navegación y acciones. Versión desplegada: `0.4.1`.
 
 ## Herramientas de lectura
 - `mi_cuenta_odontoudec`: perfil propio y rol real.
