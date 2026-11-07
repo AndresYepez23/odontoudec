@@ -8,7 +8,7 @@ const panel=root.querySelector('#ouDockPanel'),button=root.querySelector('#ouDoc
 let logged=false,unreadTimer=null,privateThreadInFrame=false;
 function syncPrivateThreadButton(){
  // El botón flotante solo se oculta con un hilo privado abierto DENTRO del panel.
- button.hidden=privateThreadInFrame&&panel.classList.contains('ou-open');
+ button.style.display=privateThreadInFrame&&panel.classList.contains('ou-open')?'none':'';
 }
 window.addEventListener('message',event=>{
  if(event.origin!==location.origin||event.source!==frame.contentWindow)return;
