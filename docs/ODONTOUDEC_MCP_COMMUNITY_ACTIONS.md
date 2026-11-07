@@ -1,54 +1,69 @@
-# OdontoUdeC MCP Cuentas — acciones de comunidad v0.3
+# OdontoUdeC MCP — versión final 0.5.0
 
 Endpoint: `https://jqbrheonqqsiijrprsqs.supabase.co/functions/v1/odontoudec-mcp-cuentas`
 
-El servidor requiere OAuth de Supabase y ejecuta operaciones con el JWT de la cuenta conectada. No usa una clave service-role en el MCP.
+El servidor requiere OAuth de Supabase y ejecuta operaciones con el JWT de la cuenta conectada. Utiliza las políticas RLS y las funciones de autorización del proyecto. No utiliza `service_role` para las operaciones normales del MCP.
 
-## Herramientas de lectura
-- `mi_cuenta_odontoudec`: perfil propio y rol real.
-- `navegar_odontoudec`: rutas conocidas; panel de administración solo para admins.
-- `resumen_administrativo_odontoudec`: contadores agregados solo para admins.
-- `trafico_administrativo_odontoudec`: resumen PostHog solo para admins.
-- `listar_publicaciones`, `listar_chat_general`, `listar_grupos_estudio`.
-- `listar_mensajes_grupo`: RLS comprueba que el usuario pertenezca al grupo.
-- `listar_conversaciones_privadas` y `leer_mensajes_privados`: RLS comprueba que el usuario sea participante.
-- `listar_recursos_biblioteca`: recursos académicos públicos.
+## Identidad y permisos por rol
 
-## Herramientas de escritura con confirmación
-Las herramientas de escritura devuelven una vista previa y no escriben nada mientras `confirmar=false`. El cliente debe volver a invocarlas con `confirmar=true` tras la aprobación explícita del usuario.
-- `crear_publicacion`, `comentar_publicacion`.
-- `enviar_mensaje_chat_general`, `enviar_mensaje_grupo`, `enviar_mensaje_privado`.
-- `crear_grupo_estudio` (el trigger existente registra al creador como propietario).
-- `unirse_grupo_estudio` (solo grupos abiertos, de acuerdo con RLS).
-- `iniciar_conversacion_privada` (solo perfiles públicos identificados por ID público).
-- `agregar_recurso_biblioteca` (enlace HTTPS; la ficha será pública).
+- En cada solicitud, el servidor consulta `public.is_admin()` con la sesión OAuth actual.
+- Las cuentas administradoras reciben las herramientas administrativas.
+- Las cuentas estudiantiles no reciben en su catálogo MCP las herramientas de panel, tráfico, resultados de encuestas ni carga de archivos administrativos.
+- La herramienta `mi_cuenta_odontoudec` identifica el rol real y el perfil propio.
+- La ruta `admin` tampoco aparece entre las opciones de navegación de estudiantes.
+- Las herramientas de escritura mantienen confirmación explícita y verificaciones de permisos en el servidor.
+- Las instrucciones MCP presentan el servicio como el asistente oficial de OdontoUdeC, con respuestas institucionales y naturales.
 
-## Subida de archivos a Biblioteca
-Se creó el bucket público `academic-library`.
-- Lectura de archivos: pública, para que los materiales publicados sean accesibles desde la Biblioteca.
-- Escritura, actualización y eliminación: solo cuentas con `public.is_admin()`.
+## Literatura científica
+
+La herramienta `buscar_literatura_cientifica` reutiliza las cuatro fuentes de la sección pública `/literatura-cientifica.html`:
+- PubMed / NCBI (E-utilities).
+- Europe PMC.
+- OpenAlex.
+- Crossref.
+
+Permite buscar en una fuente o en todas, filtrar por fecha y ordenar por relevancia o recencia. Los tipos de publicación (revisión sistemática, metaanálisis, ensayo, revisión, reporte de caso y guía clínica) se aplican a PubMed, como en el buscador web. Los resultados incluyen metadatos, autores, revista, año, DOI/PMID, resúmenes cuando la fuente los proporciona y enlaces de texto completo de acceso abierto cuando están identificados.
+
+`consultar_articulo_cientifico` permite recuperar una ficha y el resumen disponible mediante DOI o PMID. El servidor no descarga ni presenta como abierto un texto completo que no esté disponible en la fuente.
+
+## Herramientas de comunidad
+
+- Publicaciones y comentarios.
+- Chat general.
+- Grupos de estudio: consulta, creación y unión a grupos abiertos.
+- Mensajes grupales.
+- Conversaciones privadas y mensajería privada.
+- Biblioteca: búsqueda de recursos y registro de enlaces HTTPS.
+- Notificaciones: publicaciones y mensajes invocan `onesignal-push` con el JWT del usuario; el registro principal no falla si no hay destinatarios suscritos.
+
+## Biblioteca: carga de archivos
+
+El bucket `academic-library` tiene lectura pública para materiales publicados y escritura reservada a administradores.
 - Tipos: PDF, DOCX, PPTX, XLSX, JPEG, PNG y WebP.
 - Tamaño máximo: 15 MiB.
-- `preparar_subida_archivo_biblioteca`: genera un enlace temporal de carga firmado (válido por 2 horas) y una página de selección de archivo en `/biblioteca-upload.html`. El token se conserva en el fragmento de la URL, no se envía al servidor web.
-- `confirmar_subida_archivo_biblioteca`: verifica que el objeto exista, comprueba tamaño y firma del contenido, muestra una vista previa y registra el recurso en `academic_resources` solo con `confirmar=true`.
-- El archivo queda en el bucket público, pero no aparece en el catálogo hasta que se confirme su ficha.
-- Los enlaces HTTPS externos pueden añadirse por cualquier usuario autenticado conforme a la política RLS preexistente; los archivos binarios se reservan a administradores.
-- El flujo evita enviar el archivo en base64 a través de MCP, lo que sería demasiado pesado para documentos habituales.
+- `preparar_subida_archivo_biblioteca` crea un enlace firmado temporal (2 horas) y una página segura de carga.
+- `confirmar_subida_archivo_biblioteca` comprueba existencia, tamaño y firma del archivo, muestra vista previa y publica la ficha solo con `confirmar=true`.
+- Los archivos se almacenan en un bucket público; no se deben subir historiales clínicos, datos de pacientes ni documentos personales.
+
+## Encuestas
+
+- `analizar_resultados_encuesta` está disponible solo para administradores.
+- Consulta la Edge Function existente `survey-submissions` y devuelve conteos y porcentajes agregados de la encuesta `reconocimientos-2026`.
+- No devuelve nombres, identificadores ni respuestas individuales. Para las preguntas abiertas solo devuelve conteo de respuestas y longitud media.
+- La publicación de encuestas nuevas todavía no es dinámica: el formulario y sus reglas actuales están definidos en archivos estáticos y en la función de envío. Para crear encuestas desde ChatGPT sin despliegues futuros se necesitaría una única actualización de arquitectura: catálogo/configuración de encuestas en base de datos, validación genérica en backend y formulario web que consuma esa configuración. Después de esa actualización, las encuestas futuras podrían crearse y publicarse mediante operaciones MCP sin volver a desplegar el frontend.
 
 ## Seguridad y auditoría
-- Todas las herramientas autenticadas requieren un usuario OAuth válido.
-- La identidad se obtiene de Supabase Auth; el rol admin se valida con `public.is_admin()` en cada herramienta administrativa.
-- Las lecturas y escrituras de mensajes, grupos, publicaciones y recursos usan el cliente Supabase ligado al usuario, por lo que se mantienen las políticas RLS existentes.
-- Nunca se usa el rol service-role en el MCP.
-- Se creó `private.mcp_action_audit`, sin acceso directo de anon/authenticated, y una función acotada `public.mcp_log_action` (EXECUTE solo para authenticated) que registra actor, acción y destino; no almacena texto de mensajes.
-- El bucket de Biblioteca es público por diseño: no subir historiales clínicos, datos de pacientes, documentos personales ni material con derechos no autorizados.
-- Las acciones de escritura no se ejecutan sin la confirmación booleana explícita.
-- La subida de archivos requiere rol administrador; los estudiantes pueden añadir enlaces HTTPS con las reglas existentes.
 
-## Migraciones aplicadas en Supabase
-- `20261107062958_odontoudec_mcp_community_actions_and_library_storage`
-- `20261107063014_expose_authenticated_mcp_audit_wrapper`
-- `20261107063701_increase_academic_library_upload_limit_15mb`
+- La identidad se obtiene de Supabase Auth.
+- Los permisos administrativos se verifican con `public.is_admin()`, no con metadatos editables por el usuario.
+- Los mensajes, publicaciones, grupos y recursos utilizan el cliente Supabase asociado al usuario y las políticas RLS existentes.
+- La bitácora `private.mcp_action_audit` registra actor, acción y destino; no almacena el texto de los mensajes.
+- Las herramientas de escritura muestran vista previa y requieren aprobación explícita.
+- Los resultados de encuestas que entrega el MCP son agregados y no contienen identidades.
 
-## Actualización del conector ChatGPT
-Tras desplegar nuevas herramientas, ChatGPT puede mantener en caché la lista anterior. Actualiza/reconecta el servidor **OdontoUdeC Cuentas** para que vuelva a ejecutar `tools/list` y descubra las nuevas operaciones. No elimines el plugin público **OdontoUdeC**.
+## Versión
+
+- Versión del servidor: `0.5.0`.
+- Herramientas para administradores: 25.
+- Herramientas para estudiantes: 20; no se listan herramientas administrativas.
+- No se requieren cambios de esquema ni despliegues de Netlify para esta versión. Se despliega únicamente la Edge Function MCP.
