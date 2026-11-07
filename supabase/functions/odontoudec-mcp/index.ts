@@ -19,7 +19,7 @@ const PAGES: Record<string,string> = { inicio:"/", academia:"/academia.html", ba
 function response(data: Record<string,unknown>) { return { content:[{type:"text" as const,text:JSON.stringify(data)}],structuredContent:data }; }
 
 const handler = createMcpHandler(() => {
-  const server = new McpServer({name:"OdontoUdeC",version:"0.1.0"});
+  const server = new McpServer({name:"OdontoUdeC",version:"0.2.0"});
 
   server.registerTool("explorar_odontoudec",{
     title:"Explorar OdontoUdeC",
@@ -64,6 +64,47 @@ const handler = createMcpHandler(() => {
       return response({pagina,url,http_status:r.status,disponible:r.ok,nota:"Solo comprueba disponibilidad HTTP de la página pública."});
     }catch{return response({pagina,url,disponible:false,error:"La página no respondió."});}
   });
+
+  // Snapshot de interfaz pública. No maneja cookies ni ejecuta JavaScript:
+  // las partes privadas y dinámicas deben atenderse con herramientas OAuth.
+  server.registerTool("inspeccionar_interfaz_publica", {
+    title: "Inspeccionar una sección pública de OdontoUdeC",
+    description: "Lee títulos, encabezados y enlaces visibles en el HTML público actual de una sección para orientar la navegación. No accede a una sesión de usuario ni hace clic en botones.",
+    inputSchema: z.object({
+      pagina: z.enum(["inicio","academia","banco","chat","literatura","encuesta"])
+    }),
+    annotations: {readOnlyHint:true,openWorldHint:true}
+  },async({pagina})=>{
+    const pageUrl=BASE+PAGES[pagina];
+    try {
+      const r=await fetch(pageUrl,{method:"GET",redirect:"follow",signal:AbortSignal.timeout(8000)});
+      if(!r.ok)return response({pagina,url:pageUrl,error:"La sección no respondió.",codigo:r.status});
+      const html=(await r.text()).slice(0,500000);
+      const clean=(s:string)=>s.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi," ")
+        .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi," ")
+        .replace(/<[^>]+>/g," ").replace(/&nbsp;/gi," ")
+        .replace(/&amp;/gi,"&").replace(/&quot;/gi,'"')
+        .replace(/&#39;/gi,"'").replace(/\s+/g," ").trim().slice(0,180);
+      const title=clean(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||"");
+      const htmlNoScripts=html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi," ")
+        .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi," ");
+      const headings=[...htmlNoScripts.matchAll(/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/gi)]
+        .map(m=>clean(m[1])).filter(Boolean).slice(0,25);
+      const links=[...htmlNoScripts.matchAll(/<a\b[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)]
+        .map(m=>{
+          try {
+            const target=new URL(m[1],pageUrl);
+            if(target.origin!==BASE || !["https:","http:"].includes(target.protocol))return null;
+            return {nombre:clean(m[2])||"Enlace interno",url:target.href};
+          }catch{return null;}
+        }).filter(Boolean).slice(0,32);
+      return response({
+        pagina,url:pageUrl,titulo:title,encabezados:headings,enlaces_internos:links,
+        alcance:"Instantánea del HTML público sin JavaScript ni sesión. Las vistas privadas, datos dinámicos y botones requieren herramientas autenticadas."
+      });
+    }catch{return response({pagina,url:pageUrl,error:"No fue posible inspeccionar la página."});}
+  });
+
   return server;
 });
 
