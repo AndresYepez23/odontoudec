@@ -105,3 +105,24 @@ html:not(.ou-embedded) body.ou-group-chat-open #app>.fine{display:none!important
 .ou-reaction-option img{display:block;width:27px;height:27px;object-fit:contain}
 .ou-reaction-option-count{min-height:10px;font-size:9px;line-height:1;font-weight:800}
 @media(max-width:480px){.ou-reactions-menu{gap:1px;padding:4px}.ou-reaction-option{width:35px;height:40px}.ou-reaction-option img{width:25px;height:25px}}
+
+
+/* Mensajería 2026-11: un único flujo móvil, lista O conversación, nunca ambas. */
+@media(max-width:720px){
+ body:not(.ou-private-open) #app.layout:not(.hidden)>.thread{display:none!important}
+ body:not(.ou-private-open) #app.layout:not(.hidden){display:block}
+ body.ou-private-open>header{display:none!important}
+ body.ou-private-open main{height:100dvh!important;min-height:0!important;margin:0 auto!important;padding:max(8px,env(safe-area-inset-top)) 8px max(18px,env(safe-area-inset-bottom))!important;overflow:hidden!important}
+ html.ou-embedded body.ou-private-open main{height:100%!important;padding:6px!important}
+ body.ou-private-open #app.layout:not(.hidden){flex:1 1 auto;height:100%;min-height:0!important;overflow:hidden}
+ body.ou-private-open #app.layout:not(.hidden)>.thread{display:flex!important;flex-direction:column;width:100%;height:100%;min-height:0;overflow:hidden}
+ body.ou-private-open .thread-head{display:flex;align-items:center;gap:9px;flex-wrap:nowrap;padding-bottom:9px}
+ body.ou-private-open .thread-head #backInbox{display:inline-flex!important;flex:0 0 auto}
+ body.ou-private-open .thread-head .ou-thread-brand{flex:0 0 auto}
+ body.ou-private-open .thread-head .ou-thread-brand>span{display:none!important}
+ body.ou-private-open .thread-head .ou-thread-brand img{width:31px!important;height:31px!important;max-width:31px!important;max-height:31px!important;flex-basis:31px!important}
+ body.ou-private-open .thread-head #threadTitle{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1rem}
+ body.ou-private-open .thread-head #threadStatus{display:none!important}
+ body.ou-private-open #messages{flex:1 1 0;height:0;min-height:0;max-height:none;overflow-y:auto}
+ body.ou-private-open #sendForm{flex:0 0 auto;width:100%;margin:0;padding-top:8px}
+}

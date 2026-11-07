@@ -164,3 +164,9 @@ button, input, select { font: inherit; }
 .source-picker select{grid-column:1;min-height:43px;padding:9px 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);font:inherit;font-weight:650}
 .source-picker small{grid-column:2;grid-row:1;color:var(--muted);font-size:.8rem;font-weight:500;line-height:1.4}
 @media(max-width:600px){.source-picker{grid-template-columns:1fr;gap:7px}.source-picker select,.source-picker small{grid-column:1;grid-row:auto}}
+
+/* Firma institucional consistente con las otras páginas de OdontoUdeC. */
+.site-header .brand{display:inline-flex;flex-direction:row;align-items:center;gap:10px;min-width:0}
+.site-header .brand-logo{width:43px;height:43px;flex:0 0 43px;object-fit:contain;border-radius:9px}
+.site-header .brand-copy{display:flex;flex-direction:column;min-width:0}
+@media(max-width:430px){.site-header .brand-logo{width:36px;height:36px;flex-basis:36px}.site-header .brand-mark{font-size:1rem}.site-header .brand-subtitle{font-size:.61rem}}
