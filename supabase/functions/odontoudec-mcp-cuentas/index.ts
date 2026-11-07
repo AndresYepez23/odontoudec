@@ -22,8 +22,16 @@ function result(data: Record<string,unknown>) {
 Deno.serve(pipeline(
   [withOAuthProtectedResource(),withSupabase({auth:"user"})],
   async (req,{supabase})=>{
+    const {data:adminRoleFlag,error:adminRoleError}=await supabase.rpc("is_admin");
+    const isAdminForRequest=!adminRoleError && adminRoleFlag===true;
     const handler=createMcpHandler(()=>{
-      const server=new McpServer({name:"OdontoUdeC Cuentas",version:"0.4.0"});
+      const server=new McpServer(
+        {name:"OdontoUdeC Cuentas",version:"0.5.0"},
+        {instructions:`Eres el asistente oficial de OdontoUdeC. Habla en español claro, profesional, cercano y como un servicio institucional ya establecido; no describas el producto como un desarrollo personal ni menciones ramas, despliegues o conversaciones de implementación.
+Antes de responder a una solicitud personalizada por permisos, consulta mi_cuenta_odontoudec y utiliza el rol verificado por Supabase. Las herramientas administrativas solo se registran para cuentas con rol administrador; si la cuenta es estudiante, presenta únicamente las funciones estudiantiles y no menciones opciones internas del panel administrativo salvo que el usuario pregunte explícitamente por ellas.
+Para búsquedas científicas, utiliza buscar_literatura_cientifica y, cuando se proporcione DOI o PMID, consultar_articulo_cientifico. Distingue metadatos, resumen y texto completo; no afirmes haber leído el texto completo si solo recibiste el resumen. Identifica la fuente, DOI/PMID y disponibilidad de acceso abierto.
+Las acciones que escriben o publican deben mostrar una vista previa y esperar aprobación explícita antes de confirmar. Respeta siempre los permisos de Supabase y no reveles respuestas individuales de encuestas cuando la herramienta entregue únicamente resultados agregados.`}
+      );
 
       const checkAdmin=async()=>{
         const {data,error}=await supabase.rpc("is_admin");
@@ -55,7 +63,7 @@ Deno.serve(pipeline(
       server.registerTool("navegar_odontoudec",{
         title:"Navegar secciones autorizadas de OdontoUdeC",
         description:"Localiza una sección de la interfaz para abrirla. La herramienta devuelve el enlace directo y verifica el permiso para el panel de administración; NO controla visualmente una pestaña ni hace clic en ella.",
-        inputSchema:z.object({seccion:z.enum(["inicio","academia","trivia","odontobot","banco","chat","grupos","literatura","encuestas","espacio","admin"])}),
+        inputSchema:z.object({seccion:isAdminForRequest?z.enum([...USER_PAGES,"admin"] as const):z.enum(USER_PAGES)}),
         annotations:{readOnlyHint:true,openWorldHint:false}
       },async({seccion})=>{
         if(seccion==="admin" && !(await checkAdmin()))
@@ -67,6 +75,7 @@ Deno.serve(pipeline(
         });
       });
 
+      if(isAdminForRequest){
       server.registerTool("resumen_administrativo_odontoudec",{
         title:"Resumen del panel administrador",
         description:"Solo para administradores autenticados: devuelve contadores agregados reales de perfiles, publicaciones, grupos, encuestas y reportes. No entrega datos de pacientes ni mensajes.",
@@ -106,6 +115,8 @@ Deno.serve(pipeline(
       });
 
 
+      }
+
       const bearerToken=(req.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");
       const requireUser=async()=>{
         if(!bearerToken) throw new Error("Conecta tu cuenta de OdontoUdeC para continuar.");
@@ -125,6 +136,13 @@ Deno.serve(pipeline(
         });
         return !error;
       };
+      const notifyPush=async(eventType:string,recordId:string|number)=>{
+        try{
+          const {data,error}=await supabase.functions.invoke("onesignal-push",{body:{event_type:eventType,record_id:String(recordId)},headers:{Authorization:"Bearer "+bearerToken}});
+          if(error||data?.error)return {sent:false};
+          return {sent:data?.sent===true,recipients:Number(data?.recipients||0)};
+        }catch{return {sent:false};}
+      };
       const safeDbError=(error:any,fallback:string)=> {
         const code=String(error?.code||"");
         if(code==="42501"||code==="PGRST301") return "Tu cuenta no tiene permisos para realizar esta operación.";
@@ -136,6 +154,187 @@ Deno.serve(pipeline(
         const {data}=await supabase.from("profiles").select("display_name,username,semester,public_id").eq("id",userId).maybeSingle();
         return data??null;
       };
+
+
+      const literatureClean=(value:unknown)=>String(value??"").replace(/<[^>]*>/g," ").replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&").replace(/&lt;/gi,"<").replace(/&gt;/gi,">").replace(/&quot;/gi,'"').replace(/&#39;|&apos;/gi,"'").replace(/\s+/g," ").trim();
+      const literatureFetch=async(url:string,source:string)=>{
+        const response=await fetch(url,{headers:{Accept:"application/json","User-Agent":"OdontoUdeC/0.5 (https://odontoudec.online)"},signal:AbortSignal.timeout(12000)});
+        if(!response.ok)throw new Error(source+" respondió HTTP "+response.status);
+        return await response.json();
+      };
+      const literatureFromDate=(years:number)=>{
+        const date=new Date();date.setFullYear(date.getFullYear()-years);
+        return date.toISOString().slice(0,10);
+      };
+      const literatureToday=()=>new Date().toISOString().slice(0,10);
+      const literatureTypeTerms:Record<string,string>={
+        revision_sistematica:'"systematic review"[Publication Type]',
+        metaanalisis:'"meta-analysis"[Publication Type]',
+        ensayo_controlado_aleatorizado:'"randomized controlled trial"[Publication Type]',
+        ensayo_clinico:'"clinical trial"[Publication Type]',
+        revision:'"review"[Publication Type]',
+        reporte_caso:'"case reports"[Publication Type]',
+        guia_clinica:'"practice guideline"[Publication Type]'
+      };
+      const literatureSources=["pubmed","europepmc","openalex","crossref"] as const;
+      type LiteratureSource=typeof literatureSources[number];
+      type LiteratureArticle={titulo:string;autores:string;revista:string;anio:string|number;resumen:string;doi:string;pmid:string;pmcid:string;fuente:string;fuentes:string[];url_ficha:string;url_texto_completo:string;acceso_abierto:boolean;tipo_publicacion:string};
+      const literatureSearchProvider=async(source:LiteratureSource,query:string,years:number,sort:string,type:string,limit:number):Promise<{source:string,total:number,articles:LiteratureArticle[]}>=>{
+        const today=literatureToday(),from=years?literatureFromDate(years):"";
+        if(source==="pubmed"){
+          let term=query;
+          if(type&&literatureTypeTerms[type])term="("+term+") AND "+literatureTypeTerms[type];
+          const params=new URLSearchParams({db:"pubmed",term,retmode:"json",retmax:String(limit),sort:sort==="recientes"?"pub_date":"relevance",tool:"OdontoUdeC"});
+          if(years){const fromDate=new Date();fromDate.setFullYear(fromDate.getFullYear()-years);const fmt=(d:Date)=>d.getFullYear()+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+String(d.getDate()).padStart(2,"0");params.set("datetype","pdat");params.set("mindate",fmt(fromDate));params.set("maxdate",fmt(new Date()));}
+          const search=await literatureFetch("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?"+params.toString(),"PubMed");
+          const ids=Array.isArray(search?.esearchresult?.idlist)?search.esearchresult.idlist.map(String):[];
+          const total=Number(search?.esearchresult?.count||0);
+          if(!ids.length)return {source:"PubMed",total,articles:[]};
+          const summaryParams=new URLSearchParams({db:"pubmed",id:ids.join(","),retmode:"json",tool:"OdontoUdeC"});
+          const summary=await literatureFetch("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?"+summaryParams.toString(),"PubMed");
+          const uids=Array.isArray(summary?.result?.uids)?summary.result.uids:ids;
+          const articles:LiteratureArticle[]=uids.map((id:string)=>{
+            const item=summary?.result?.[id]||{},articleIds=Array.isArray(item.articleids)?item.articleids:[];
+            const doi=String(articleIds.find((x:any)=>x.idtype==="doi")?.value||"");
+            const pmcid=String(articleIds.find((x:any)=>x.idtype==="pmc")?.value||"");
+            const year=String(item.pubdate||"").match(/\b(?:19|20)\d{2}\b/)?.[0]||"";
+            const authors=Array.isArray(item.authors)?item.authors.map((x:any)=>x.name).filter(Boolean).slice(0,5).join(", "):"";
+            return {titulo:literatureClean(item.title)||"Título no disponible",autores:authors||"Autores no especificados",revista:literatureClean(item.fulljournalname||item.source)||"Revista no especificada",anio:year,resumen:"",doi,pmid:String(id),pmcid,fuente:"PubMed",fuentes:["PubMed"],url_ficha:"https://pubmed.ncbi.nlm.nih.gov/"+encodeURIComponent(id)+"/",url_texto_completo:pmcid?"https://pmc.ncbi.nlm.nih.gov/articles/"+encodeURIComponent(pmcid)+"/":"",acceso_abierto:Boolean(pmcid),tipo_publicacion:Array.isArray(item.pubtype)?item.pubtype.join("; "):""};
+          });
+          return {source:"PubMed",total,articles};
+        }
+        if(source==="europepmc"){
+          let q="("+query+")";
+          if(years)q+=" AND FIRST_PDATE:["+from+" TO "+today+"]";
+          if(sort==="recientes")q+=" sort_date:y";
+          const params=new URLSearchParams({query:q,format:"json",resultType:"core",pageSize:String(limit),cursorMark:"*"});
+          const data=await literatureFetch("https://www.ebi.ac.uk/europepmc/webservices/rest/search?"+params.toString(),"Europe PMC");
+          const rows=data?.resultList?.result||[];
+          const articles:LiteratureArticle[]=rows.map((item:any)=>{
+            const links=item.fullTextUrlList?.fullTextUrl;
+            const linkList=Array.isArray(links)?links:(links?[links]:[]);
+            const fullText=linkList.find((x:any)=>x?.url)?.url||"";
+            const pmid=String(item.pmid||""),pmcid=String(item.pmcid||""),doi=String(item.doi||"");
+            const open=String(item.isOpenAccess||"").toUpperCase()==="Y";
+            return {titulo:literatureClean(item.title)||"Título no disponible",autores:literatureClean(item.authorString)||"Autores no especificados",revista:literatureClean(item.journalTitle)||"Revista no especificada",anio:String(item.firstPublicationDate||"").slice(0,4),resumen:literatureClean(item.abstractText).slice(0,3000),doi,pmid,pmcid,fuente:"Europe PMC",fuentes:["Europe PMC"],url_ficha:pmid?"https://europepmc.org/article/MED/"+encodeURIComponent(pmid):(doi?"https://europepmc.org/article/MED/"+encodeURIComponent(doi):"https://europepmc.org/"),url_texto_completo:open?(fullText||(pmcid?"https://europepmc.org/articles/"+encodeURIComponent(pmcid):"")):"",acceso_abierto:open,tipo_publicacion:literatureClean(item.pubType)};
+          });
+          return {source:"Europe PMC",total:Number(data?.hitCount||0),articles};
+        }
+        if(source==="openalex"){
+          const params=new URLSearchParams({search:query,per_page:String(limit),page:"1",select:"id,doi,title,publication_year,authorships,primary_location,open_access,best_oa_location,type,abstract_inverted_index"});
+          if(years)params.set("filter","from_publication_date:"+from);
+          params.set("sort",sort==="recientes"?"publication_date:desc":"relevance_score:desc");
+          const data=await literatureFetch("https://api.openalex.org/works?"+params.toString(),"OpenAlex");
+          const articles:LiteratureArticle[]=(data?.results||[]).map((item:any)=>{
+            const authors=(item.authorships||[]).slice(0,5).map((a:any)=>a.author?.display_name).filter(Boolean).join(", ");
+            const doi=String(item.doi||"").replace(/^https?:\/\/doi\.org\//i,"");
+            const oa=item.open_access||{},location=item.best_oa_location||{};
+            let abstract="";
+            const index=item.abstract_inverted_index;
+            if(index&&typeof index==="object"){
+              const words:Array<[number,string]>=[];
+              for(const [word,positions] of Object.entries(index) as Array<[string,any]>){if(Array.isArray(positions))for(const position of positions)if(Number.isInteger(position))words.push([position,word]);}
+              words.sort((a,b)=>a[0]-b[0]);abstract=words.map(x=>x[1]).join(" ").slice(0,3000);
+            }
+            return {titulo:literatureClean(item.title)||"Título no disponible",autores:authors||"Autores no especificados",revista:literatureClean(item.primary_location?.source?.display_name)||"Fuente no especificada",anio:item.publication_year||"",resumen:abstract,doi,pmid:"",pmcid:"",fuente:"OpenAlex",fuentes:["OpenAlex"],url_ficha:String(item.id||"https://openalex.org/"),url_texto_completo:oa.is_oa?String(location.landing_page_url||location.pdf_url||oa.oa_url||""):"",acceso_abierto:Boolean(oa.is_oa),tipo_publicacion:literatureClean(item.type)};
+          });
+          return {source:"OpenAlex",total:Number(data?.meta?.count||0),articles};
+        }
+        const params=new URLSearchParams({"query.bibliographic":query,rows:String(limit),offset:"0",select:"DOI,title,author,published,container-title,URL,type,abstract"});
+        if(years)params.set("filter","from-pub-date:"+from);
+        if(sort==="recientes"){params.set("sort","published");params.set("order","desc");}
+        const data=await literatureFetch("https://api.crossref.org/works?"+params.toString(),"Crossref");
+        const message=data?.message||{},items=message.items||[];
+        const articles:LiteratureArticle[]=items.map((item:any)=>{
+          const authors=(item.author||[]).slice(0,5).map((a:any)=>[a.given,a.family].filter(Boolean).join(" ")).filter(Boolean).join(", ");
+          const dateParts=item.published?.["date-parts"]?.[0]||[];
+          const doi=String(item.DOI||"");
+          return {titulo:literatureClean(Array.isArray(item.title)?item.title[0]:item.title)||"Título no disponible",autores:authors||"Autores no especificados",revista:literatureClean(Array.isArray(item["container-title"])?item["container-title"][0]:"")||"Revista no especificada",anio:dateParts[0]||"",resumen:literatureClean(item.abstract).slice(0,3000),doi,pmid:"",pmcid:"",fuente:"Crossref",fuentes:["Crossref"],url_ficha:doi?"https://doi.org/"+encodeURIComponent(doi):String(item.URL||"https://www.crossref.org/"),url_texto_completo:"",acceso_abierto:false,tipo_publicacion:literatureClean(item.type)};
+        });
+        return {source:"Crossref",total:Number(message["total-results"]||0),articles};
+      };
+
+      server.registerTool("buscar_literatura_cientifica",{
+        title:"Buscar literatura científica",
+        description:"Busca artículos odontológicos y biomédicos en las mismas cuatro fuentes de la sección Literatura Científica de OdontoUdeC: PubMed, Europe PMC, OpenAlex y Crossref. Devuelve metadatos, resúmenes disponibles, DOI/PMID y enlaces de acceso abierto. Usa esta herramienta para búsquedas bibliográficas, evidencia clínica, revisiones y artículos para seminarios. El filtro por tipo de publicación se aplica a PubMed; las fechas se aplican a todas las fuentes. No descarga ni garantiza el texto completo.",
+        inputSchema:z.object({
+          consulta:z.string().min(2).max(180),
+          fuente:z.enum(["todas","pubmed","europepmc","openalex","crossref"]).default("todas"),
+          periodo_anios:z.union([z.literal(0),z.literal(1),z.literal(5),z.literal(10)]).default(0),
+          orden:z.enum(["relevancia","recientes"]).default("relevancia"),
+          tipo_publicacion:z.enum(["ninguno","revision_sistematica","metaanalisis","ensayo_controlado_aleatorizado","ensayo_clinico","revision","reporte_caso","guia_clinica"]).default("ninguno"),
+          limite_por_fuente:z.number().int().min(1).max(5).default(3)
+        }),
+        annotations:{readOnlyHint:true,openWorldHint:true}
+      },async({consulta,fuente,periodo_anios,orden,tipo_publicacion,limite_por_fuente})=>{
+        const sources:LiteratureSource[]=fuente==="todas"?[...literatureSources]:[fuente as LiteratureSource];
+        const settled=await Promise.allSettled(sources.map(source=>literatureSearchProvider(source,consulta,periodo_anios,orden,tipo_publicacion==="ninguno"?"":tipo_publicacion,limite_por_fuente)));
+        const totals:Record<string,number>={},errors:string[]=[],merged=new Map<string,LiteratureArticle>();
+        settled.forEach((entry,index)=>{
+          const source=sources[index];
+          if(entry.status==="rejected"){errors.push(source+": "+String(entry.reason?.message||"error de consulta"));return;}
+          totals[entry.value.source]=entry.value.total;
+          for(const article of entry.value.articles){
+            const key=article.doi?"doi:"+article.doi.toLowerCase():(article.pmid?"pmid:"+article.pmid:"title:"+article.titulo.toLowerCase().replace(/[^a-z0-9]+/g," ").trim());
+            const previous=merged.get(key);
+            if(!previous){merged.set(key,{...article,fuentes:[...article.fuentes]});continue;}
+            previous.fuentes=Array.from(new Set([...previous.fuentes,...article.fuentes]));
+            if(!previous.resumen&&article.resumen)previous.resumen=article.resumen;
+            if(!previous.doi&&article.doi)previous.doi=article.doi;
+            if(!previous.pmid&&article.pmid)previous.pmid=article.pmid;
+            if(!previous.pmcid&&article.pmcid)previous.pmcid=article.pmcid;
+            if(!previous.url_texto_completo&&article.url_texto_completo){previous.url_texto_completo=article.url_texto_completo;previous.acceso_abierto=article.acceso_abierto;}
+            if(!previous.tipo_publicacion&&article.tipo_publicacion)previous.tipo_publicacion=article.tipo_publicacion;
+          }
+        });
+        const articles=[...merged.values()];
+        if(orden==="recientes")articles.sort((a,b)=>Number(b.anio||0)-Number(a.anio||0));
+        if(!articles.length)return result({consulta:consulta,fuentes_consultadas:sources,resultados:0,totales_por_fuente:totals,errores:errors,error:errors.length?"No se pudo consultar ninguna fuente. Revisa la conexión e inténtalo nuevamente.":undefined,articulos:[]});
+        const notes:string[]=[];
+        if(tipo_publicacion!=="ninguno"&&fuente!=="pubmed")notes.push("El filtro por tipo de publicación se aplicó únicamente a PubMed, igual que en el buscador web.");
+        if(errors.length)notes.push("Algunas fuentes no respondieron; los resultados disponibles se conservaron.");
+        notes.push("Los resúmenes se incluyen solo cuando la fuente los proporciona. Un enlace de acceso abierto no garantiza que todos los formatos estén disponibles.");
+        return result({consulta:consulta,fuentes_consultadas:sources,resultados:articles.length,totales_por_fuente:totals,errores:errors,articulos:articles,notas:notes});
+      });
+
+      server.registerTool("consultar_articulo_cientifico",{
+        title:"Consultar ficha de artículo científico",
+        description:"Recupera la ficha bibliográfica y el resumen disponible de un artículo por DOI o PMID. Busca primero en Europe PMC y utiliza Crossref o PubMed como respaldo. Devuelve enlaces originales y de acceso abierto cuando estén identificados.",
+        inputSchema:z.object({identificador:z.string().min(3).max(180),tipo:z.enum(["doi","pmid"]).default("doi")}),
+        annotations:{readOnlyHint:true,openWorldHint:true}
+      },async({identificador,tipo})=>{
+        const id=identificador.trim().replace(/^https?:\/\/doi\.org\//i,"");
+        const isDoi=tipo==="doi";
+        const query=isDoi?"DOI:"+id:"EXT_ID:"+id;
+        const params=new URLSearchParams({query,format:"json",resultType:"core",pageSize:"1"});
+        try{
+          const data=await literatureFetch("https://www.ebi.ac.uk/europepmc/webservices/rest/search?"+params.toString(),"Europe PMC");
+          const item=data?.resultList?.result?.[0];
+          if(item){
+            const links=item.fullTextUrlList?.fullTextUrl;
+            const linkList=Array.isArray(links)?links:(links?[links]:[]);
+            const fullText=linkList.find((x:any)=>x?.url)?.url||"";
+            const open=String(item.isOpenAccess||"").toUpperCase()==="Y";
+            const pmid=String(item.pmid||""),pmcid=String(item.pmcid||""),doi=String(item.doi||id);
+            return result({encontrado:true,titulo:literatureClean(item.title),autores:literatureClean(item.authorString),revista:literatureClean(item.journalTitle),fecha:item.firstPublicationDate||"",resumen:literatureClean(item.abstractText).slice(0,5000),doi,pmid,pmcid,fuente:"Europe PMC",acceso_abierto:open,url_ficha:pmid?"https://europepmc.org/article/MED/"+encodeURIComponent(pmid):(doi?"https://doi.org/"+encodeURIComponent(doi):"https://europepmc.org/"),url_texto_completo:open?(fullText||(pmcid?"https://pmc.ncbi.nlm.nih.gov/articles/"+encodeURIComponent(pmcid)+"/":"")):"",nota:"Se devuelve el resumen bibliográfico disponible, no necesariamente el texto completo."});
+          }
+        }catch{}
+        if(isDoi){
+          try{
+            const data=await literatureFetch("https://api.crossref.org/works/"+encodeURIComponent(id),"Crossref");
+            const item=data?.message;
+            if(item)return result({encontrado:true,titulo:literatureClean(Array.isArray(item.title)?item.title[0]:item.title),autores:(item.author||[]).slice(0,8).map((a:any)=>[a.given,a.family].filter(Boolean).join(" ")).join(", "),revista:literatureClean(Array.isArray(item["container-title"])?item["container-title"][0]:""),fecha:item.published?.["date-parts"]?.[0]?.join("-")||"",resumen:literatureClean(item.abstract).slice(0,5000),doi:item.DOI||id,pmid:"",fuente:"Crossref",acceso_abierto:false,url_ficha:"https://doi.org/"+encodeURIComponent(id),url_texto_completo:"",nota:"Crossref proporciona metadatos editoriales; no garantiza acceso al texto completo."});
+          }catch{}
+        }else{
+          try{
+            const params=new URLSearchParams({db:"pubmed",id,retmode:"json",tool:"OdontoUdeC"});
+            const data=await literatureFetch("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?"+params.toString(),"PubMed");
+            const item=data?.result?.[id];
+            if(item)return result({encontrado:true,titulo:literatureClean(item.title),autores:(item.authors||[]).slice(0,8).map((a:any)=>a.name).join(", "),revista:literatureClean(item.fulljournalname||item.source),fecha:item.pubdate||"",resumen:"PubMed no devolvió el resumen en esta ficha abreviada. Consulta la ficha original para ver si está disponible.",doi:(item.articleids||[]).find((a:any)=>a.idtype==="doi")?.value||"",pmid:id,fuente:"PubMed",acceso_abierto:false,url_ficha:"https://pubmed.ncbi.nlm.nih.gov/"+encodeURIComponent(id)+"/",url_texto_completo:"",nota:"Se recuperaron metadatos bibliográficos; el texto completo depende de la disponibilidad del editor o del repositorio."});
+          }catch{}
+        }
+        return result({encontrado:false,identificador:id,tipo,nota:"No encontramos una ficha coincidente en las fuentes consultadas. Verifica el DOI o PMID."});
+      });
 
       server.registerTool("listar_publicaciones",{
         title:"Ver publicaciones de la comunidad",
@@ -168,7 +367,8 @@ Deno.serve(pipeline(
         const {data,error}=await supabase.from("posts").insert({author_id:user.id,title:titulo.trim(),content:contenido.trim(),category:categoria}).select("id,title,category,created_at").single();
         if(error)return result({ok:false,error:safeDbError(error,"No se pudo crear la publicación.")});
         const logged=await audit("create_post","post",String(data.id),{category:categoria});
-        return result({ok:true,publicacion:{id:data.id,titulo:data.title,categoria:data.category,fecha:data.created_at,url:BASE+"/chat.html"},auditoria:logged?"registrada":"no disponible"});
+        const push=await notifyPush("post",data.id);
+        return result({ok:true,publicacion:{id:data.id,titulo:data.title,categoria:data.category,fecha:data.created_at,url:BASE+"/chat.html"},auditoria:logged?"registrada":"no disponible",notificacion:push.sent?"enviada":"sin suscriptores o no disponible"});
       });
 
       server.registerTool("comentar_publicacion",{
@@ -209,7 +409,8 @@ Deno.serve(pipeline(
         const {data,error}=await supabase.from("chat_messages").insert({user_id:user.id,display_name:profile?.display_name||"Estudiante",content:mensaje.trim()}).select("id,display_name,content,created_at").single();
         if(error)return result({ok:false,error:safeDbError(error,"No se pudo enviar el mensaje al chat general.")});
         const logged=await audit("send_public_chat","chat_message",String(data.id));
-        return result({ok:true,mensaje:{id:data.id,autor:data.display_name,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible"});
+        const push=await notifyPush("community_message",data.id);
+        return result({ok:true,mensaje:{id:data.id,autor:data.display_name,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible",notificacion:push.sent?"enviada":"sin suscriptores o no disponible"});
       });
 
       server.registerTool("listar_grupos_estudio",{
@@ -293,7 +494,8 @@ Deno.serve(pipeline(
         const {data,error}=await supabase.from("study_group_messages").insert({group_id,sender_id:user.id,content:mensaje.trim()}).select("id,group_id,content,created_at").single();
         if(error)return result({ok:false,error:safeDbError(error,"No se pudo enviar el mensaje. Comprueba que pertenezcas al grupo.")});
         const logged=await audit("send_group_message","group_message",data.id,{group_id});
-        return result({ok:true,mensaje:{id:data.id,group_id:data.group_id,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible"});
+        const push=await notifyPush("group_message",data.id);
+        return result({ok:true,mensaje:{id:data.id,group_id:data.group_id,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible",notificacion:push.sent?"enviada":"sin suscriptores o no disponible"});
       });
 
       server.registerTool("listar_conversaciones_privadas",{
@@ -365,7 +567,8 @@ Deno.serve(pipeline(
         const {data,error}=await supabase.from("private_messages").insert({conversation_id,sender_id:user.id,content:mensaje.trim()}).select("id,conversation_id,content,created_at").single();
         if(error)return result({ok:false,error:safeDbError(error,"No se pudo enviar el mensaje privado. Comprueba que participes en la conversación.")});
         const logged=await audit("send_private_message","private_message",data.id,{conversation_id});
-        return result({ok:true,mensaje:{id:data.id,conversation_id:data.conversation_id,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible"});
+        const push=await notifyPush("private_message",data.id);
+        return result({ok:true,mensaje:{id:data.id,conversation_id:data.conversation_id,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible",notificacion:push.sent?"enviada":"sin suscriptores o no disponible"});
       });
 
       server.registerTool("listar_recursos_biblioteca",{
@@ -419,6 +622,45 @@ Deno.serve(pipeline(
       };
       const slugify=(value:string)=>value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50)||"general";
 
+
+      if(isAdminForRequest){
+        server.registerTool("analizar_resultados_encuesta",{
+          title:"Analizar resultados de encuesta",
+          description:"Solo para administradores autenticados. Consulta la encuesta estudiantil vigente y devuelve conteos y porcentajes agregados por categoría. No expone nombres, identificadores ni respuestas individuales. Úsala para revisar participación y tendencias generales.",
+          inputSchema:z.object({}),
+          annotations:{readOnlyHint:true,openWorldHint:false}
+        },async()=>{
+          if(!(await checkAdmin()))return result({autorizado:false,error:"No tienes permisos para consultar los resultados de la encuesta."});
+          const {data,error}=await supabase.functions.invoke("survey-submissions",{body:{action:"admin_results"},headers:{Authorization:"Bearer "+bearerToken}});
+          if(error||!data?.ok)return result({error:"No se pudieron consultar los resultados agregados de la encuesta. Comprueba que la función de encuestas esté disponible."});
+          const rows=Array.isArray(data.results)?data.results:[];
+          const selectionLabels:Record<string,string>={
+            ortodoncista:"Mejor Ortodoncista",odontopediatra:"Mejor Odontopediatra",endodoncista:"Mejor Endodoncista",
+            rehabilitador_oral:"Mejor Rehabilitador Oral",periodoncista:"Mejor Periodoncista",cirujano:"Mejor Cirujano",
+            semiologo:"Mejor Semiólogo",coordinador_clinica:"Mejor Coordinador de Clínica"
+          };
+          const openLabels:Record<string,string>={
+            docente:"Mejor Docente",docente_didactico:"Docente más Didáctico",docente_colaborador:"Docente más Colaborador",
+            docente_inspirador:"Docente más Inspirador",docente_paciente:"Docente más Paciente",
+            docente_calidad_humana:"Docente con Mayor Calidad Humana",docente_deja_huella:"Docente que Deja Huella"
+          };
+          const categorias=Object.entries(selectionLabels).map(([key,label])=>{
+            const counts=new Map<string,number>();
+            for(const row of rows){const value=row?.answers?.[key];if(typeof value==="string"&&value.trim())counts.set(value,(counts.get(value)||0)+1);}
+            const votos=[...counts.entries()].map(([opcion,cantidad])=>({opcion,cantidad,porcentaje:rows.length?Math.round(cantidad/rows.length*1000)/10:0})).sort((a,b)=>b.cantidad-a.cantidad||a.opcion.localeCompare(b.opcion));
+            return {categoria:label,respuestas_recibidas:votos.reduce((sum,item)=>sum+item.cantidad,0),opciones:votos};
+          });
+          const abiertas=Object.entries(openLabels).map(([key,label])=>{
+            const values=rows.map(row=>row?.answers?.[key]).filter((value:any)=>typeof value==="string"&&value.trim());
+            const average=values.length?Math.round(values.reduce((sum:number,value:string)=>sum+value.length,0)/values.length):0;
+            return {categoria:label,respuestas_recibidas:values.length,longitud_promedio_caracteres:average};
+          });
+          const logged=await audit("read_survey_aggregate","survey","reconocimientos-2026",{total_respuestas:rows.length});
+          return result({autorizado:true,encuesta:"Encuesta estudiantil · Reconocimientos 2026",total_participaciones:rows.length,categorias_cerradas:categorias,categorias_abiertas:abiertas,privacidad:"Solo se entregan conteos y porcentajes agregados; no se exponen nombres, identificadores ni respuestas individuales.",auditoria:logged?"registrada":"no disponible"});
+        });
+      }
+
+      if(isAdminForRequest){
       server.registerTool("preparar_subida_archivo_biblioteca",{
         title:"Preparar subida de archivo a la Biblioteca",
         description:"Genera un enlace temporal de carga para que el administrador seleccione el archivo en una página segura de OdontoUdeC. Admite PDF, DOCX, PPTX, XLSX, JPEG, PNG y WebP hasta 15 MB. No publica todavía el recurso; luego se confirma desde ChatGPT.",
@@ -499,6 +741,8 @@ Deno.serve(pipeline(
         const logged=await audit("upload_library_file","academic_resource",String(resource.id),{semester:draft.semestre,resource_type:tipo,mime_type:mime,size_bytes:file.size});
         return result({ok:true,recurso:{id:resource.id,titulo:resource.title,enlace:resource.url,asignatura:resource.subject,semestre:resource.semester,tipo:resource.resource_type,tamano_bytes:file.size},auditoria:logged?"registrada":"no disponible",visibilidad:"público"});
       });
+
+      }
 
       return server;
     });
