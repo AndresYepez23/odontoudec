@@ -469,9 +469,15 @@ Deno.serve(pipeline(
         await requireAdmin();
         const pathPattern=/^(?:general|semestre-(?:[1-9]|10))\/[a-z0-9-]{1,50}\/[0-9a-f-]{36}\.(?:pdf|docx|pptx|xlsx|jpg|jpeg|png|webp)$/i;
         if(!pathPattern.test(ruta))return result({error:"La ruta de carga no tiene un formato válido."});
-        const {data:file,error:downloadError}=await supabase.storage.from("academic-library").download(ruta);
-        if(downloadError||!file)return result({error:"No encontramos el archivo subido. Revisa si completó la carga o si el enlace temporal expiró."});
-        if(file.size<8||file.size>15728640)return result({error:"El archivo debe pesar como máximo 15 MB."});
+        const {data:publicData}=supabase.storage.from("academic-library").getPublicUrl(ruta);
+        let fileResponse:Response;
+        try{fileResponse=await fetch(publicData.publicUrl,{signal:AbortSignal.timeout(15000)});}
+        catch{return result({error:"No pudimos comprobar el archivo subido. Inténtalo nuevamente."});}
+        if(!fileResponse.ok)return result({error:"No encontramos el archivo subido. Revisa si completó la carga o si el enlace temporal expiró."});
+        const declaredSize=Number(fileResponse.headers.get("content-length")||0);
+        if(declaredSize>15728640)return result({error:"El archivo debe pesar como máximo 15 MB."});
+        const bytes=new Uint8Array(await fileResponse.arrayBuffer());
+        if(bytes.length<8||bytes.length>15728640)return result({error:"El archivo debe pesar como máximo 15 MB."});
         const ext=ruta.split(".").pop()!.toLowerCase(),mimeByExt:Record<string,string>={
           pdf:"application/pdf",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
           pptx:"application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -479,9 +485,7 @@ Deno.serve(pipeline(
           jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",webp:"image/webp"
         };
         const mime=mimeByExt[ext],spec=fileSpecs[mime];
-        const bytes=new Uint8Array(await file.arrayBuffer());
         if(!spec||!spec.signature(bytes))return result({error:"El contenido del archivo no coincide con su extensión. No se publicará."});
-        const {data:publicData}=supabase.storage.from("academic-library").getPublicUrl(ruta);
         const {data:existing}=await supabase.from("academic_resources").select("id,title,url").eq("url",publicData.publicUrl).maybeSingle();
         if(existing)return result({ok:true,ya_registrado:true,recurso:{id:existing.id,titulo:existing.title,enlace:existing.url}});
         const draft={titulo:titulo.trim(),ruta,asignatura:asignatura?.trim()||null,descripcion:descripcion?.trim()||null,semestre:semestre??null,tipo,tamano_bytes:file.size,mime,visibilidad:"Público"};
