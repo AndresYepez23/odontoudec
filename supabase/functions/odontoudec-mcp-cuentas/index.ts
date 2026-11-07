@@ -127,7 +127,7 @@ Deno.serve(pipeline(
       };
       const notifyPush=async(eventType:string,recordId:string|number)=>{
         try{
-          const {data,error}=await supabase.functions.invoke("onesignal-push",{body:{event_type:eventType,record_id:String(recordId)}});
+          const {data,error}=await supabase.functions.invoke("onesignal-push",{body:{event_type:eventType,record_id:String(recordId)},headers:{Authorization:"Bearer "+bearerToken}});
           if(error||data?.error)return {sent:false};
           return {sent:data?.sent===true,recipients:Number(data?.recipients||0)};
         }catch{return {sent:false};}
