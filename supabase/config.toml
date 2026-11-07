@@ -3,3 +3,8 @@ verify_jwt = false
 
 [functions.survey-submissions]
 verify_jwt = false
+
+# Servidor MCP público. Solo expone herramientas de lectura con datos no sensibles.
+# La autenticación de administrador deberá usar OAuth 2.1 en una fase separada.
+[functions.odontoudec-mcp]
+verify_jwt = false
