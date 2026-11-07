@@ -23,7 +23,7 @@ Deno.serve(pipeline(
   [withOAuthProtectedResource(),withSupabase({auth:"user"})],
   async (req,{supabase})=>{
     const handler=createMcpHandler(()=>{
-      const server=new McpServer({name:"OdontoUdeC Cuentas",version:"0.3.0"});
+      const server=new McpServer({name:"OdontoUdeC Cuentas",version:"0.4.0"});
 
       const checkAdmin=async()=>{
         const {data,error}=await supabase.rpc("is_admin");
@@ -408,9 +408,20 @@ Deno.serve(pipeline(
         return result({ok:true,recurso:{id:data.id,titulo:data.title,enlace:data.url,asignatura:data.subject,semestre:data.semester,tipo:data.resource_type},auditoria:logged?"registrada":"no disponible"});
       });
 
-      server.registerTool("subir_archivo_biblioteca",{
-        title:"Subir archivo a la Biblioteca",
-        description:"Sube un PDF, DOCX, PPTX, XLSX, JPG, PNG o WebP de hasta 4 MB a la Biblioteca pública. Solo administradores pueden publicar archivos. Primero valida y muestra la vista previa; confirmar=true realiza la subida. El archivo será público.",
+      const fileSpecs:Record<string,{extensions:string[];signature:(b:Uint8Array)=>boolean}>={
+        "application/pdf":{extensions:["pdf"],signature:b=>b[0]===0x25&&b[1]===0x50&&b[2]===0x44&&b[3]===0x46},
+        "image/png":{extensions:["png"],signature:b=>b[0]===0x89&&b[1]===0x50&&b[2]===0x4e&&b[3]===0x47},
+        "image/jpeg":{extensions:["jpg","jpeg"],signature:b=>b[0]===0xff&&b[1]===0xd8&&b[2]===0xff},
+        "image/webp":{extensions:["webp"],signature:b=>String.fromCharCode(...b.slice(0,4))==="RIFF"&&String.fromCharCode(...b.slice(8,12))==="WEBP"},
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":{extensions:["docx"],signature:b=>b[0]===0x50&&b[1]===0x4b&&b[2]===0x03&&b[3]===0x04},
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation":{extensions:["pptx"],signature:b=>b[0]===0x50&&b[1]===0x4b&&b[2]===0x03&&b[3]===0x04},
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":{extensions:["xlsx"],signature:b=>b[0]===0x50&&b[1]===0x4b&&b[2]===0x03&&b[3]===0x04}
+      };
+      const slugify=(value:string)=>value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50)||"general";
+
+      server.registerTool("preparar_subida_archivo_biblioteca",{
+        title:"Preparar subida de archivo a la Biblioteca",
+        description:"Genera un enlace temporal de carga para que el administrador seleccione el archivo en una página segura de OdontoUdeC. Admite PDF, DOCX, PPTX, XLSX, JPEG, PNG y WebP hasta 15 MB. No publica todavía el recurso; luego se confirma desde ChatGPT.",
         inputSchema:z.object({
           titulo:z.string().min(3).max(150),nombre_archivo:z.string().min(1).max(180),
           mime_type:z.enum([
@@ -420,48 +431,69 @@ Deno.serve(pipeline(
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "image/jpeg","image/png","image/webp"
           ]),
-          archivo_base64:z.string().min(20).max(5600000),
+          tamano_bytes:z.number().int().min(1).max(15728640),
           asignatura:z.string().max(100).optional(),descripcion:z.string().max(1200).optional(),
-          semestre:z.number().int().min(1).max(10).optional(),tipo:z.enum(["Apuntes","Guía","Video","Artículo","Libro","Otro"]).default("Apuntes"),
+          semestre:z.number().int().min(1).max(10).optional(),
+          tipo:z.enum(["Apuntes","Guía","Video","Artículo","Libro","Otro"]).default("Apuntes")
+        }),
+        annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false}
+      },async({titulo,nombre_archivo,mime_type,tamano_bytes,asignatura,descripcion,semestre,tipo})=>{
+        await requireAdmin();
+        const ext=(nombre_archivo.split(".").pop()||"").toLowerCase(),spec=fileSpecs[mime_type];
+        if(!spec||!spec.extensions.includes(ext))return result({error:"La extensión del archivo no coincide con el tipo MIME seleccionado."});
+        const path=(semestre?"semestre-"+semestre:"general")+"/"+slugify(asignatura||"general")+"/"+crypto.randomUUID()+"."+ext;
+        const {data,error}=await supabase.storage.from("academic-library").createSignedUploadUrl(path,{upsert:false});
+        if(error||!data?.token)return result({error:"No se pudo preparar la carga temporal. Inténtalo nuevamente."});
+        const fragment=new URLSearchParams({path,token:data.token}).toString();
+        const uploadPage=BASE+"/biblioteca-upload.html#"+fragment;
+        return result({
+          preparado:true,archivo:{titulo,nombre:nombre_archivo,tamano_bytes,tipo:mime_type,asignatura:asignatura||null,semestre:semestre??null,categoria:tipo},
+          ruta:path,enlace_de_carga:uploadPage,expira_en_minutos:120,
+          siguiente_paso:"Abre el enlace, selecciona y sube el archivo. Cuando la página confirme que terminó, vuelve a ChatGPT y ejecuta confirmar_subida_archivo_biblioteca con la ruta y los datos del recurso.",
+          visibilidad:"El archivo se almacena en el bucket público, pero no aparecerá en la Biblioteca hasta confirmar el registro."
+        });
+      });
+
+      server.registerTool("confirmar_subida_archivo_biblioteca",{
+        title:"Confirmar y publicar archivo en la Biblioteca",
+        description:"Verifica que el archivo exista, comprueba tamaño y firma del contenido y registra el recurso en la Biblioteca pública. Solo administradores. Requiere confirmar=true para publicar.",
+        inputSchema:z.object({
+          ruta:z.string().min(10).max(300),
+          titulo:z.string().min(3).max(150),asignatura:z.string().max(100).optional(),
+          descripcion:z.string().max(1200).optional(),semestre:z.number().int().min(1).max(10).optional(),
+          tipo:z.enum(["Apuntes","Guía","Video","Artículo","Libro","Otro"]).default("Apuntes"),
           confirmar:z.boolean().default(false)
         }),
         annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false}
-      },async({titulo,nombre_archivo,mime_type,archivo_base64,asignatura,descripcion,semestre,tipo,confirmar})=>{
+      },async({ruta,titulo,asignatura,descripcion,semestre,tipo,confirmar})=>{
         await requireAdmin();
-        const raw=archivo_base64.replace(/^data:[^,]+;base64,/i,"").replace(/\s/g,"");
-        if(!/^[A-Za-z0-9+/]+={0,2}$/.test(raw)||raw.length%4!==0)return result({error:"El archivo no está codificado correctamente en base64."});
-        let binary:string;try{binary=atob(raw);}catch{return result({error:"No se pudo decodificar el archivo."});}
-        const bytes=Uint8Array.from(binary,(ch)=>ch.charCodeAt(0));
-        if(bytes.length<8||bytes.length>4194304)return result({error:"El archivo debe pesar entre 8 bytes y 4 MB."});
-        const ext=(nombre_archivo.split(".").pop()||"").toLowerCase();
-        const allowed:Record<string,{ext:string[],signature:(b:Uint8Array)=>boolean}>={
-          "application/pdf":{ext:["pdf"],signature:b=>b[0]===0x25&&b[1]===0x50&&b[2]===0x44&&b[3]===0x46},
-          "image/png":{ext:["png"],signature:b=>b[0]===0x89&&b[1]===0x50&&b[2]===0x4e&&b[3]===0x47},
-          "image/jpeg":{ext:["jpg","jpeg"],signature:b=>b[0]===0xff&&b[1]===0xd8&&b[2]===0xff},
-          "image/webp":{ext:["webp"],signature:b=>String.fromCharCode(...b.slice(0,4))==="RIFF"&&String.fromCharCode(...b.slice(8,12))==="WEBP"},
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document":{ext:["docx"],signature:b=>b[0]===0x50&&b[1]===0x4b&&b[2]===0x03&&b[3]===0x04},
-          "application/vnd.openxmlformats-officedocument.presentationml.presentation":{ext:["pptx"],signature:b=>b[0]===0x50&&b[1]===0x4b&&b[2]===0x03&&b[3]===0x04},
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":{ext:["xlsx"],signature:b=>b[0]===0x50&&b[1]===0x4b&&b[2]===0x03&&b[3]===0x04}
+        const pathPattern=/^(?:general|semestre-(?:[1-9]|10))\/[a-z0-9-]{1,50}\/[0-9a-f-]{36}\.(?:pdf|docx|pptx|xlsx|jpg|jpeg|png|webp)$/i;
+        if(!pathPattern.test(ruta))return result({error:"La ruta de carga no tiene un formato válido."});
+        const {data:file,error:downloadError}=await supabase.storage.from("academic-library").download(ruta);
+        if(downloadError||!file)return result({error:"No encontramos el archivo subido. Revisa si completó la carga o si el enlace temporal expiró."});
+        if(file.size<8||file.size>15728640)return result({error:"El archivo debe pesar como máximo 15 MB."});
+        const ext=ruta.split(".").pop()!.toLowerCase(),mimeByExt:Record<string,string>={
+          pdf:"application/pdf",docx:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          pptx:"application/vnd.openxmlformats-officedocument.presentationml.presentation",
+          xlsx:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",webp:"image/webp"
         };
-        const spec=allowed[mime_type];
-        if(!spec||!spec.ext.includes(ext)||!spec.signature(bytes))return result({error:"La extensión, el tipo MIME y el contenido del archivo no coinciden."});
-        const draft={titulo:titulo.trim(),archivo:nombre_archivo,tamano_bytes:bytes.length,tipo:mime_type,asignatura:asignatura?.trim()||null,semestre:semestre??null,visibilidad:"Público: cualquier visitante podrá abrirlo."};
-        if(!confirmar)return result({requiere_confirmacion:true,accion:"subir_archivo_biblioteca",vista_previa:draft,mensaje:"El archivo se publicará en la Biblioteca pública. Confirma expresamente para subirlo."});
-        const slug=(value:string)=>value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,50)||"general";
-        const path=(semestre?"semestre-"+semestre:"general")+"/"+slug(asignatura||"general")+"/"+crypto.randomUUID()+"."+ext;
-        const {error:uploadError}=await supabase.storage.from("academic-library").upload(path,bytes,{contentType:mime_type,cacheControl:"3600",upsert:false});
-        if(uploadError)return result({ok:false,error:safeDbError(uploadError,"No se pudo subir el archivo a Storage.")});
-        const {data:publicData}=supabase.storage.from("academic-library").getPublicUrl(path);
-        const {data:resource,error:resourceError}=await supabase.from("academic_resources").insert({
-          title:titulo.trim(),subject:asignatura?.trim()||null,description:descripcion?.trim()||null,
-          url:publicData.publicUrl,resource_type:tipo,semester:semestre??null,created_by:(await requireUser()).id
+        const mime=mimeByExt[ext],spec=fileSpecs[mime];
+        const bytes=new Uint8Array(await file.arrayBuffer());
+        if(!spec||!spec.signature(bytes))return result({error:"El contenido del archivo no coincide con su extensión. No se publicará."});
+        const {data:publicData}=supabase.storage.from("academic-library").getPublicUrl(ruta);
+        const {data:existing}=await supabase.from("academic_resources").select("id,title,url").eq("url",publicData.publicUrl).maybeSingle();
+        if(existing)return result({ok:true,ya_registrado:true,recurso:{id:existing.id,titulo:existing.title,enlace:existing.url}});
+        const draft={titulo:titulo.trim(),ruta,asignatura:asignatura?.trim()||null,descripcion:descripcion?.trim()||null,semestre:semestre??null,tipo,tamano_bytes:file.size,mime,visibilidad:"Público"};
+        if(!confirmar)return result({requiere_confirmacion:true,accion:"confirmar_subida_archivo_biblioteca",vista_previa:draft,mensaje:"El archivo se añadirá a la Biblioteca y será accesible públicamente. Confirma para publicarlo."});
+        const user=await requireUser();
+        const {data:resource,error}=await supabase.from("academic_resources").insert({
+          title:draft.titulo,subject:draft.asignatura,description:draft.descripcion,url:publicData.publicUrl,
+          resource_type:tipo,semester:draft.semestre,created_by:user.id
         }).select("id,title,url,subject,semester,resource_type").single();
-        if(resourceError){
-          await supabase.storage.from("academic-library").remove([path]);
-          return result({ok:false,error:safeDbError(resourceError,"El archivo se subió, pero no se pudo registrar en la Biblioteca. Se intentó retirar el archivo automáticamente.")});
-        }
-        const logged=await audit("upload_library_file","academic_resource",String(resource.id),{semester:semestre??null,resource_type:tipo,mime_type,size_bytes:bytes.length});
-        return result({ok:true,recurso:{id:resource.id,titulo:resource.title,enlace:resource.url,asignatura:resource.subject,semestre:resource.semester,tipo:resource.resource_type,tamano_bytes:bytes.length},auditoria:logged?"registrada":"no disponible",visibilidad:"público"});
+        if(error)return result({ok:false,error:safeDbError(error,"El archivo está subido, pero no se pudo registrar en la Biblioteca.")});
+        const logged=await audit("upload_library_file","academic_resource",String(resource.id),{semester:draft.semestre,resource_type:tipo,mime_type:mime,size_bytes:file.size});
+        return result({ok:true,recurso:{id:resource.id,titulo:resource.title,enlace:resource.url,asignatura:resource.subject,semestre:resource.semester,tipo:resource.resource_type,tamano_bytes:file.size},auditoria:logged?"registrada":"no disponible",visibilidad:"público"});
       });
 
       return server;
