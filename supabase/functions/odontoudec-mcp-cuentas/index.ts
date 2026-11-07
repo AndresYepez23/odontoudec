@@ -23,7 +23,7 @@ Deno.serve(pipeline(
   [withOAuthProtectedResource(),withSupabase({auth:"user"})],
   async (req,{supabase})=>{
     const handler=createMcpHandler(()=>{
-      const server=new McpServer({name:"OdontoUdeC Cuentas",version:"0.4.0"});
+      const server=new McpServer({name:"OdontoUdeC Cuentas",version:"0.4.1"});
 
       const checkAdmin=async()=>{
         const {data,error}=await supabase.rpc("is_admin");
