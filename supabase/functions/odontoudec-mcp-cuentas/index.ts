@@ -345,13 +345,13 @@ Deno.serve(pipeline(
         inputSchema:z.object({conversation_id:z.string().uuid(),limite:z.number().int().min(1).max(100).default(50)}),
         annotations:{readOnlyHint:true,openWorldHint:false}
       },async({conversation_id,limite})=>{
-        await requireUser();
+        const user=await requireUser();
         const {data,error}=await supabase.from("private_messages").select("id,sender_id,content,created_at").eq("conversation_id",conversation_id).order("created_at",{ascending:false}).limit(limite);
         if(error)return result({error:safeDbError(error,"No se pudo leer la conversación privada.")});
         const ids=[...new Set((data??[]).map((m:any)=>m.sender_id))];
         const {data:profiles}=ids.length?await supabase.from("profiles").select("id,display_name").in("id",ids):{data:[]};
         const names=new Map((profiles??[]).map((p:any)=>[p.id,p.display_name]));
-        return result({conversation_id,mensajes:(data??[]).reverse().map((m:any)=>({id:m.id,autor:names.get(m.sender_id)||"Participante",propio:m.sender_id=== (await requireUser()).id,contenido:m.content,fecha:m.created_at})),url:BASE+"/mensajes.html"});
+        return result({conversation_id,mensajes:(data??[]).reverse().map((m:any)=>({id:m.id,autor:names.get(m.sender_id)||"Participante",propio:m.sender_id===user.id,contenido:m.content,fecha:m.created_at})),url:BASE+"/mensajes.html"});
       });
 
       server.registerTool("enviar_mensaje_privado",{
