@@ -125,6 +125,13 @@ Deno.serve(pipeline(
         });
         return !error;
       };
+      const notifyPush=async(eventType:string,recordId:string|number)=>{
+        try{
+          const {data,error}=await supabase.functions.invoke("onesignal-push",{body:{event_type:eventType,record_id:String(recordId)}});
+          if(error||data?.error)return {sent:false};
+          return {sent:data?.sent===true,recipients:Number(data?.recipients||0)};
+        }catch{return {sent:false};}
+      };
       const safeDbError=(error:any,fallback:string)=> {
         const code=String(error?.code||"");
         if(code==="42501"||code==="PGRST301") return "Tu cuenta no tiene permisos para realizar esta operación.";
@@ -168,7 +175,8 @@ Deno.serve(pipeline(
         const {data,error}=await supabase.from("posts").insert({author_id:user.id,title:titulo.trim(),content:contenido.trim(),category:categoria}).select("id,title,category,created_at").single();
         if(error)return result({ok:false,error:safeDbError(error,"No se pudo crear la publicación.")});
         const logged=await audit("create_post","post",String(data.id),{category:categoria});
-        return result({ok:true,publicacion:{id:data.id,titulo:data.title,categoria:data.category,fecha:data.created_at,url:BASE+"/chat.html"},auditoria:logged?"registrada":"no disponible"});
+        const push=await notifyPush("post",data.id);
+        return result({ok:true,publicacion:{id:data.id,titulo:data.title,categoria:data.category,fecha:data.created_at,url:BASE+"/chat.html"},auditoria:logged?"registrada":"no disponible",notificacion:push.sent?"enviada":"sin suscriptores o no disponible"});
       });
 
       server.registerTool("comentar_publicacion",{
@@ -209,7 +217,8 @@ Deno.serve(pipeline(
         const {data,error}=await supabase.from("chat_messages").insert({user_id:user.id,display_name:profile?.display_name||"Estudiante",content:mensaje.trim()}).select("id,display_name,content,created_at").single();
         if(error)return result({ok:false,error:safeDbError(error,"No se pudo enviar el mensaje al chat general.")});
         const logged=await audit("send_public_chat","chat_message",String(data.id));
-        return result({ok:true,mensaje:{id:data.id,autor:data.display_name,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible"});
+        const push=await notifyPush("community_message",data.id);
+        return result({ok:true,mensaje:{id:data.id,autor:data.display_name,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible",notificacion:push.sent?"enviada":"sin suscriptores o no disponible"});
       });
 
       server.registerTool("listar_grupos_estudio",{
@@ -293,7 +302,8 @@ Deno.serve(pipeline(
         const {data,error}=await supabase.from("study_group_messages").insert({group_id,sender_id:user.id,content:mensaje.trim()}).select("id,group_id,content,created_at").single();
         if(error)return result({ok:false,error:safeDbError(error,"No se pudo enviar el mensaje. Comprueba que pertenezcas al grupo.")});
         const logged=await audit("send_group_message","group_message",data.id,{group_id});
-        return result({ok:true,mensaje:{id:data.id,group_id:data.group_id,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible"});
+        const push=await notifyPush("group_message",data.id);
+        return result({ok:true,mensaje:{id:data.id,group_id:data.group_id,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible",notificacion:push.sent?"enviada":"sin suscriptores o no disponible"});
       });
 
       server.registerTool("listar_conversaciones_privadas",{
@@ -365,7 +375,8 @@ Deno.serve(pipeline(
         const {data,error}=await supabase.from("private_messages").insert({conversation_id,sender_id:user.id,content:mensaje.trim()}).select("id,conversation_id,content,created_at").single();
         if(error)return result({ok:false,error:safeDbError(error,"No se pudo enviar el mensaje privado. Comprueba que participes en la conversación.")});
         const logged=await audit("send_private_message","private_message",data.id,{conversation_id});
-        return result({ok:true,mensaje:{id:data.id,conversation_id:data.conversation_id,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible"});
+        const push=await notifyPush("private_message",data.id);
+        return result({ok:true,mensaje:{id:data.id,conversation_id:data.conversation_id,contenido:data.content,fecha:data.created_at},auditoria:logged?"registrada":"no disponible",notificacion:push.sent?"enviada":"sin suscriptores o no disponible"});
       });
 
       server.registerTool("listar_recursos_biblioteca",{
