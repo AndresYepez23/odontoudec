@@ -48,6 +48,7 @@ Se creó el bucket público `academic-library`.
 ## Migraciones aplicadas en Supabase
 - `20261107062958_odontoudec_mcp_community_actions_and_library_storage`
 - `20261107063014_expose_authenticated_mcp_audit_wrapper`
+- `20261107063701_increase_academic_library_upload_limit_15mb`
 
 ## Actualización del conector ChatGPT
 Tras desplegar nuevas herramientas, ChatGPT puede mantener en caché la lista anterior. Actualiza/reconecta el servidor **OdontoUdeC Cuentas** para que vuelva a ejecutar `tools/list` y descubra las nuevas operaciones. No elimines el plugin público **OdontoUdeC**.
