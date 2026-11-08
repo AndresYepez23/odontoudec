@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#32105f">
+<meta name="description" content="Experimenta con aplicaciones de inteligencia artificial de Hugging Face Spaces desde OdontoUdeC.">
+<title>Laboratorio IA | OdontoUdeC</title>
+<link rel="icon" href="/assets/download-removebg-preview%20(2).png" type="image/png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/assets/community-dock.css">
+<style>
+:root{--p:#32105f;--p2:#54218b;--gold:#d7a928;--gold2:#f4d978;--ink:#241d2d;--muted:#675c6f;--line:#e8dfef;--paper:#faf8fc}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:inherit}button{font:inherit;cursor:pointer}
+.topbar{background:var(--p);color:white;text-align:center;padding:8px 15px;font-size:.77rem}
+.topbar b{color:var(--gold2)}
+.header{z-index:11;position:sticky;top:0;background:#fffffff0;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav{max-width:1120px;padding:10px 22px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;gap:9px;align-items:center;color:var(--p);text-decoration:none;font-weight:900}
+.brand img{width:42px;height:42px;object-fit:contain}
+.brand em{font-style:normal;color:#ab7e13}
+.links{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.links a{font-size:.82rem;text-decoration:none;color:#665473;padding:8px 9px;border-radius:9px;font-weight:740}
+.links a:hover{background:#f3e9fb}.links a.active{background:#f1e7fa;color:var(--p)}
+.wrap{max-width:1120px;margin:auto;padding:0 22px}
+.hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 83% 14%,#d7a9283a,transparent 38%),linear-gradient(135deg,#fff,#f5effc 61%,#fff9e9);padding:64px 0 52px;border-bottom:1px solid #f0e6f0}
+.hero:after{content:"";position:absolute;width:360px;height:360px;border-radius:50%;border:65px solid #54218b0a;right:-170px;bottom:-250px;pointer-events:none}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid #e1d0ef;color:var(--p2);border-radius:99px;padding:6px 12px;font-size:.7rem;letter-spacing:.12em;font-weight:900;text-transform:uppercase}
+.eyebrow i{background:var(--gold);height:8px;width:8px;border-radius:50%}
+h1{font-size:clamp(2.4rem,6vw,4.25rem);letter-spacing:-.062em;line-height:1.07;color:var(--p);max-width:800px;margin:18px 0 14px}
+h1 em{font-style:normal;color:#ad8011}
+.hero p{max-width:665px;color:var(--muted);margin:0 0 20px;font-size:1.01rem}
+.tags{display:flex;gap:8px;flex-wrap:wrap}
+.tags span{padding:7px 10px;font-size:.72rem;font-weight:800;border:1px solid #ecdded;background:#fff;border-radius:99px;color:#5b4968}
+.heading{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin:38px 0 16px}
+.heading h2{color:var(--p);font-size:1.65rem;line-height:1.3;letter-spacing:-.035em;margin:0 0 5px}
+.heading p{color:var(--muted);font-size:.89rem;margin:0;max-width:610px}
+.heading a{font-size:.83rem;font-weight:800;color:var(--p2);text-underline-offset:3px}
+.privacy{margin:0 0 19px;padding:12px 15px;border:1px solid #e8d6a1;background:#fff8e8;color:#655033;border-radius:13px;display:flex;gap:10px;align-items:flex-start;font-size:.81rem}
+.privacy strong{color:#684d10}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px;margin:0 0 28px}
+.card{background:#fff;border:1px solid var(--line);border-radius:21px;padding:23px;display:flex;flex-direction:column;gap:10px;min-width:0;box-shadow:0 12px 36px #2610350a;transition:border-color .18s,box-shadow .18s,transform .18s}
+.card:hover{border-color:#d7c1e7;box-shadow:0 16px 33px #28104a18;transform:translateY(-2px)}
+.card-top{display:flex;align-items:center;justify-content:space-between}
+.card-icon{display:grid;place-items:center;font-size:1.65rem;width:55px;height:55px;border-radius:14px;border:1px solid #e4d3eb;background:linear-gradient(135deg,#f0e5fa,#fff6df)}
+.chip{border:1px solid #f1e0aa;background:#fff8e9;color:#826015;border-radius:99px;padding:5px 11px;font-size:.65rem;text-transform:uppercase;font-weight:900;letter-spacing:.09em}
+.card h3{color:var(--p);font-size:1.25rem;line-height:1.28;margin:5px 0 0;letter-spacing:-.02em}
+.card p{color:#67596e;font-size:.88rem;line-height:1.6;margin:0;flex:1}
+.credit{font-size:.72rem;color:#817589}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:42px;padding:10px 16px;border:0;border-radius:10px;background:var(--p);color:#fff;text-decoration:none;font-weight:800;font-size:.83rem}
+.btn:hover{background:var(--p2)}
+.btn.secondary{color:var(--p);background:#f7f1fb;border:1px solid #ddcfea}
+.btn.secondary:hover{background:#efe3f9}
+.stage{margin:0 0 44px;background:#fff;border:1px solid #d6c1e6;border-radius:21px;box-shadow:0 15px 48px #25113d19;overflow:hidden;scroll-margin-top:85px}
+.stage[hidden]{display:none}
+.stage-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:linear-gradient(110deg,#f6effc,#fff9e9);padding:14px 18px;border-bottom:1px solid var(--line)}
+.overline{font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:#92701d;font-weight:900}
+.stage h2{color:var(--p);font-size:1.1rem;margin:3px 0 0}
+.stage-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.stage iframe{display:block;border:0;width:100%;height:min(74vh,750px);min-height:550px;background:white}
+.stage-foot{font-size:.77rem;color:#70627a;padding:11px 17px;background:#fbf8fd;border-top:1px solid var(--line)}
+.footer{background:#281044;color:#ece6f5;padding:26px 0}
+.footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer p{margin:0;opacity:.9;font-size:.78rem}.footer a{color:var(--gold2);font-weight:800;font-size:.8rem;text-decoration:none}
+@media(max-width:740px){.wrap{padding:0 15px}.nav{padding:9px 15px}.links{gap:2px}.links a{font-size:.72rem;padding:7px}.links a:nth-child(2){display:none}.hero{padding:43px 0 36px}h1{font-size:2.6rem}.grid{grid-template-columns:1fr;gap:13px}.card{padding:19px}.stage iframe{min-height:500px;height:75vh}.stage-top{padding:12px}.stage-buttons{width:100%}.stage-buttons .btn{flex:1}}
+@media(max-width:410px){h1{font-size:2.25rem}.actions .btn{flex:1}.links a:nth-child(1){display:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.card{transition:none}.card:hover{transform:none}}
+</style>
+</head><body>
+<div class="topbar"><b>OdontoUdeC</b> · Explora posibilidades con inteligencia artificial</div>
+<header class="header"><nav class="nav" aria-label="Navegación del Laboratorio IA">
+<a class="brand" href="index.html#inicio"><img src="/assets/download-removebg-preview%20(2).png" alt="Logo OdontoUdeC">Odonto<em>UdeC</em></a>
+<div class="links"><a href="index.html#inicio">Inicio</a><a href="academia.html">Academia</a><a class="active" href="laboratorio-ia.html" aria-current="page">Laboratorio IA</a></div>
+</nav></header>
+<main>
+<section class="hero"><div class="wrap">
+<span class="eyebrow"><i></i> Herramientas reales · Hugging Face Spaces</span>
+<h1>Explora la IA.<br><em>Haz cosas increíbles.</em></h1>
+<p>Prueba aplicaciones creadas por desarrolladores de todo el mundo, integradas en OdontoUdeC. Genera imágenes, experimenta con audio y descubre herramientas visuales.</p>
+<div class="tags"><span>✨ Creatividad</span><span>🎙️ Audio inteligente</span><span>🧩 Edición</span><span>🧊 Experiencias 3D</span></div>
+</div></section>
+<div class="wrap">
+<div class="heading"><div><h2>Tu laboratorio de experiencias</h2><p>Seleccionamos aplicaciones públicas verificadas. Su funcionamiento depende de sus autores y de la disponibilidad de Hugging Face.</p></div><a href="https://huggingface.co/spaces" target="_blank" rel="noopener noreferrer">Explorar todos los Spaces ↗</a></div>
+<div class="privacy" role="note"><span aria-hidden="true">🔒</span><div><strong>Privacidad:</strong> al pulsar «Probar», cargarás una aplicación externa de Hugging Face. Lo que escribas o subas puede procesarse fuera de OdontoUdeC. No envíes datos de pacientes, fotografías clínicas identificables ni información confidencial.</div></div>
+<div class="grid" id="labCards">
+<article class="card"><div class="card-top"><span class="card-icon" aria-hidden="true">🎨</span><span class="chip">Crear</span></div><h3>Imágenes desde tus ideas</h3><p>Describe lo que imaginas. FLUX.1 Schnell utiliza inteligencia artificial para generar una imagen a partir de tus palabras.</p><span class="credit">black-forest-labs · FLUX.1 Schnell</span><div class="actions"><button class="btn lab-open" type="button" data-tool="flux">Probar ahora ↗</button><a class="btn secondary" href="https://huggingface.co/spaces/black-forest-labs/FLUX.1-schnell" target="_blank" rel="noopener noreferrer">Ver original</a></div></article>
+<article class="card"><div class="card-top"><span class="card-icon" aria-hidden="true">🎤</span><span class="chip">Escuchar</span></div><h3>Convierte audio en texto</h3><p>Graba o utiliza un archivo de audio autorizado y descubre cómo Whisper Large V3 reconoce las palabras de una conversación.</p><span class="credit">hf-audio · Whisper Large V3</span><div class="actions"><button class="btn lab-open" type="button" data-tool="whisper">Probar ahora ↗</button><a class="btn secondary" href="https://huggingface.co/spaces/hf-audio/whisper-large-v3" target="_blank" rel="noopener noreferrer">Ver original</a></div></article>
+<article class="card"><div class="card-top"><span class="card-icon" aria-hidden="true">✂️</span><span class="chip">Editar</span></div><h3>Elimina el fondo de una foto</h3><p>Prueba una demostración de eliminación de fondos con inteligencia artificial en tu navegador. Necesita un dispositivo con WebGPU compatible.</p><span class="credit">Xenova · Background Removal WebGPU</span><div class="actions"><button class="btn lab-open" type="button" data-tool="background">Probar ahora ↗</button><a class="btn secondary" href="https://huggingface.co/spaces/Xenova/remove-background-webgpu" target="_blank" rel="noopener noreferrer">Ver original</a></div></article>
+<article class="card"><div class="card-top"><span class="card-icon" aria-hidden="true">🧊</span><span class="chip">Crear en 3D</span></div><h3>De una imagen a un objeto 3D</h3><p>Una experiencia experimental de Microsoft para convertir fotografías en modelos tridimensionales mediante TRELLIS.2.</p><span class="credit">microsoft · TRELLIS.2</span><div class="actions"><button class="btn lab-open" type="button" data-tool="trellis">Probar ahora ↗</button><a class="btn secondary" href="https://huggingface.co/spaces/microsoft/TRELLIS.2" target="_blank" rel="noopener noreferrer">Ver original</a></div></article>
+</div>
+<section id="labStage" class="stage" hidden aria-label="Aplicación de inteligencia artificial seleccionada">
+<div class="stage-top"><div><span class="overline">Hugging Face · Aplicación externa</span><h2 id="labTitle">Laboratorio IA</h2></div><div class="stage-buttons"><a id="labOriginal" class="btn secondary" href="https://huggingface.co/spaces" target="_blank" rel="noopener noreferrer">Abrir original ↗</a><button id="labClose" class="btn secondary" type="button">Cerrar ×</button></div></div>
+<iframe id="labFrame" src="about:blank" title="Aplicación externa de Hugging Face" loading="lazy" referrerpolicy="no-referrer" allow="camera; microphone; clipboard-write" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads allow-popups"></iframe>
+<div class="stage-foot">Algunas aplicaciones pueden estar temporalmente en pausa o en una cola de espera. Si no se muestran correctamente, toca «Abrir original».</div>
+</section>
+</div></main>
+<footer class="footer"><div class="wrap"><p>OdontoUdeC · Proyecto estudiantil independiente. Las herramientas externas pertenecen a sus autores.</p><a href="index.html#inicio">Volver a OdontoUdeC ↗</a></div></footer>
+<script>
+(function(){
+"use strict";
+const tools=Object.freeze({
+ flux:{title:"Imágenes con FLUX.1 Schnell",url:"https://black-forest-labs-flux-1-schnell.hf.space/",original:"https://huggingface.co/spaces/black-forest-labs/FLUX.1-schnell"},
+ whisper:{title:"Transcripción con Whisper Large V3",url:"https://hf-audio-whisper-large-v3.hf.space/",original:"https://huggingface.co/spaces/hf-audio/whisper-large-v3"},
+ background:{title:"Eliminación de fondos con WebGPU",url:"https://xenova-remove-background-webgpu.static.hf.space/",original:"https://huggingface.co/spaces/Xenova/remove-background-webgpu"},
+ trellis:{title:"Creación 3D con TRELLIS.2",url:"https://microsoft-trellis-2.hf.space/",original:"https://huggingface.co/spaces/microsoft/TRELLIS.2"}
+});
+const stage=document.getElementById("labStage");
+const frame=document.getElementById("labFrame");
+const title=document.getElementById("labTitle");
+const link=document.getElementById("labOriginal");
+document.querySelectorAll(".lab-open").forEach(button=>{
+ button.addEventListener("click",()=>{
+  const app=tools[button.dataset.tool];
+  if(!app)return;
+  title.textContent=app.title;link.href=app.original;frame.title=app.title;
+  if(frame.src!==app.url)frame.src=app.url;
+  stage.hidden=false;
+  stage.scrollIntoView({block:"start",behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+ });
+});
+document.getElementById("labClose").addEventListener("click",()=>{
+ frame.src="about:blank";frame.title="Aplicación externa de Hugging Face";stage.hidden=true;
+});
+})();
+</script>
+<script src="/assets/community-dock.js"></script>
+<script src="/assets/posthog.js" defer></script>
+</body></html>

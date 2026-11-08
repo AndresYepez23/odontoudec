@@ -1,0 +1,11 @@
+/* Guía visual: estilos propios de OdontoUdeC (morado y dorado). */
+.driver-popover.ou-driver-popover{--driver-popover-bg:#fff;--driver-popover-text:#32105f;max-width:min(340px,calc(100vw - 28px));padding:20px 19px 16px;background:#fff;border:1px solid #dfc98b;border-top:4px solid #d7a928;border-radius:17px;box-shadow:0 20px 55px #210c3850;color:#3e304c;font-family:Inter,system-ui,sans-serif}
+.ou-driver-popover .driver-popover-title{color:#32105f;font-size:17px;line-height:1.3;font-weight:850;letter-spacing:-.025em}
+.ou-driver-popover .driver-popover-description{color:#685a72;font-size:13px;line-height:1.6;margin-top:7px}
+.ou-driver-popover .driver-popover-progress-text{color:#806219;font-size:11px;font-weight:800}
+.ou-driver-popover .driver-popover-navigation-btns{gap:7px}
+.ou-driver-popover .driver-popover-navigation-btns button{font:750 12px/1.3 Inter,system-ui,sans-serif;text-shadow:none;border:1px solid #dfd5e9;border-radius:9px;padding:9px 12px;background:#f6f1fa;color:#32105f}
+.ou-driver-popover .driver-popover-next-btn{background:#32105f!important;color:white!important;border-color:#32105f!important}
+.ou-driver-popover .driver-popover-next-btn:hover{background:#54218b!important}
+.ou-driver-popover .driver-popover-close-btn{background:transparent!important;border:0!important;color:#6c597e!important;padding:4px 7px!important}
+@media(max-width:600px){.driver-popover.ou-driver-popover{border-radius:14px;padding:16px 15px 14px}.ou-driver-popover .driver-popover-title{font-size:15px}}
