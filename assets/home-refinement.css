@@ -25,3 +25,38 @@
  .nav>.brand img{width:34px;height:34px}
  .nav>.brandmark{font-size:1.04rem}
 }
+
+/* Corrección: el desplegable Más no debe ampliar ni recortar el encabezado móvil. */
+.mobile-more-link{display:none!important}
+@media(max-width:850px){
+ .nav{position:relative!important}
+ .nav>.navlinks{
+  overflow:visible!important;white-space:nowrap!important;justify-content:space-between!important;
+  flex-wrap:nowrap!important;gap:2px!important;min-width:0!important;
+ }
+ .nav>.navlinks>a[href="#agenda"],.nav>.navlinks>a[href="#biblioteca"]{display:none!important}
+ .nav>.navlinks>a,.nav>.navlinks>.nav-more>summary{
+  padding:8px 5px!important;font-size:clamp(.69rem,2.85vw,.8rem)!important;
+  white-space:nowrap!important;
+ }
+ .nav>.navlinks>.nav-more{position:relative!important;flex:0 0 auto!important;width:auto!important}
+ .nav>.navlinks>.nav-more>.nav-more-menu{
+  position:absolute!important;display:grid!important;right:0!important;left:auto!important;
+  top:calc(100% + 7px)!important;width:min(290px,calc(100vw - 28px))!important;
+  min-width:0!important;max-height:min(65dvh,440px)!important;overflow-y:auto!important;
+  margin:0!important;padding:7px!important;box-sizing:border-box!important;
+  border:1px solid #e8def1!important;border-radius:13px!important;
+  background:#fff!important;box-shadow:0 16px 36px rgba(35,12,60,.18)!important;
+  z-index:100!important;white-space:normal!important;
+ }
+ .nav>.navlinks>.nav-more:not([open])>.nav-more-menu{display:none!important}
+ .nav>.navlinks>.nav-more>.nav-more-menu a,
+ .nav>.navlinks>.nav-more>.nav-more-menu button{
+  display:block;width:100%;box-sizing:border-box;padding:10px 12px!important;
+  text-align:left!important;white-space:normal!important;font-size:.86rem!important;
+  border-radius:8px;
+ }
+ .nav>.navlinks>.nav-more>.nav-more-menu .mobile-more-link{display:block!important}
+ .nav>.navlinks>.nav-more>.nav-more-menu .mobile-logout{display:none!important}
+ .nav>.navlinks>.nav-more.is-logged-in>.nav-more-menu .mobile-logout{display:block!important}
+}
