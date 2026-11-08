@@ -18,6 +18,18 @@ main{width:min(100% - 32px,820px);margin:38px auto 70px}.intro{padding:clamp(23p
 #survey{display:grid;gap:15px;margin-top:20px}#questions{display:grid;gap:15px}.question{padding:21px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 5px 18px #32105f06}.q-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}.q-num{flex:0 0 32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#f2eafa;color:var(--purple);font-weight:900}.question h2{margin:2px 0 0;color:var(--purple);font-size:1.05rem}.hint{font-size:.83rem;color:var(--muted);margin:5px 0 0}
 .options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.option{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid #eee8f2;border-radius:11px;background:#fdfcfe;cursor:pointer;font-size:.91rem}.option:hover{border-color:#cbb5dd;background:#faf6fd}.option input{accent-color:var(--purple);margin:4px 0 0;flex:0 0 auto}.question textarea{width:100%;min-height:105px;resize:vertical;padding:12px 13px;border:1px solid #ddd2e8;border-radius:11px;font:inherit;outline-color:var(--purple2)}.question textarea:focus,.option:focus-within{border-color:var(--purple2);box-shadow:0 0 0 3px #54218b14}
 .notice{padding:16px 18px;border:1px solid #f0dfae;border-radius:14px;background:#fff9e9;color:#69521c;font-size:.9rem;margin-top:20px}.notice strong{display:block;margin-bottom:3px}.hidden{display:none!important}
+.explore-card{margin-top:20px;padding:clamp(20px,4vw,28px);border:1px solid #e5d8ef;border-radius:20px;background:linear-gradient(135deg,#fff,#f8f3fc);box-shadow:0 10px 28px #32105f08}
+.explore-card h2{margin:6px 0 8px;color:var(--purple);font-size:clamp(1.35rem,3vw,1.8rem);line-height:1.15}
+.explore-card>p{margin:0;color:var(--muted);max-width:650px}
+.explore-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:17px}
+.explore-link{display:flex;align-items:center;gap:11px;min-width:0;padding:12px;border:1px solid var(--line);border-radius:13px;background:#fff;text-decoration:none}
+.explore-link:hover{border-color:#cbb5dd;background:#fdfbff}
+.explore-link .explore-icon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border-radius:10px;background:#f2eafa;color:var(--purple);font-weight:900}
+.explore-link strong{display:block;color:var(--purple);font-size:.92rem}
+.explore-link small{display:block;color:var(--muted);font-size:.78rem}
+.explore-link .arrow{margin-left:auto;color:var(--purple2);font-weight:900}
+.explore-cta{margin-top:17px}
+@media(max-width:600px){.explore-links{grid-template-columns:1fr}}
 footer{text-align:center;padding:25px;color:#82778b;font-size:.8rem}
 @media(max-width:600px){main{margin-top:20px}.options{grid-template-columns:1fr}.question{padding:17px}.nav{padding:12px 16px}}
 .brand-mark{background:transparent;padding:0;overflow:hidden}.brand-mark img{display:block;width:100%;height:100%;object-fit:contain}
@@ -54,6 +66,18 @@ footer{text-align:center;padding:25px;color:#82778b;font-size:.8rem}
 <div id="questions"></div>
 <div class="auth-actions"><button class="btn" id="submitSurvey" type="submit">Enviar mi participación</button></div>
 </form>
+<section id="exploreMore" class="explore-card hidden" aria-labelledby="exploreTitle">
+  <span class="kicker">SIGUE DESCUBRIENDO</span>
+  <h2 id="exploreTitle">Tu experiencia en OdontoUdeC no termina aquí.</h2>
+  <p>Gracias por participar. Ahora puedes conocer otras herramientas creadas para acompañar tu formación y conectar con la comunidad estudiantil.</p>
+  <div class="explore-links">
+    <a class="explore-link" href="/academia.html"><span class="explore-icon">01</span><span><strong>Academia</strong><small>OdontoBot, atlas, trivia y más.</small></span><span class="arrow">↗</span></a>
+    <a class="explore-link" href="/mi-espacio.html"><span class="explore-icon">02</span><span><strong>Mi espacio</strong><small>Organiza tus asignaturas y recursos.</small></span><span class="arrow">↗</span></a>
+    <a class="explore-link" href="/grupos-estudio.html"><span class="explore-icon">03</span><span><strong>Grupos de estudio</strong><small>Aprende y conversa con compañeros.</small></span><span class="arrow">↗</span></a>
+    <a class="explore-link" href="/banco-pacientes.html"><span class="explore-icon">04</span><span><strong>Banco de pacientes</strong><small>Conecta formación y comunidad.</small></span><span class="arrow">↗</span></a>
+  </div>
+  <div class="auth-actions explore-cta"><a class="btn" href="/#inicio">Explorar OdontoUdeC</a><a class="btn alt" href="/#comunidad">Ir a la comunidad</a></div>
+</section>
 <section id="adminPanel" class="question hidden" style="margin-top:18px"><div class="q-head"><span class="q-num">A</span><div><h2>Resultados administrativos</h2><p class="hint">Acceso restringido a administradores. Cada respuesta está asociada a la identidad del estudiante.</p></div></div><button class="btn alt" id="refreshResults" type="button">Actualizar resultados</button><p id="adminSummary" class="hint" aria-live="polite"></p><div id="adminResults"></div></section>
 
 </main>
@@ -106,12 +130,12 @@ async function functionErrorMessage(error,fallback){
  }
  return fallback;
 }
-function showCompleted({redirect=false}={}){
+function showCompleted(){
  const form=document.getElementById("survey");
  form.classList.add("hidden");
  document.getElementById("guest").classList.add("hidden");
  statusEl.innerHTML='<strong>✓ Encuesta completada.</strong> Tu participación ya está registrada. Gracias por aportar a OdontoUdeC.';
- if(redirect){statusEl.innerHTML+='<p class="hint">Volverás al inicio en unos segundos…</p>';window.setTimeout(()=>location.replace("/"),2600);}
+ document.getElementById("exploreMore").classList.remove("hidden");
 }
 async function checkParticipation(){
  const {data,error}=await client.functions.invoke("survey-submissions",{body:{action:"status"}});
@@ -138,14 +162,14 @@ document.getElementById("survey").addEventListener("submit",async event=>{
  statusEl.textContent="Validando y registrando tu participación…";
  const {data,error}=await client.functions.invoke("survey-submissions",{body:{action:"submit",answers:collectAnswers()}});
  if(error||!data?.ok){
-  if(error?.context?.status===409){showCompleted();return;}
+  if(error?.context?.status===409){showCompleted();document.getElementById("exploreMore").scrollIntoView({behavior:"smooth",block:"center"});return;}
   statusEl.textContent=data?.error||await functionErrorMessage(error,"No pudimos registrar tu respuesta. Inténtalo nuevamente.");
   button.disabled=false;button.textContent="Enviar mi participación";
   return;
  }
  form.querySelectorAll("input,textarea,button").forEach(el=>el.disabled=true);
  button.textContent="Encuesta completada ✓";
- showCompleted({redirect:true});
+ showCompleted();document.getElementById("exploreMore").scrollIntoView({behavior:"smooth",block:"center"});
 });
 document.getElementById("refreshResults").addEventListener("click",loadAdminResults);
 async function init(){
