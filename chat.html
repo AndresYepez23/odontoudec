@@ -33,6 +33,11 @@ html.ou-embedded #sendForm button{display:inline-flex!important;visibility:visib
 html.ou-embedded #room>.rules{display:none!important}
 @media(max-width:560px){html.ou-embedded .panel{padding:7px!important}html.ou-embedded #room>.row:first-child{min-height:30px}html.ou-embedded .msg{max-width:92%}}
 
+
+/* Reserva una zona segura cuando Netlify dibuja su insignia sobre un iframe de chat. */
+@media(max-width:700px){
+ html.ou-embedded #sendForm,html.ou-embedded #messageForm{margin-bottom:76px!important;flex-shrink:0!important}
+}
 </style><link rel="stylesheet" href="assets/community-dock.css"><link rel="stylesheet" href="assets/chat-ui.css?v=20261108-giphy">
 
 <link rel="icon" type="image/png" href="/assets/download-removebg-preview%20(2).png">
