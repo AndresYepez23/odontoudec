@@ -22,26 +22,6 @@ frame.addEventListener('load',()=>{
  syncPrivateThreadButton();
 });
 function setUnreadUnavailable(){const badge=root.querySelector('#ouDockUnread');badge.classList.remove('ou-visible');badge.removeAttribute('title');badge.setAttribute('aria-label','No se pudo consultar el contador de mensajes privados sin leer');}
-function syncOnboardingShortcut(){
- const menu=document.querySelector('.nav-more-menu'),existing=menu?.querySelector('[data-ou-onboarding-shortcut]');
- if(!menu)return;
- if(!logged){existing?.remove();return;}
- if(existing)return;
- const link=document.createElement('a');
- link.href='#onboardingGuide';link.textContent='Guía de bienvenida';link.dataset.ouOnboardingShortcut='true';
- link.addEventListener('click',event=>{
-  event.preventDefault();
-  const modal=document.getElementById('onboardingGuide');
-  if(!modal)return;
-  modal.classList.add('open');modal.setAttribute('aria-hidden','false');
-  const finishButton=document.getElementById('finishOnboarding');
-  if(finishButton)finishButton.onclick=()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');};
-  menu.closest('details')?.removeAttribute('open');
-  document.getElementById('navlinks')?.classList.remove('open');
-  document.getElementById('closeOnboarding')?.focus();
- });
- menu.appendChild(link);
-}
 async function refreshUnread(client,userId){
  try{
   const {data:conversations,error}=await client.from('private_conversations').select('id,created_at').or('user_one.eq.'+userId+',user_two.eq.'+userId).order('created_at',{ascending:false}).limit(50);
@@ -76,7 +56,6 @@ async function init(){
   if(!client){guest.style.display='block';frame.style.display='none';tabbar.style.display='none';return;}
   const applySession=(session)=>{
    logged=!!session;
-   syncOnboardingShortcut();
    guest.style.display=logged?'none':'block';
    frame.style.display=logged?'block':'none';
    tabbar.style.display=logged?'grid':'none';
