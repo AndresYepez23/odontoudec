@@ -60,3 +60,9 @@
  .nav>.navlinks>.nav-more>.nav-more-menu .mobile-logout{display:none!important}
  .nav>.navlinks>.nav-more.is-logged-in>.nav-more-menu .mobile-logout{display:block!important}
 }
+
+/* Cerrar sesión solo se muestra dentro del menú Más en pantallas móviles. */
+.mobile-logout{display:none!important}
+@media(max-width:850px){
+ .nav>.navlinks .nav-more.is-logged-in .mobile-logout{display:block!important}
+}
