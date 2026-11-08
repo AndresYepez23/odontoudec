@@ -97,7 +97,8 @@ exports.handler = async function (event) {
         properties: {
           exp,
           eject_at_room_exp: true,
-          max_participants: scope === "private" ? 2 : scope === "groups" ? 10 : 12,
+          max_participants: scope === "private" ? 2 : 10,
+          enable_screenshare: true,
           enable_prejoin_ui: true,
           enable_chat: false,
           start_video_off: true,

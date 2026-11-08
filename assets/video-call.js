@@ -117,7 +117,7 @@
     const refresh = () => { button.hidden = !resolve(); };
     refresh();
     const observer = new MutationObserver(refresh);
-    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["class"] });
     button.addEventListener("click", () => {
       const context = resolve();
       if (!context) { toast("Selecciona primero un chat o un grupo para usar videollamadas."); return; }
