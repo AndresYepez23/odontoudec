@@ -82,6 +82,11 @@ body.ou-group-chat-open #messageForm{flex:0 0 auto}
  body.ou-group-chat-open #chatPanel .chat-head>div{order:3;flex-basis:100%}
  body.ou-group-chat-open #chatPanel .chat-log{min-height:45vh}
 }
+
+/* Reserva una zona segura cuando Netlify dibuja su insignia sobre un iframe de chat. */
+@media(max-width:700px){
+ html.ou-embedded #sendForm,html.ou-embedded #messageForm{margin-bottom:76px!important;flex-shrink:0!important}
+}
 </style>
 <link rel="stylesheet" href="assets/community-dock.css">
 <link rel="stylesheet" href="assets/chat-ui.css?v=20261108-giphy">
