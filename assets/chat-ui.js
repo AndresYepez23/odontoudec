@@ -4,6 +4,7 @@
 
   const BUCKET = "chat-media";
   const PREFIX = "[[ODONTO_IMAGE_V1]]";
+  const GIF_PREFIX = "[[ODONTO_GIF_V1]]";
   const MAX_INPUT = 15 * 1024 * 1024;
   const MAX_OUTPUT = 1400000;
   const MAX_CAPTION = 300;
@@ -20,6 +21,73 @@
 
   function setStatus(callback, message) {
     if (typeof callback === "function") callback(message);
+  }
+
+  function validGifPreviewUrl(value) {
+    try {
+      const url = new URL(String(value || ""));
+      return url.protocol === "https:" && /^media\d*\.giphy\.com$/i.test(url.hostname) && url.pathname.length > 1;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function validGifId(value) {
+    return /^[A-Za-z0-9_-]{1,120}$/.test(String(value || ""));
+  }
+
+  function normalizeGif(item) {
+    if (!item?.id || !validGifId(String(item.id))) return null;
+    const rendition = item?.images?.fixed_width || item?.images?.fixed_width_small || item?.images?.fixed_height_small || {};
+    const previewMp4 = validGifPreviewUrl(rendition.mp4) ? rendition.mp4 : "";
+    const previewWebp = validGifPreviewUrl(rendition.webp) ? rendition.webp : "";
+    const previewUrl = validGifPreviewUrl(rendition.url) ? rendition.url : "";
+    let source = "";
+    try {
+      const parsedSource = new URL(String(item.source || ""));
+      if (parsedSource.protocol === "https:" || parsedSource.protocol === "http:") {
+        source = parsedSource.hostname.replace(/^www\./i, "").slice(0, 45);
+      }
+    } catch (_) {}
+    return {
+      id: String(item.id),
+      previewMp4,
+      previewWebp,
+      previewUrl,
+      title: String(item.title || "GIF compartido").slice(0, 60),
+      username: String(item.username || "").replace(/^@/, "").slice(0, 40),
+      source,
+      analytics: item.analytics || null
+    };
+  }
+
+  function encodeGifContent(gif, caption) {
+    if (!gif || !validGifId(gif.id)) throw new Error("Este GIF no es válido. Selecciona otro.");
+    return GIF_PREFIX + JSON.stringify({
+      id: String(gif.id),
+      title: String(gif.title || "GIF compartido").slice(0, 60),
+      username: String(gif.username || "").replace(/^@/, "").slice(0, 40),
+      source: String(gif.source || "").slice(0, 45),
+      caption: String(caption || "").trim().slice(0, 60)
+    });
+  }
+
+  function parseGifContent(content) {
+    const value = String(content ?? "");
+    if (!value.startsWith(GIF_PREFIX)) return null;
+    try {
+      const data = JSON.parse(value.slice(GIF_PREFIX.length));
+      if (!data || !validGifId(data.id)) return null;
+      return {
+        id: String(data.id),
+        title: String(data.title || "GIF compartido").slice(0, 60),
+        username: String(data.username || "").replace(/^@/, "").slice(0, 40),
+        source: String(data.source || "").slice(0, 45),
+        caption: String(data.caption || "").slice(0, 60)
+      };
+    } catch (_) {
+      return null;
+    }
   }
 
   function canvasBlob(canvas, type, quality) {
@@ -208,8 +276,50 @@
   }
 
   async function renderMessageContent(container, content, db) {
-    const parsed = parseContent(content);
+    const rawContent = String(content ?? "");
     container.replaceChildren();
+    container.classList.remove("chat-gif-message");
+
+    if (rawContent.startsWith(GIF_PREFIX)) {
+      const gif = parseGifContent(rawContent);
+      container.classList.add("chat-gif-message");
+      if (!gif) {
+        container.textContent = "GIF no disponible.";
+        return;
+      }
+      if (gif.caption) {
+        const caption = document.createElement("span");
+        caption.className = "chat-gif-caption";
+        caption.textContent = gif.caption;
+        container.appendChild(caption);
+      }
+      const frame = document.createElement("iframe");
+      frame.className = "chat-gif-frame";
+      frame.src = "https://giphy.com/embed/" + encodeURIComponent(gif.id);
+      frame.title = gif.title || "GIF compartido de GIPHY";
+      frame.loading = "lazy";
+      frame.referrerPolicy = "strict-origin-when-cross-origin";
+      frame.setAttribute("allowfullscreen", "");
+      frame.setAttribute("scrolling", "no");
+      container.appendChild(frame);
+
+      if (gif.username || gif.source) {
+        const creator = document.createElement("span");
+        creator.className = "chat-gif-source";
+        creator.textContent = gif.username ? "GIF de @" + gif.username : "Fuente: " + gif.source;
+        container.appendChild(creator);
+      }
+      const credit = document.createElement("a");
+      credit.className = "chat-gif-credit";
+      credit.href = "https://giphy.com/";
+      credit.target = "_blank";
+      credit.rel = "noopener noreferrer";
+      credit.textContent = "Powered by GIPHY";
+      container.appendChild(credit);
+      return;
+    }
+
+    const parsed = parseContent(content);
 
     if (parsed.caption) {
       container.appendChild(document.createTextNode(parsed.caption));
@@ -270,8 +380,14 @@
     let available = !input.disabled;
     const originalMaxLength = input.maxLength;
     let pendingFile = null;
+    let pendingGif = null;
     let previewUrl = null;
     let busy = false;
+    let giphyKey = null;
+    let giphyKeyPromise = null;
+    let gifSearchController = null;
+    const gifRequestTimes = [];
+    const giphyCustomerId = randomId();
 
     const controls = document.createElement("div");
     controls.className = "chat-attach-wrap";
@@ -322,6 +438,33 @@
     controls.append(trigger, menu, gallery, camera);
     row.insertBefore(controls, input);
 
+    // Un único botón GIF compacto junto al adjunto; el selector va en body
+    // para no quedar recortado por los paneles estrechos de conversación.
+    const gifWrap = document.createElement("div");
+    gifWrap.className = "chat-gif-wrap";
+    const gifTrigger = document.createElement("button");
+    gifTrigger.type = "button";
+    gifTrigger.className = "chat-gif-trigger";
+    gifTrigger.textContent = "GIF";
+    gifTrigger.title = "Buscar GIF";
+    gifTrigger.setAttribute("aria-label", "Buscar y enviar un GIF");
+    gifTrigger.setAttribute("aria-expanded", "false");
+    gifTrigger.disabled = !available;
+
+    const gifPicker = document.createElement("section");
+    gifPicker.className = "chat-gif-picker";
+    gifPicker.hidden = true;
+    gifPicker.setAttribute("role", "dialog");
+    gifPicker.setAttribute("aria-label", "Buscar GIF en GIPHY");
+    gifPicker.innerHTML = '<div class="chat-gif-picker-head"><strong>GIFs para tu chat</strong><button type="button" class="chat-gif-close" aria-label="Cerrar buscador GIF">×</button></div><form class="chat-gif-search"><input type="search" maxlength="50" placeholder="Buscar en GIPHY…" aria-label="Buscar GIF"><button type="submit">Buscar</button></form><div class="chat-gif-grid" aria-live="polite"><p class="chat-gif-empty">Abre el buscador para ver los GIF populares.</p></div><footer class="chat-gif-footer"><span>Powered by GIPHY</span><span>Contenido filtrado · PG</span></footer>';
+    const gifSearchForm = gifPicker.querySelector(".chat-gif-search");
+    const gifSearchInput = gifPicker.querySelector('input[type="search"]');
+    const gifGrid = gifPicker.querySelector(".chat-gif-grid");
+    const gifClose = gifPicker.querySelector(".chat-gif-close");
+    gifWrap.appendChild(gifTrigger);
+    row.insertBefore(gifWrap, input);
+    document.body.appendChild(gifPicker);
+
     const preview = document.createElement("div");
     preview.className = "chat-attachment-preview";
     preview.hidden = true;
@@ -339,12 +482,60 @@
     function clear() {
       revokePreview();
       pendingFile = null;
+      pendingGif = null;
       preview.hidden = true;
       preview.replaceChildren();
       gallery.value = "";
       camera.value = "";
       input.required = originalRequired;
       if (originalMaxLength > 0) input.maxLength = originalMaxLength;
+    }
+
+    function selectGif(gif) {
+      if (!gif || !validGifId(gif.id)) return;
+      clear();
+      pendingGif = {
+        id: gif.id,
+        title: gif.title || "GIF compartido",
+        username: gif.username || "",
+        source: gif.source || "",
+        analytics: gif.analytics || null
+      };
+      input.required = false;
+      input.maxLength = Math.min(originalMaxLength > 0 ? originalMaxLength : 60, 60);
+
+      let thumbnail;
+      if (gif.previewWebp || gif.previewUrl) {
+        thumbnail = document.createElement("img");
+        thumbnail.className = "chat-preview-thumb chat-gif-preview-thumb";
+        thumbnail.src = gif.previewWebp || gif.previewUrl;
+        thumbnail.alt = gif.title || "GIF seleccionado";
+      } else {
+        thumbnail = document.createElement("iframe");
+        thumbnail.className = "chat-preview-thumb chat-gif-preview-frame";
+        thumbnail.src = "https://giphy.com/embed/" + encodeURIComponent(gif.id);
+        thumbnail.title = gif.title || "GIF seleccionado";
+        thumbnail.setAttribute("allowfullscreen", "");
+      }
+      const details = document.createElement("div");
+      details.className = "chat-preview-details";
+      const title = document.createElement("strong");
+      title.textContent = "GIF listo para enviar";
+      const subtitle = document.createElement("span");
+      subtitle.textContent = "Powered by GIPHY · Puedes añadir un texto";
+      details.append(title, subtitle);
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "chat-preview-remove";
+      remove.textContent = "Quitar";
+      remove.addEventListener("click", () => {
+        clear();
+        report("GIF retirado. Puedes seguir escribiendo.");
+      });
+      preview.append(thumbnail, details, remove);
+      preview.hidden = false;
+      closeGifPicker();
+      report("GIF seleccionado. Pulsa Enviar para compartirlo.");
     }
 
     function selectFile(file) {
@@ -400,8 +591,213 @@
       camera.value = "";
     });
 
+    function closeGifPicker() {
+      gifPicker.hidden = true;
+      gifTrigger.setAttribute("aria-expanded", "false");
+      if (gifSearchController) {
+        gifSearchController.abort();
+        gifSearchController = null;
+      }
+      // GIPHY no permite cachear respuestas ni URLs de medios: se descartan
+      // los resultados en cuanto se cierra el selector.
+      gifGrid.replaceChildren();
+    }
+
+    function positionGifPicker() {
+      const rect = gifTrigger.getBoundingClientRect();
+      const width = Math.max(200, Math.min(340, window.innerWidth - 24));
+      const maxHeight = Math.max(220, Math.min(370, window.innerHeight - 24));
+      const left = Math.max(12, Math.min(rect.left, window.innerWidth - width - 12));
+      let top = rect.top - maxHeight - 8;
+      if (top < 12) top = Math.min(window.innerHeight - maxHeight - 12, rect.bottom + 8);
+      gifPicker.style.width = width + "px";
+      gifPicker.style.maxHeight = maxHeight + "px";
+      gifPicker.style.left = left + "px";
+      gifPicker.style.top = Math.max(12, top) + "px";
+    }
+
+    function showGifMessage(message, isError) {
+      gifGrid.replaceChildren();
+      const note = document.createElement("p");
+      note.className = "chat-gif-empty" + (isError ? " is-error" : "");
+      note.textContent = message;
+      gifGrid.appendChild(note);
+    }
+
+    function trackGiphyAction(gif, action) {
+      const rawUrl = gif?.analytics?.[action]?.url;
+      if (!rawUrl) return;
+      try {
+        const url = new URL(rawUrl);
+        if (url.protocol !== "https:" || url.hostname !== "giphy-analytics.giphy.com") return;
+        url.searchParams.set("ts", String(Date.now()));
+        url.searchParams.set("customer_id", giphyCustomerId);
+        fetch(url.toString(), { method: "GET", mode: "no-cors", credentials: "omit", cache: "no-store", keepalive: true }).catch(() => {});
+      } catch (_) {}
+    }
+
+    function renderGifResults(items) {
+      gifGrid.replaceChildren();
+      const gifs = (items || []).map(normalizeGif).filter(Boolean);
+      if (!gifs.length) {
+        showGifMessage("No encontramos GIFs. Prueba con otra palabra.", false);
+        return;
+      }
+      gifs.forEach(gif => {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "chat-gif-option";
+        option.title = gif.title || "Seleccionar GIF";
+        option.setAttribute("aria-label", "Seleccionar GIF: " + (gif.title || "GIF"));
+        if (gif.previewMp4) {
+          const video = document.createElement("video");
+          video.src = gif.previewMp4;
+          video.autoplay = true;
+          video.muted = true;
+          video.loop = true;
+          video.playsInline = true;
+          video.preload = "metadata";
+          video.addEventListener("loadeddata", () => trackGiphyAction(gif, "onload"), { once: true });
+          option.appendChild(video);
+        } else if (gif.previewWebp || gif.previewUrl) {
+          const image = document.createElement("img");
+          image.src = gif.previewWebp || gif.previewUrl;
+          image.alt = "";
+          image.loading = "lazy";
+          image.decoding = "async";
+          image.addEventListener("load", () => trackGiphyAction(gif, "onload"), { once: true });
+          option.appendChild(image);
+        } else {
+          const label = document.createElement("span");
+          label.className = "chat-gif-option-fallback";
+          label.textContent = gif.title || "GIF";
+          option.appendChild(label);
+          trackGiphyAction(gif, "onload");
+        }
+        option.addEventListener("click", () => {
+          trackGiphyAction(gif, "onclick");
+          selectGif(gif);
+        });
+        gifGrid.appendChild(option);
+      });
+    }
+
+    async function getGiphyKey() {
+      if (giphyKey) return giphyKey;
+      if (giphyKeyPromise) return giphyKeyPromise;
+      giphyKeyPromise = (async () => {
+        const { data, error } = await db.auth.getSession();
+        const token = data?.session?.access_token;
+        if (error || !token) throw new Error("Inicia sesión para buscar GIFs.");
+        const response = await fetch("/.netlify/functions/giphy-config", {
+          headers: { Authorization: "Bearer " + token },
+          cache: "no-store"
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || "No se pudo activar el buscador de GIFs.");
+        if (!payload.apiKey) throw new Error("El buscador de GIFs aún no está configurado.");
+        giphyKey = payload.apiKey;
+        return giphyKey;
+      })().finally(() => { giphyKeyPromise = null; });
+      return giphyKeyPromise;
+    }
+
+    async function requestGiphy(query, signal) {
+      const normalized = String(query || "").trim();
+      const now = Date.now();
+      while (gifRequestTimes.length && now - gifRequestTimes[0] > 60 * 60 * 1000) gifRequestTimes.shift();
+      if (gifRequestTimes.length >= 75) {
+        throw new Error("Se alcanzó el límite de búsquedas de esta sesión. Inténtalo más tarde.");
+      }
+
+      const apiKey = await getGiphyKey();
+      const endpoint = normalized ? "search" : "trending";
+      const params = new URLSearchParams({
+        api_key: apiKey,
+        limit: "12",
+        rating: "pg",
+        lang: "es",
+        bundle: "messaging_non_clips",
+        customer_id: giphyCustomerId
+      });
+      if (normalized) params.set("q", normalized.slice(0, 50));
+      gifRequestTimes.push(now);
+      const response = await fetch("https://api.giphy.com/v1/gifs/" + endpoint + "?" + params.toString(), {
+        signal,
+        mode: "cors",
+        credentials: "omit",
+        cache: "no-store"
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload?.meta?.status !== 200) {
+        if (response.status === 429) throw new Error("GIPHY alcanzó el límite temporal de búsquedas. Inténtalo más tarde.");
+        throw new Error("No se pudieron cargar los GIFs. Comprueba la conexión e inténtalo de nuevo.");
+      }
+      return Array.isArray(payload.data) ? payload.data : [];
+    }
+
+    async function loadTrendingGifs() {
+      showGifMessage("Cargando GIFs populares…", false);
+      try {
+        const items = await requestGiphy("");
+        if (!gifPicker.hidden) renderGifResults(items);
+      } catch (error) {
+        if (!gifPicker.hidden) showGifMessage(error?.message || "No se pudieron cargar los GIFs.", true);
+      }
+    }
+
+    async function searchGifs(query) {
+      if (gifSearchController) gifSearchController.abort();
+      gifSearchController = new AbortController();
+      const controller = gifSearchController;
+      showGifMessage("Buscando GIFs…", false);
+      try {
+        const items = await requestGiphy(query, controller.signal);
+        if (!controller.signal.aborted && !gifPicker.hidden) renderGifResults(items);
+      } catch (error) {
+        if (error?.name !== "AbortError" && !gifPicker.hidden) showGifMessage(error?.message || "No se pudo completar la búsqueda.", true);
+      } finally {
+        if (gifSearchController === controller) gifSearchController = null;
+      }
+    }
+
+    async function openGifPicker() {
+      if (busy || !available) return;
+      menu.hidden = true;
+      if (!gifPicker.hidden) {
+        closeGifPicker();
+        return;
+      }
+      gifPicker.hidden = false;
+      gifTrigger.setAttribute("aria-expanded", "true");
+      positionGifPicker();
+      gifSearchInput.value = "";
+      await loadTrendingGifs();
+    }
+
+    gifTrigger.addEventListener("click", openGifPicker);
+    gifClose.addEventListener("click", closeGifPicker);
+    gifSearchForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const query = gifSearchInput.value.trim();
+      if (query.length < 2) {
+        showGifMessage("Escribe al menos dos caracteres para buscar.", false);
+        return;
+      }
+      void searchGifs(query);
+    });
+    window.addEventListener("resize", () => { if (!gifPicker.hidden) positionGifPicker(); });
+    window.addEventListener("scroll", () => { if (!gifPicker.hidden) positionGifPicker(); }, true);
+    document.addEventListener("pointerdown", event => {
+      if (!gifWrap.contains(event.target) && !gifPicker.contains(event.target)) closeGifPicker();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !gifPicker.hidden) closeGifPicker();
+    });
+
     trigger.addEventListener("click", () => {
       if (busy) return;
+      closeGifPicker();
       menu.hidden = !menu.hidden;
     });
 
@@ -414,6 +810,8 @@
       trigger.disabled = busy || !available;
       galleryButton.disabled = busy || !available;
       cameraButton.disabled = busy || !available;
+      gifTrigger.disabled = busy || !available;
+      if (busy) closeGifPicker();
     }
 
     function setAvailable(value) {
@@ -421,11 +819,24 @@
       trigger.disabled = busy || !available;
       galleryButton.disabled = busy || !available;
       cameraButton.disabled = busy || !available;
-      if (!available) menu.hidden = true;
+      gifTrigger.disabled = busy || !available;
+      if (!available) {
+        menu.hidden = true;
+        closeGifPicker();
+      }
     }
 
     async function prepare({ text, scope, scopeId, userId }) {
       const caption = String(text || "").trim();
+      const target = scope || getScope?.();
+      if (pendingGif) {
+        if (caption.length > 60) throw new Error("Con un GIF puedes añadir una leyenda de hasta 60 caracteres.");
+        const content = encodeGifContent(pendingGif, caption);
+        const maxLength = target?.type === "community" ? 500 : 2000;
+        if (content.length > maxLength) throw new Error("Reduce el texto que acompaña el GIF e inténtalo de nuevo.");
+        report("Enviando GIF…");
+        return { content, path: null, kind: "gif", gifAnalytics: pendingGif.analytics || null };
+      }
       if (!pendingFile) return { content: caption, path: null };
       if (caption.length > MAX_CAPTION) {
         throw new Error("Con una fotografía puedes añadir un texto de hasta 300 caracteres.");
@@ -434,7 +845,6 @@
       report("Optimizando fotografía…");
       let uploaded = null;
       try {
-        const target = scope || getScope?.();
         const owner = userId || getUser?.()?.id;
         uploaded = await uploadImage(db, pendingFile, target?.type, scopeId || target?.id, owner);
         const content = encodeContent(caption, uploaded.path);
@@ -452,13 +862,14 @@
     }
 
     return {
-      hasPending: () => Boolean(pendingFile),
+      hasPending: () => Boolean(pendingFile || pendingGif),
       prepare,
       clear,
       rollback: path => removeAttachment(db, path),
       setBusy,
       setAvailable,
-      report
+      report,
+      trackGif: (prepared, action) => trackGiphyAction({ analytics: prepared?.gifAnalytics }, action)
     };
   }
 
@@ -466,6 +877,8 @@
     mountComposer,
     renderMessageContent,
     parseContent,
+    parseGifContent,
+    encodeGifContent,
     removeAttachment
   });
 })();

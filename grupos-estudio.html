@@ -84,7 +84,7 @@ body.ou-group-chat-open #messageForm{flex:0 0 auto}
 }
 </style>
 <link rel="stylesheet" href="assets/community-dock.css">
-<link rel="stylesheet" href="assets/chat-ui.css">
+<link rel="stylesheet" href="assets/chat-ui.css?v=20261108-giphy">
 
 <link rel="icon" type="image/png" href="/assets/download-removebg-preview%20(2).png">
 <link rel="apple-touch-icon" href="/assets/download-removebg-preview%20(2).png">
@@ -129,7 +129,7 @@ body.ou-group-chat-open #messageForm{flex:0 0 auto}
 <script>window.OneSignalDeferred=window.OneSignalDeferred||[];OneSignalDeferred.push(async function(OneSignal){await OneSignal.init({appId:"64e9045a-6129-4f50-aa9a-03cfbe70bfae"});});</script>
 <script src="/assets/onesignal.js?v=20261106-2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/assets/onesignal-push.js?v=20261106-2"></script>
-<script src="assets/chat-ui.js"></script>
+<script src="assets/chat-ui.js?v=20261108-giphy"></script>
 <script src="assets/chat-reactions.js?v=20261106-final"></script>
 <script>
 const db=window.supabase.createClient("https://jqbrheonqqsiijrprsqs.supabase.co","sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8");window.ouSupabaseClient=db;
@@ -205,6 +205,7 @@ async function loadMessages(){
   const {data:createdMessage,error}=await db.from("study_group_messages").insert({group_id:activeGroup,sender_id:user.id,content:prepared.content}).select("id").single();
   if(error){if(prepared.path)await composer.rollback(prepared.path);say("chatStatus","No se pudo enviar: "+error.message);return;}
   if(createdMessage?.id)void window.OdontoPush?.notify(db,"group_message",createdMessage.id);
+  composer.trackGif(prepared,"onsent");
   input.value="";composer.clear();say("chatStatus","Mensaje enviado.");await loadMessages();
  }catch(error){say("chatStatus",error?.message||"No se pudo enviar la fotografía.");}
  finally{input.disabled=false;send.disabled=false;composer.setBusy(false);}
