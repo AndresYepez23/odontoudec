@@ -383,8 +383,8 @@
     let pendingGif = null;
     let previewUrl = null;
     let busy = false;
-    let giphyKey = null;
-    let giphyKeyPromise = null;
+    const giphyKeys = new Map();
+    const giphyKeyPromises = new Map();
     let gifSearchController = null;
     const gifRequestTimes = [];
     const giphyCustomerId = randomId();
@@ -682,24 +682,29 @@
       });
     }
 
-    async function getGiphyKey() {
-      if (giphyKey) return giphyKey;
-      if (giphyKeyPromise) return giphyKeyPromise;
-      giphyKeyPromise = (async () => {
+    async function getGiphyKey(scope) {
+      const section = String(scope || "");
+      if (!["community", "private", "groups"].includes(section)) {
+        throw new Error("No se pudo identificar esta sección del chat.");
+      }
+      if (giphyKeys.has(section)) return giphyKeys.get(section);
+      if (giphyKeyPromises.has(section)) return giphyKeyPromises.get(section);
+      const request = (async () => {
         const { data, error } = await db.auth.getSession();
         const token = data?.session?.access_token;
         if (error || !token) throw new Error("Inicia sesión para buscar GIFs.");
-        const response = await fetch("/.netlify/functions/giphy-config", {
+        const response = await fetch("/.netlify/functions/giphy-config?scope=" + encodeURIComponent(section), {
           headers: { Authorization: "Bearer " + token },
           cache: "no-store"
         });
         const payload = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(payload.error || "No se pudo activar el buscador de GIFs.");
-        if (!payload.apiKey) throw new Error("El buscador de GIFs aún no está configurado.");
-        giphyKey = payload.apiKey;
-        return giphyKey;
-      })().finally(() => { giphyKeyPromise = null; });
-      return giphyKeyPromise;
+        if (!payload.apiKey) throw new Error("El buscador de GIFs aún no está configurado para esta sección.");
+        giphyKeys.set(section, payload.apiKey);
+        return payload.apiKey;
+      })().finally(() => { giphyKeyPromises.delete(section); });
+      giphyKeyPromises.set(section, request);
+      return request;
     }
 
     async function requestGiphy(query, signal) {
@@ -710,7 +715,8 @@
         throw new Error("Se alcanzó el límite de búsquedas de esta sesión. Inténtalo más tarde.");
       }
 
-      const apiKey = await getGiphyKey();
+      const activeScope = getScope?.()?.type;
+      const apiKey = await getGiphyKey(activeScope);
       const endpoint = normalized ? "search" : "trending";
       const params = new URLSearchParams({
         api_key: apiKey,

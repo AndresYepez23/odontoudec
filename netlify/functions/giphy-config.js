@@ -30,14 +30,26 @@ exports.handler = async function (event) {
     return json(401, { error: "Inicia sesión para utilizar los GIFs." });
   }
 
+  const section = String(event.queryStringParameters?.scope || "");
+  const keyBySection = {
+    community: "GIPHY_API_KEY",
+    private: "GIPHY_API_KEY_PRIVATE",
+    groups: "GIPHY_API_KEY_GROUPS"
+  };
+  const envName = keyBySection[section];
+  if (!envName) {
+    return json(400, { error: "Sección de chat no válida." });
+  }
+
   const base = String(process.env.SUPABASE_URL || "").replace(/\/+$/, "");
   const anon = process.env.SUPABASE_ANON_KEY;
-  const apiKey = process.env.GIPHY_API_KEY;
+  const apiKey = process.env[envName];
   if (!base || !anon) {
     return json(503, { error: "No está configurada la autenticación de OdontoUdeC." });
   }
   if (!apiKey) {
-    return json(503, { error: "El buscador de GIFs aún no está activado. Falta configurar GIPHY_API_KEY." });
+    const sectionName = section === "community" ? "Comunidad" : section === "private" ? "Mensajes privados" : "Grupos";
+    return json(503, { error: "El buscador de GIFs aún no está configurado para " + sectionName + ". Falta agregar su clave de GIPHY en Netlify." });
   }
 
   try {
