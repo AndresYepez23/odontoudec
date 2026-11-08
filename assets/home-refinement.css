@@ -66,3 +66,11 @@
 @media(max-width:850px){
  .nav>.navlinks .nav-more.is-logged-in .mobile-logout{display:block!important}
 }
+
+/* PWA: botón claro y coherente en todas las plataformas */
+#installPwaButton{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:43px;padding:10px 16px!important;border:1px solid #d9c5e8;border-radius:12px;background:linear-gradient(115deg,#f9f4ff,#fffaf0);color:#32105f;font-weight:850;box-shadow:0 3px 11px rgba(50,16,95,.07)}
+#installPwaButton[hidden]{display:none!important}
+#installPwaButton .pwa-platform-icon{display:inline-flex;width:21px;height:21px;align-items:center;justify-content:center;flex:0 0 21px}
+#installPwaButton .pwa-platform-icon svg{display:block;width:20px;height:20px;fill:currentColor}
+#installPwaButton:hover{background:#f0e6fa;border-color:#bd9dd5}
+#pwaInstallHelp:not([hidden]){display:block;max-width:570px;margin-top:11px;padding:11px 13px;border:1px solid #e8dcef;border-radius:11px;background:#fff;color:#584a64;font-size:.83rem;line-height:1.5}
