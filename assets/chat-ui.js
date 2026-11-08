@@ -303,10 +303,18 @@
       frame.setAttribute("scrolling", "no");
       container.appendChild(frame);
 
-      if (gif.username || gif.source) {
+      if (gif.username) {
+        const creator = document.createElement("a");
+        creator.className = "chat-gif-source";
+        creator.href = "https://giphy.com/" + encodeURIComponent(gif.username);
+        creator.target = "_blank";
+        creator.rel = "noopener noreferrer";
+        creator.textContent = "GIF de @" + gif.username;
+        container.appendChild(creator);
+      } else if (gif.source) {
         const creator = document.createElement("span");
         creator.className = "chat-gif-source";
-        creator.textContent = gif.username ? "GIF de @" + gif.username : "Fuente: " + gif.source;
+        creator.textContent = "Fuente: " + gif.source;
         container.appendChild(creator);
       }
       const credit = document.createElement("a");
@@ -456,7 +464,7 @@
     gifPicker.hidden = true;
     gifPicker.setAttribute("role", "dialog");
     gifPicker.setAttribute("aria-label", "Buscar GIF en GIPHY");
-    gifPicker.innerHTML = '<div class="chat-gif-picker-head"><strong>GIFs para tu chat</strong><button type="button" class="chat-gif-close" aria-label="Cerrar buscador GIF">×</button></div><form class="chat-gif-search"><input type="search" maxlength="50" placeholder="Buscar en GIPHY…" aria-label="Buscar GIF"><button type="submit">Buscar</button></form><div class="chat-gif-grid" aria-live="polite"><p class="chat-gif-empty">Abre el buscador para ver los GIF populares.</p></div><footer class="chat-gif-footer"><span>Powered by GIPHY</span><span>Contenido filtrado · PG</span></footer>';
+    gifPicker.innerHTML = '<div class="chat-gif-picker-head"><strong>GIFs para tu chat</strong><button type="button" class="chat-gif-close" aria-label="Cerrar buscador GIF">×</button></div><form class="chat-gif-search"><input type="search" maxlength="50" placeholder="Buscar en GIPHY…" aria-label="Buscar GIF"><button type="submit">Buscar</button></form><div class="chat-gif-grid" aria-live="polite"><p class="chat-gif-empty">Abre el buscador para ver los GIF populares.</p></div><footer class="chat-gif-footer"><a class="chat-gif-powered" href="https://giphy.com/" target="_blank" rel="noopener noreferrer" aria-label="Powered by GIPHY"><img src="/assets/giphy-powered-by.png" alt="Powered by GIPHY"></a><span class="chat-gif-safety">Contenido filtrado · PG</span></footer>';
     const gifSearchForm = gifPicker.querySelector(".chat-gif-search");
     const gifSearchInput = gifPicker.querySelector('input[type="search"]');
     const gifGrid = gifPicker.querySelector(".chat-gif-grid");

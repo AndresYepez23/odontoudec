@@ -33,8 +33,8 @@ exports.handler = async function (event) {
   const section = String(event.queryStringParameters?.scope || "");
   const keyBySection = {
     community: "GIPHY_API_KEY",
-    private: "GIPHY_API_KEY_PRIVATE",
-    groups: "GIPHY_API_KEY_GROUPS"
+    private: "GIPHY_API_KEY_1",
+    groups: "GIPHY_API_KEY_2"
   };
   const envName = keyBySection[section];
   if (!envName) {
