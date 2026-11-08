@@ -94,6 +94,7 @@ body.ou-group-chat-open #messageForm{flex:0 0 auto}
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="OdontoUdeC">
   <meta name="mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="/assets/video-call.css?v=20261107">
 </head>
 <body>
 <header><a class="brand" href="index.html"><img src="assets/download-removebg-preview%20(2).png" alt="Logo OdontoUdeC"><span>OdontoUdeC</span></a><nav class="site-nav" aria-label="Navegación principal"><a href="index.html#inicio">Inicio</a><a href="index.html#agenda">Calendario</a><a href="mi-espacio.html">Mi espacio</a><a href="grupos-estudio.html">Grupos</a><a href="academia.html">Academia</a><a href="perfil-academico.html">Mi perfil</a></nav></header>
@@ -222,6 +223,7 @@ db.auth.onAuthStateChange((_event,session)=>{
 });
 init();
 </script>
-<script src="/assets/notifications.js?v=20261106-2"></script><script src="assets/community-dock.js"></script>
+<script src="/assets/notifications.js?v=20261106-2"></script><script src="/assets/video-call.js?v=20261107"></script><script>window.OdontoVideo.mountAction({host:document.querySelector('#chatPanel .chat-head'),before:document.getElementById('closeChat'),resolve:()=>user&&activeGroup?{scope:'groups',id:activeGroup,label:document.getElementById('chatTitle').textContent}:null,db});</script>
+<script src="assets/community-dock.js"></script>
 <script src="/assets/posthog.js" defer></script>
 </body></html>

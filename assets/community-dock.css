@@ -27,3 +27,9 @@
 }
 #ouDockUnread{display:none;min-width:19px;height:19px;padding:0 5px;border-radius:99px;background:#d7a928;color:#281047;font-size:11px;font-weight:900;line-height:19px;text-align:center}
 #ouDockUnread.ou-visible{display:inline-block}
+
+/* Acceso a videollamadas discreto, visible y sin añadir otra pestaña. */
+#ouDockHead #ouDockVideo{display:inline-flex;align-items:center;gap:5px;border:1px solid #9ee5d4;background:#d8f7ee;color:#195c50;font-size:12px;font-weight:850;white-space:nowrap;padding:7px 9px}
+#ouDockHead #ouDockVideo:hover{background:#bdf0e2}
+#ouDockHead #ouDockVideo span{font-size:12px}
+@media(max-width:370px){#ouDockHead #ouDockVideo span{display:none}#ouDockHead #ouDockVideo{padding:7px 8px}}

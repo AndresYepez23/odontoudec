@@ -1,0 +1,57 @@
+/* OdontoUdeC · videollamadas Daily integradas sin alterar el flujo textual. */
+.ou-video-trigger{
+  display:inline-flex!important;align-items:center;justify-content:center;gap:7px;
+  flex:0 0 auto!important;min-width:0;min-height:36px!important;padding:7px 11px!important;
+  border:1px solid #91d7c8!important;border-radius:11px!important;
+  background:#e9faf5!important;color:#14574c!important;
+  box-shadow:none!important;font-size:12px!important;font-weight:800!important;
+  line-height:1.15!important;cursor:pointer;white-space:nowrap;
+}
+.ou-video-trigger:hover,.ou-video-trigger:focus-visible{background:#d5f5ec!important;border-color:#4aaf9b!important;outline:2px solid transparent;}
+.ou-video-trigger svg,.ou-video-camera svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.ou-video-trigger[hidden]{display:none!important}
+#room>.row:first-child #who{flex:1 1 80px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#room>.row:first-child{flex-wrap:nowrap!important}
+.thread-head #threadTitle{flex:1 1 auto;min-width:0}
+.thread-head .ou-video-trigger{margin-left:auto}
+.thread-head #threadStatus{margin-left:0}
+.chat-head .ou-video-trigger{margin-left:auto}
+.ou-video-overlay{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(18,11,33,.84);backdrop-filter:blur(6px);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+.ou-video-window{display:grid;grid-template-rows:auto minmax(0,1fr) auto;width:min(1050px,100%);height:min(760px,100%);min-height:0;overflow:hidden;border:1px solid #e5d8ef;border-radius:22px;background:#130e20;box-shadow:0 28px 85px #07041188;color:white}
+.ou-video-head{display:flex;align-items:center;gap:11px;padding:13px 17px;background:linear-gradient(120deg,#311058,#52278c);min-height:64px}
+.ou-video-camera{width:38px;height:38px;flex:0 0 38px;display:grid;place-items:center;border-radius:12px;background:#e7fcf4;color:#116454}
+.ou-video-camera svg{width:23px;height:23px}
+.ou-video-heading{display:flex;flex-direction:column;min-width:0;flex:1;line-height:1.35}
+.ou-video-heading strong{font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ou-video-heading small{font-size:12px;color:#e7daf0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ou-video-exit{display:flex;align-items:center;gap:5px;flex:0 0 auto;border:1px solid #ffffff50!important;border-radius:10px!important;background:#ffffff1c!important;color:#fff!important;font:700 13px system-ui,sans-serif!important;padding:8px 11px!important;cursor:pointer}
+.ou-video-exit:hover{background:#ffffff30!important}
+.ou-video-stage{position:relative;min-height:0;overflow:hidden;display:flex;align-items:stretch;justify-content:stretch;background:#140f22}
+.ou-video-stage>iframe{width:100%!important;height:100%!important;min-height:0;display:block;border:0}
+.ou-video-wait,.ou-video-error{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;width:100%;text-align:center;padding:24px;color:#fff}
+.ou-video-wait strong,.ou-video-error strong{font-size:18px}
+.ou-video-wait p,.ou-video-error p{margin:0;max-width:460px;color:#d6cce0;font-size:14px}
+.ou-video-error button{border:0;border-radius:10px;background:#e1f8f0;color:#155e50;padding:10px 15px;font-weight:800;cursor:pointer}
+.ou-video-spinner{width:37px;height:37px;border:3px solid #ffffff3a;border-top-color:#62dfc7;border-radius:50%;animation:ou-video-spin .8s linear infinite}
+@keyframes ou-video-spin{to{transform:rotate(360deg)}}
+.ou-video-footer{display:flex;align-items:center;gap:8px;padding:10px 17px;min-height:43px;background:#21152f;color:#ded1e5;font-size:12px}
+.ou-video-dot{width:8px;height:8px;border-radius:50%;background:#54cfad}
+.ou-video-daily{margin-left:auto;color:#b2a5bf}
+.ou-video-toast{position:fixed;bottom:max(22px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:2147483001;max-width:min(95vw,420px);padding:12px 16px;border-radius:12px;background:#2b164d;color:white;box-shadow:0 10px 30px #22113455;font-size:13px;line-height:1.4;text-align:center}
+@media(max-width:850px){
+  .thread-head #threadStatus{display:none!important}
+  .thread-head .ou-video-action-text{display:none}
+  .thread-head .ou-video-trigger{width:38px;min-width:38px;padding:7px!important}
+}
+@media(max-width:600px){
+  #room>.row:first-child .ou-video-action-text{display:none}
+  #room>.row:first-child .ou-video-trigger{width:36px;min-width:36px;padding:7px!important}
+  .chat-head .ou-video-action-text{display:none}
+  .chat-head .ou-video-trigger{width:38px;min-width:38px;padding:7px!important}
+  .ou-video-overlay{padding:0;backdrop-filter:none}
+  .ou-video-window{width:100vw;height:100dvh;border-radius:0;border:0;grid-template-rows:auto minmax(0,1fr) auto}
+  .ou-video-head{padding:max(10px,env(safe-area-inset-top)) 12px 10px;min-height:65px}
+  .ou-video-heading strong{font-size:14px}
+  .ou-video-footer{padding:9px 12px max(9px,env(safe-area-inset-bottom))}
+  .ou-video-exit{padding:8px!important}
+}
