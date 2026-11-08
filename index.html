@@ -194,28 +194,6 @@ function setAuthUI(){
 }
 document.getElementById('showLogin').addEventListener('click',()=>setAuthMode('signin'));
 document.getElementById('showSignup').addEventListener('click',()=>setAuthMode('signup'));
-let onboardingInFlightFor=null;
-async function showFirstVisitGuide(user){
- if(!user)return;
- const key='ou-onboarding-shown-'+user.id;
- if(sessionStorage.getItem(key)||onboardingInFlightFor===user.id)return;
- onboardingInFlightFor=user.id;
- let {data:profile,error}=await supabaseClient.from('profiles').select('onboarding_completed').eq('id',user.id).maybeSingle();
- if(error){onboardingInFlightFor=null;console.warn('No se pudo consultar el recorrido:',error.message);return;}
- if(!profile){
-  try{await ensureProfile(user);const retry=await supabaseClient.from('profiles').select('onboarding_completed').eq('id',user.id).maybeSingle();profile=retry.data;if(retry.error)throw retry.error;}
-  catch(e){onboardingInFlightFor=null;console.warn('No se pudo preparar el perfil:',e.message);return;}
- }
- if(profile?.onboarding_completed){sessionStorage.setItem(key,'1');onboardingInFlightFor=null;return;}
- if(!window.OdontoTour||typeof window.OdontoTour.start!=='function'){onboardingInFlightFor=null;notify('El recorrido guiado no está disponible ahora. Puedes intentarlo desde Más.');return;}
- try{
-  const started=await window.OdontoTour.start({
-   onFinish:async()=>{const {error:updateError}=await supabaseClient.from('profiles').update({onboarding_completed:true,updated_at:new Date().toISOString()}).eq('id',user.id);sessionStorage.setItem(key,'1');if(updateError)notify('Terminaste el recorrido, pero no pudimos guardar el progreso.');onboardingInFlightFor=null;},
-   onDismiss:()=>{sessionStorage.setItem(key,'1');onboardingInFlightFor=null;}
-  });
-  if(!started){onboardingInFlightFor=null;notify('No pudimos iniciar el recorrido. Puedes repetirlo desde Más.');}
- }catch(e){onboardingInFlightFor=null;console.warn('Error en el recorrido:',e);notify('El recorrido guiado no está disponible ahora. Inténtalo desde Más.');}
-}
 async function ensureProfile(user){
  const displayName=(user.user_metadata?.display_name || user.email?.split('@')[0] || 'Estudiante').slice(0,60);
  const {data,error}=await supabaseClient.from('profiles').select('id').eq('id',user.id).maybeSingle();
@@ -349,7 +327,6 @@ async function handleAuth(mode){
     // Perfil, publicaciones y bienvenida se preparan en segundo plano.
     ensureProfile(currentUser).catch(err=>notify('Accediste correctamente, pero no se pudo completar tu perfil: '+err.message));
     loadPosts().catch(err=>console.warn('No se pudieron actualizar las publicaciones:',err));
-    showFirstVisitGuide(currentUser).catch(err=>console.warn('No se pudo abrir la guía de bienvenida:',err));
   }finally{
     if(timeoutId!==null)clearTimeout(timeoutId);
     button.disabled=false;
@@ -408,11 +385,10 @@ supabaseClient.auth.onAuthStateChange((event,session)=>{
    checkAdmin().catch(err=>console.warn('[Auth] No se pudo comprobar administración:',err));
    if(event!=='INITIAL_SESSION'){
      loadPosts().catch(err=>console.warn('[Auth] No se pudieron cargar publicaciones:',err));
-     if(eventUser)showFirstVisitGuide(eventUser).catch(err=>console.warn('[Auth] No se pudo abrir bienvenida:',err));
    }
  },0);
 });
-(async()=>{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;window.OdontoOneSignal?.syncUser(currentUser);setAuthUI();await checkAdmin();await loadPosts();if(currentUser)await showFirstVisitGuide(currentUser);})();
+(async()=>{const {data}=await supabaseClient.auth.getSession();currentUser=data.session?.user||null;window.OdontoOneSignal?.syncUser(currentUser);setAuthUI();await checkAdmin();await loadPosts();})();
 
 // Calendario académico y biblioteca: requieren las tablas academic_events y academic_resources en Supabase.
 const eventStatus=document.getElementById('eventStatus');
@@ -551,4 +527,7 @@ document.getElementById('clearPosts').classList.add('hidden');
 <script src="/assets/posthog.js" defer></script>
 <script src="/assets/admin-panel.js" defer></script>
 <script src="/assets/home-refinement.js?v=20261108-1" defer></script>
+<script>
+(()=>{const more=document.querySelector('.nav-more');if(!more)return;const desktop=window.matchMedia('(min-width:851px) and (hover:hover) and (pointer:fine)');more.addEventListener('pointerenter',event=>{if(desktop.matches&&event.pointerType!=='touch')more.open=true;});more.addEventListener('pointerleave',event=>{if(desktop.matches&&event.pointerType!=='touch'&&!more.contains(document.activeElement))more.open=false;});more.addEventListener('focusin',()=>{if(desktop.matches)more.open=true;});more.addEventListener('focusout',event=>{if(desktop.matches&&!more.contains(event.relatedTarget))more.open=false;});window.addEventListener('resize',()=>{if(!desktop.matches)more.open=false;});})();
+</script>
 </body></html>
