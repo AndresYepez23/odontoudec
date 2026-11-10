@@ -22,7 +22,7 @@ button.secondary{background:var(--mint);color:var(--teal)}button.danger{backgrou
 .message{max-width:85%;padding:10px 12px;border-radius:13px;background:#eaf7f5;align-self:flex-start;overflow-wrap:anywhere}.message.mine{background:#32105f;color:white;align-self:flex-end}.message small{display:block;opacity:.85;font-size:.74rem;font-weight:800;margin-bottom:4px}.message.mine small{color:#f4d978}
 .auth{padding:20px}.empty{padding:22px;text-align:center;color:var(--muted)}.fine{font-size:.78rem;color:var(--muted);margin-top:12px}
 @media(max-width:760px){header{align-items:flex-start;flex-direction:column}header nav{display:flex;flex-wrap:wrap;gap:7px}header nav a{font-size:.82rem}main{margin:16px auto}.hero{padding:20px}.grid{grid-template-columns:1fr}.chat-log{height:48vh;min-height:300px}header{padding:13px 16px}}
-.site-nav{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}.site-nav a{display:inline-flex;align-items:center;padding:8px 10px;border-radius:10px;color:#54218b;text-decoration:none;font-size:.86rem;font-weight:750;white-space:nowrap}.site-nav a:hover,.site-nav a:focus-visible{background:#f3edf9;outline-color:#d7a928}.site-nav a[aria-current="page"]{background:#f3edf9;color:#32105f}@media(max-width:760px){header .site-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:5px}header .site-nav a{justify-content:center;padding:8px 5px;background:#faf8fc;font-size:.78rem}}@media(max-width:390px){header .site-nav{grid-template-columns:repeat(2,minmax(0,1fr))}}html.ou-embedded header,html.ou-embedded .hero,html.ou-embedded .fine{display:none!important}
+.site-nav{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}.site-nav a{display:inline-flex;align-items:center;padding:8px 10px;border-radius:10px;color:#54218b;text-decoration:none;font-size:.86rem;font-weight:750;white-space:nowrap}.site-nav a:hover,.site-nav a:focus-visible{background:#f3edf9;outline-color:#d7a928}.site-nav a[aria-current="page"]{background:#f3edf9;color:#32105f}@media(max-width:760px){header .site-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:5px}header .site-nav a{justify-content:center;padding:8px 5px;background:#faf8fc;font-size:.78rem}}@media(max-width:390px){header .site-nav{grid-template-columns:repeat(2,minmax(0,1fr))}}html.ou-embedded header,html.ou-embedded .site-topline,html.ou-embedded .hero,html.ou-embedded .fine{display:none!important}
 html.ou-embedded,html.ou-embedded body{width:100%;height:100%;min-height:0;margin:0;padding:0;overflow:hidden;background:#fff}
 html.ou-embedded main{width:100%;height:100%;max-width:none;margin:0;padding:9px;overflow:hidden}
 html.ou-embedded #app:not(.hidden){width:100%;height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
@@ -83,9 +83,39 @@ body.ou-group-chat-open #messageForm{flex:0 0 auto}
  body.ou-group-chat-open #chatPanel .chat-log{min-height:45vh}
 }
 
-/* Reserva una zona segura cuando Netlify dibuja su insignia sobre un iframe de chat. */
+/* Chat grupal incrustado: el historial cede espacio al compositor en cualquier altura. */
+html.ou-embedded body.ou-group-chat-open #chatPanel:not(.hidden){
+ display:flex!important;flex-direction:column!important;width:100%;height:100%!important;
+ min-height:0!important;max-height:none!important;overflow:hidden!important
+}
+html.ou-embedded body.ou-group-chat-open #chatPanel .chat-head{
+ display:flex!important;flex:0 0 auto!important;flex-wrap:nowrap!important;gap:6px!important;min-width:0
+}
+html.ou-embedded body.ou-group-chat-open #chatPanel .chat-head>div{
+ order:0!important;flex:1 1 0!important;flex-basis:0!important;min-width:0
+}
+html.ou-embedded body.ou-group-chat-open #chatPanel #chatLog{
+ height:0!important;min-height:0!important;max-height:none!important;
+ flex:1 1 0!important;overflow-y:auto!important;overflow-x:hidden!important;margin:8px 0!important
+}
+html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm{
+ display:block!important;flex:0 0 auto!important;min-height:0!important
+}
+html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm .row{
+ display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:8px!important;margin:0!important
+}
+html.ou-embedded body.ou-group-chat-open #chatPanel #messageInput{flex:1 1 auto!important;min-width:0!important}
+html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm button{
+ flex:0 0 auto!important;width:auto!important;min-width:70px!important
+}
+html.ou-embedded body.ou-group-chat-open #chatPanel #chatStatus{
+ flex:0 0 auto!important;min-height:0!important;margin:3px 0 0!important
+}
+
+/* La insignia de Netlify conserva su espacio sin desplazar el compositor. */
 @media(max-width:700px){
- html.ou-embedded #sendForm,html.ou-embedded #messageForm{margin-bottom:76px!important;flex-shrink:0!important}
+ html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm{margin:0!important;flex:0 0 auto!important}
+ html.ou-embedded body.ou-group-chat-open #chatPanel::after{content:"";display:block;flex:0 0 76px}
 }
 </style>
 <link rel="stylesheet" href="assets/community-dock.css">
