@@ -56,7 +56,7 @@ header.ou-space-header.site-shell-header{position:sticky;top:0;z-index:30}
 
 /* Portada: un lienzo continuo evita los cortes de fondo entre secciones. */
 .home-main{background:linear-gradient(180deg,#fbf8fd 0%,#fff 34%,#fcf9fe 72%,#fff 100%)}
-.home-main>section{background:transparent!important}
+.home-main>section:not(.safety){background:transparent!important}
 .auth-social{display:grid;gap:0;margin:12px 0 2px}
 .auth-social .google-auth-button{min-height:56px;border:1px solid #d8c9e7;border-radius:14px;background:#fff;box-shadow:0 5px 16px rgba(50,16,95,.07);font-size:1rem;font-weight:800}
 .auth-social .google-auth-button:hover{border-color:#bda3d2;box-shadow:0 9px 22px rgba(50,16,95,.12)}
