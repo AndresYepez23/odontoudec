@@ -112,10 +112,25 @@ html.ou-embedded body.ou-group-chat-open #chatPanel #chatStatus{
  flex:0 0 auto!important;min-height:0!important;margin:3px 0 0!important
 }
 
-/* La insignia de Netlify conserva su espacio sin desplazar el compositor. */
+/* Zona inferior compacta para la insignia; el historial recupera altura útil. */
 @media(max-width:700px){
- html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm{margin:0!important;flex:0 0 auto!important}
- html.ou-embedded body.ou-group-chat-open #chatPanel::after{content:"";display:block;flex:0 0 76px}
+ html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm{margin:0 0 56px!important;flex:0 0 auto!important}
+ html.ou-embedded body.ou-group-chat-open #chatPanel::after{content:none!important;display:none!important}
+}
+/* Composer de grupos: controles fijos, campo flexible y botón sin solapamientos. */
+html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm .chat-compose-row{
+ display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+ align-items:center!important;width:100%!important;min-width:0!important;gap:8px!important
+}
+html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm .chat-compose-row>.chat-attach-wrap,
+html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm .chat-compose-row>.chat-gif-wrap{
+ display:flex!important;flex:0 0 40px!important;width:40px!important;min-width:40px!important
+}
+html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm .chat-compose-row>input{
+ flex:1 1 0!important;width:0!important;min-width:0!important
+}
+html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm .chat-compose-row>button[type="submit"]{
+ display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:70px!important
 }
 </style>
 <link rel="stylesheet" href="assets/community-dock.css">
