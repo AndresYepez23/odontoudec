@@ -69,7 +69,8 @@ window.ODONTOUDEC_SURVEY = Object.freeze({
       "PEREZ BENAVIDES JORGE",
       "RODRÍGUEZ VARGAS FEDERICO V.",
       "TORRES OSORIO LENIN",
-      "CANTILLO OSWALDO"
+      "CANTILLO OSWALDO",
+      "Adel Martinez"
     ]},
     { id: "semiologo", title: "Mejor Semiólogo", required: true, options: [
       "HIGUERA BLANCO JULIAN",
