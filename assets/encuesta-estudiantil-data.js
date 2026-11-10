@@ -22,7 +22,8 @@ window.ODONTOUDEC_SURVEY = Object.freeze({
       "GOMEZ RAMIREZ SANDRA PATRICIA",
       "CACERES MATTA SANDRA VIVIANA",
       "CARMONA ARANGO LUIS EDUARDO",
-      "PÉREZ TRESPALACIOS GLORIA E."
+      "PÉREZ TRESPALACIOS GLORIA E.",
+      "CESÁR GUARDO"
     ]},
     { id: "endodoncista", title: "Mejor Endodoncista", required: true, options: [
       "VELASCO ZÚÑIGA GUSTAVO",
