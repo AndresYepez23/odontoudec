@@ -133,6 +133,53 @@ html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm .chat-compose-r
 html.ou-embedded body.ou-group-chat-open #chatPanel #messageForm .chat-compose-row>button[type="submit"]{
  display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:70px!important
 }
+
+/* Chat grupal: anclar el panel al iframe completo y dejar que el historial absorba el espacio. */
+@media(max-width:700px){
+ html.ou-embedded #app.ou-group-chat{
+  position:relative!important;display:block!important;
+  width:100%!important;height:100%!important;min-height:0!important;
+  max-height:none!important;overflow:hidden!important
+ }
+ html.ou-embedded #app.ou-group-chat>#chatPanel:not(.hidden){
+  position:absolute!important;inset:0!important;
+  display:flex!important;flex-direction:column!important;
+  width:100%!important;height:100%!important;min-height:0!important;
+  max-height:none!important;margin:0!important;
+  padding:9px 9px 64px!important;overflow:hidden!important
+ }
+ html.ou-embedded #app.ou-group-chat>#chatPanel .chat-head{
+  display:flex!important;flex:0 0 auto!important;min-width:0!important
+ }
+ html.ou-embedded #app.ou-group-chat>#chatPanel #chatLog{
+  display:flex!important;flex:1 1 0!important;width:100%!important;
+  height:0!important;min-height:0!important;max-height:none!important;
+  margin:8px 0!important;overflow-y:auto!important;overflow-x:hidden!important
+ }
+ html.ou-embedded #app.ou-group-chat>#chatPanel #messageForm{
+  display:block!important;flex:0 0 auto!important;
+  width:100%!important;margin:0!important;padding-top:8px!important
+ }
+ html.ou-embedded #app.ou-group-chat>#chatPanel #chatStatus{
+  display:block!important;flex:0 0 auto!important;
+  min-height:0!important;margin:3px 0 0!important
+ }
+ html.ou-embedded #app.ou-group-chat>#chatPanel #messageForm .chat-compose-row{
+  display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+  align-items:center!important;width:100%!important;min-width:0!important;gap:7px!important
+ }
+ html.ou-embedded #app.ou-group-chat>#chatPanel #messageForm .chat-compose-row>.chat-attach-wrap,
+ html.ou-embedded #app.ou-group-chat>#chatPanel #messageForm .chat-compose-row>.chat-gif-wrap{
+  display:flex!important;flex:0 0 38px!important;width:38px!important;min-width:38px!important
+ }
+ html.ou-embedded #app.ou-group-chat>#chatPanel #messageForm .chat-compose-row>input{
+  flex:1 1 0!important;width:0!important;min-width:0!important
+ }
+ html.ou-embedded #app.ou-group-chat>#chatPanel #messageForm .chat-compose-row>button[type="submit"]{
+  display:inline-flex!important;flex:0 0 auto!important;width:auto!important;min-width:70px!important
+ }
+}
+
 </style>
 <link rel="stylesheet" href="assets/community-dock.css">
 <link rel="stylesheet" href="assets/chat-ui.css?v=20261108-giphy">
