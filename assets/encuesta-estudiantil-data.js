@@ -65,7 +65,6 @@ window.ODONTOUDEC_SURVEY = Object.freeze({
       "GUZMAN DE AVILA JAIME",
       "HARRIS RICARDO JONATHAN",
       "LEOTTAU JHON FIDEL",
-      "OROZO BONILLA ROBERTO CARLOS",
       "LOPEZ APARICIO ERICH BAYRON",
       "PEREZ BENAVIDES JORGE",
       "RODRÍGUEZ VARGAS FEDERICO V.",
@@ -81,7 +80,8 @@ window.ODONTOUDEC_SURVEY = Object.freeze({
       "HARRIS RICARDO JONATHAN",
       "JIMÉNEZ MALAGÓN MARIA DEL C.",
       "TETAY SALGADO SINDY",
-      "TORRES OSORIO LENIN"
+      "TORRES OSORIO LENIN",
+      "JOSÉ OROZCO"
     ]},
     { id: "docente", title: "Mejor Docente", required: true, type: "free_text", options: [] },
     { id: "coordinador_clinica", title: "Mejor Coordinador de Clínica", required: true, options: [
