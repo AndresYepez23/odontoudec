@@ -6,6 +6,8 @@ root.innerHTML='<section id="ouDockPanel" aria-label="Centro de conversaciones">
 document.body.appendChild(root);
 const panel=root.querySelector('#ouDockPanel'),button=root.querySelector('#ouDockButton'),frame=root.querySelector('#ouDockFrame'),guest=root.querySelector('#ouDockGuest'),tabs=[...root.querySelectorAll('#ouDockTabs button')],tabbar=root.querySelector('#ouDockTabs');
 let logged=false,unreadTimer=null,privateThreadInFrame=false;
+const EMBED_VERSION='20261110-8ea-layout';
+const embedUrl=page=>page+'?embed=1&v='+EMBED_VERSION;
 function syncPrivateThreadButton(){
  // El botón flotante solo se oculta con un hilo privado abierto DENTRO del panel.
  button.style.display=privateThreadInFrame&&panel.classList.contains('ou-open')?'none':'';
@@ -44,12 +46,12 @@ async function refreshUnread(client,userId){
   badge.setAttribute('aria-label',total+' mensajes privados sin leer');
  }catch(e){setUnreadUnavailable();console.info('No se pudo actualizar el contador de mensajes:',e.message);}
 }
-function open(){panel.classList.add('ou-open');button.setAttribute('aria-expanded','true');if(logged&&!frame.hasAttribute('src'))frame.src='chat.html?embed=1';syncPrivateThreadButton();}
+function open(){panel.classList.add('ou-open');button.setAttribute('aria-expanded','true');if(logged&&!frame.hasAttribute('src'))frame.src=embedUrl('chat.html');syncPrivateThreadButton();}
 function close(){panel.classList.remove('ou-open');panel.classList.remove('ou-expanded');button.setAttribute('aria-expanded','false');syncPrivateThreadButton();}
 button.addEventListener('click',()=>panel.classList.contains('ou-open')?close():open());
 root.querySelector('#ouDockClose').addEventListener('click',close);
 root.querySelector('#ouDockExpand').addEventListener('click',()=>panel.classList.toggle('ou-expanded'));
-tabs.forEach(t=>t.addEventListener('click',()=>{privateThreadInFrame=false;syncPrivateThreadButton();tabs.forEach(x=>x.setAttribute('aria-selected',String(x===t)));frame.src=t.dataset.page+'?embed=1';}));
+tabs.forEach(t=>t.addEventListener('click',()=>{privateThreadInFrame=false;syncPrivateThreadButton();tabs.forEach(x=>x.setAttribute('aria-selected',String(x===t)));frame.src=embedUrl(t.dataset.page);}));
 async function init(){
  try{
   const client=window.ouSupabaseClient||window.supabase?.createClient?.('https://jqbrheonqqsiijrprsqs.supabase.co','sb_publishable_bXfNGlIlersAhrUNR99wlA_golwgRC8');
@@ -59,7 +61,7 @@ async function init(){
    guest.style.display=logged?'none':'block';
    frame.style.display=logged?'block':'none';
    tabbar.style.display=logged?'grid':'none';
-   if(logged&&!frame.hasAttribute('src'))frame.src='chat.html?embed=1';
+   if(logged&&!frame.hasAttribute('src'))frame.src=embedUrl('chat.html');
    if(!logged){
     privateThreadInFrame=false;syncPrivateThreadButton();
     if(unreadTimer)clearInterval(unreadTimer);
