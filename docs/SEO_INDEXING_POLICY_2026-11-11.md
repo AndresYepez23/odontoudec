@@ -41,3 +41,22 @@ No bloquear estas rutas mediante robots.txt: el rastreador necesita poder leer l
 - No se agregan nuevas dependencias ni cambios de JavaScript, estilos o comportamiento de la aplicación.
 - Los cambios visibles se limitan a dos enlaces discretos de Privacidad y Términos dentro del footer ya existente.
 - En Search Console, enviar sitemap.xml una vez y supervisar indexación; enviar sitemap es una señal de rastreo, no garantía de indexación.
+
+
+## Expansión editorial local y académica — 11 de noviembre de 2026
+
+Se añade el centro público `/guias/` y 20 guías temáticas con contenido original y URLs canónicas propias. El directorio agrupa tres intenciones de búsqueda:
+- Odontología en Cartagena, banco de pacientes, solicitudes de contacto, Clínicas Odontológicas de la Universidad de Cartagena y referencia a Zaragocilla.
+- Información para aspirantes y estudiantes: programa, pensum como referencia histórica, recursos académicos y grupos de estudio.
+- Contenidos formativos sobre anatomía dental, Cariología, Operatoria, Endodoncia, Periodoncia, investigación, búsqueda bibliográfica, IA y prevención.
+
+Las páginas se enlazan desde un directorio público alcanzable mediante un único enlace discreto en el footer de la portada. No se incorporan enlaces a la navegación principal de estudiantes ni se alteran chat, módulos privados, sesiones, notificaciones, Supabase o flujos de la aplicación.
+
+## Límites editoriales y de representación
+- OdontoUdeC se identifica como iniciativa estudiantil independiente; no se presenta como sitio oficial de la Universidad ni como clínica o prestador de salud.
+- Las páginas sobre las Clínicas Odontológicas enlazan fuentes institucionales y recomiendan verificar horarios, requisitos, costos y disponibilidad directamente con la Universidad.
+- El banco de pacientes se describe como solicitud de contacto; no se promete cita, tratamiento, gratuidad, cupos ni resultados.
+- El contenido educativo no sustituye diagnóstico, tratamiento, protocolos institucionales ni orientación profesional.
+- No se publican precios, teléfonos, horarios, direcciones exactas ni servicios no confirmados.
+- Todas las páginas nuevas son visibles para usuarios y rastreadores; no se usa texto oculto, cloaking, doorway pages ni páginas duplicadas.
+- El sitemap enumera únicamente páginas públicas canónicas. Se mantienen fuera del sitemap las rutas autenticadas, personales y transaccionales señaladas arriba.
