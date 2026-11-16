@@ -33,8 +33,80 @@ function json(payload, status = 200) {
   });
 }
 
+function cacheControlFor(key) {
+  if (key === "OneSignalSDKWorker.js" || key === "manifest.webmanifest" || key === "robots.txt" || key === "sitemap.xml") {
+    return "public, max-age=60, s-maxage=300";
+  }
+  if (/\.(?:html?)$/i.test(key)) return "public, max-age=60, s-maxage=300";
+  if (/\.(?:css|js)$/i.test(key)) return "public, max-age=300, s-maxage=3600";
+  return "public, max-age=3600, s-maxage=86400";
+}
+
+function resolveAssetKeys(pathname) {
+  if (pathname === "/") return ["index.html"];
+  if (pathname === "/guias") return ["guias/index.html"];
+  if (pathname.endsWith("/")) return [pathname.slice(1) + "index.html"];
+  const key = pathname.replace(/^\/+/, "");
+  const candidates = [key];
+  if (!/\.[^/]+$/.test(key)) candidates.push(key + ".html", key + "/index.html");
+  return candidates;
+}
+
+async function serveStatic(request, env, ctx) {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return new Response("Method Not Allowed", {
+      status: 405,
+      headers: { Allow: "GET, HEAD", "Cache-Control": "no-store" }
+    });
+  }
+
+  const url = new URL(request.url);
+  if (url.pathname === "/guias") {
+    return Response.redirect(new URL("/guias/", url), 301);
+  }
+
+  const cache = caches.default;
+  const cacheKey = new Request(url.toString(), { method: "GET" });
+  const cached = await cache.match(cacheKey);
+  if (cached) {
+    return new Response(request.method === "HEAD" ? null : cached.body, {
+      status: cached.status,
+      statusText: cached.statusText,
+      headers: cached.headers
+    });
+  }
+
+  const candidates = resolveAssetKeys(url.pathname);
+  for (const key of candidates) {
+    const asset = await env.ODO_ASSETS.getWithMetadata(key, { type: "arrayBuffer" });
+    if (!asset || asset.value === null) continue;
+
+    const headers = new Headers({
+      "Content-Type": asset.metadata?.contentType || "application/octet-stream",
+      "Cache-Control": cacheControlFor(key),
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "strict-origin-when-cross-origin"
+    });
+    const response = new Response(request.method === "HEAD" ? null : asset.value, {
+      status: 200,
+      headers
+    });
+    if (request.method === "GET") ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    return response;
+  }
+
+  return new Response("Not Found", {
+    status: 404,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff"
+    }
+  });
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/$/, "") || "/";
 
@@ -43,12 +115,9 @@ export default {
       return json({
         service: "OdontoUdeC",
         platform: "Cloudflare Workers",
+        storage: "Cloudflare Workers KV",
         status: "ok",
-        functions: [
-          "admin-api",
-          "giphy-config",
-          "posthog-analytics"
-        ],
+        functions: ["admin-api", "giphy-config", "posthog-analytics"],
         version: "cloudflare-migration-2026-11-16"
       });
     }
@@ -70,6 +139,6 @@ export default {
       return json({ code: "not_found", message: "Función no encontrada." }, 404);
     }
 
-    return new Response("Not Found", { status: 404 });
+    return serveStatic(request, env, ctx);
   }
 };
