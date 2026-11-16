@@ -126,3 +126,17 @@ Keep all mail/authentication records DNS-only. Before nameserver cutover, audit 
 - This is a multi-page site, not an SPA. Do not configure an SPA fallback.
 - Preserve the existing HTML paths, query strings, SEO URLs, PWA routes, and function paths.
 - Do not migrate Supabase data or change auth configuration as part of the hosting cutover.
+
+
+## Production deployment verification — 2026-11-16
+
+- Cloudflare Worker `odontoudec-staging` is deployed at 100% on version `5519f354-72f8-4b0d-b43f-93c536419c6c` (deployment `b185d11b-cde7-462f-bf86-7489a6bf9dbb`).
+- The Worker source includes the router and all three modules: `admin-api.js`, `giphy-config.js`, and `posthog-analytics.js`.
+- Routes preserved: `/.netlify/functions/admin-api`, `/.netlify/functions/giphy-config`, `/.netlify/functions/posthog-analytics`.
+- Static website is stored in KV namespace `ODO_ASSETS`; 85 keys confirmed, including index, chat, academic pages, PWA files, sitemap, robots, and all guide pages.
+- Health route: `/_cloudflare/health` (reports presence of all seven secrets and key assets).
+- Custom domains `odontoudec.online` and `www.odontoudec.online` are attached and enabled on the Worker. `cf-test.odontoudec.online` is also attached for testing.
+- Cloudflare zone is `active`; nameservers are `keira.ns.cloudflare.com` and `pranab.ns.cloudflare.com`.
+- Resend DKIM TXT, DMARC TXT, and two sending CNAMEs are DNS-only.
+- A live HTTP smoke test from the execution environment was blocked by outbound-domain restrictions. Cloudflare API confirms deployment, routing source, assets, secrets, custom domains, and active zone; user should still test critical browser flows.
+- Netlify remains intact as rollback until end-to-end verification is complete.
