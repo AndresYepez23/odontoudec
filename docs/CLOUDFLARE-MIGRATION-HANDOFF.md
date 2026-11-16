@@ -82,7 +82,7 @@ Preserve the current authorization checks. The admin API must continue validatin
 - Existing Workers subdomain: `andressimonyepezarrieta23`.
 - New staging Worker: `odontoudec-staging`; created 2026-11-16 with a temporary placeholder response. Do not treat it as the migrated application yet.
 - The five user-provided bindings are stored on `odontoudec-staging` as `secret_text`: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GIPHY_API_KEY`, `GIPHY_API_KEY_2`, and `GIPHY_API_KEY_3`.
-- The two private bindings `SUPABASE_SERVICE_ROLE_KEY` and `POSTHOG_PERSONAL_API_KEY` remain pending. Netlify's environment-variable listing confirms they exist for production but masks their values, so they cannot be copied from the connector. The user must supply them or create replacement keys in Supabase/PostHog and then add them to Cloudflare. Never commit any of these values to Git.
+- All seven required bindings have now been confirmed in Cloudflare for `odontoudec-staging`, including `SUPABASE_SERVICE_ROLE_KEY` and `POSTHOG_PERSONAL_API_KEY`. Their actual secret values are never committed to Git.
 - An older Worker named `odontoudec` exists from 2026-11-08. It has assets but no custom domain. Do not overwrite it until its purpose is confirmed.
 - Zone `odontoudec.online` has been created and is currently `pending`.
 - Cloudflare assigned nameservers:
@@ -133,8 +133,14 @@ Do not use `not_found_handling: "single-page-application"`; this site has many i
 - Live Netlify deployment remains the SEO-enabled build from commit `ddc1822157570d9a48e68416a2b78de11397223a`; the attempted revert to `891afcb97e2fc75a715c8a677352cebf9620fd43` was skipped.
 - The migration branch is now based on the live deployment commit, not the skipped rollback.
 - The Cloudflare staging Worker `odontoudec-staging` exists but is only a placeholder; it does not yet host the website.
-- The staging Worker currently has five confirmed secret bindings: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `GIPHY_API_KEY`, `GIPHY_API_KEY_2`, and `GIPHY_API_KEY_3`. `SUPABASE_SERVICE_ROLE_KEY` and `POSTHOG_PERSONAL_API_KEY` remain pending.
-- Netlify's environment-variable response masks `SUPABASE_SERVICE_ROLE_KEY` and `POSTHOG_PERSONAL_API_KEY`; create new credentials in Supabase/PostHog if their original values are not available locally.
+- The staging Worker now has all seven confirmed secret bindings: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `GIPHY_API_KEY`, `GIPHY_API_KEY_2`, `GIPHY_API_KEY_3`, and `POSTHOG_PERSONAL_API_KEY` (verified via Cloudflare secrets listing on 2026-11-16).
+- The user intends to rotate the two privileged API keys later. Do not include key values in any file or log.
 - PostHog HogQL endpoint requires a personal API key with the Query Read permission. Existing code targets US Cloud project `714898` at `https://us.posthog.com`.
 - Cowabi has no connected app/API in this workspace. The user must perform the registrar nameserver change in Cowabi's customer panel; do not claim that it has been linked.
 - Before cutover, audit the full current DNS zone in Cowabi, especially any MX/TXT records and other subdomains. Cloudflare's scan suggested wildcard and AAAA records, but these were not imported because their necessity and target were not confirmed.
+
+## Secret and DNS verification (2026-11-16)
+
+- Cloudflare returned `success=true` for both remaining privileged Worker secret bindings and subsequent GET confirmed all seven names were present, each of type `secret_text`.
+- The pending zone has Resend DKIM TXT, DMARC TXT (`v=DMARC1; p=none;`), and two DNS-only CNAME records (`rsend.auth`, `send.auth`). The verified Resend CNAME and DKIM TTLs are 3600 seconds.
+- Cloudflare nameservers remain `keira.ns.cloudflare.com` and `pranab.ns.cloudflare.com`. Zone is pending delegation from the registrar. **Do not interpret configured secrets as a completed site migration**: staging Worker still has only the placeholder code and application functions/static assets have not been deployed or tested.
