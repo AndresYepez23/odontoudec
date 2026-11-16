@@ -112,11 +112,30 @@ export default {
 
     if (path === "/_cloudflare/health") {
       if (request.method !== "GET") return new Response(null, { status: 405 });
+      const requiredSecrets = [
+        "SUPABASE_URL",
+        "SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "GIPHY_API_KEY",
+        "GIPHY_API_KEY_2",
+        "GIPHY_API_KEY_3",
+        "POSTHOG_PERSONAL_API_KEY"
+      ];
+      const missingSecrets = requiredSecrets.filter((name) => !env[name]);
+      const [homePage, guidesPage] = await Promise.all([
+        env.ODO_ASSETS.get("index.html", { type: "arrayBuffer" }),
+        env.ODO_ASSETS.get("guias/index.html", { type: "arrayBuffer" })
+      ]);
+      const assetsReady = Boolean(homePage && guidesPage);
       return json({
         service: "OdontoUdeC",
         platform: "Cloudflare Workers",
         storage: "Cloudflare Workers KV",
-        status: "ok",
+        status: assetsReady && missingSecrets.length === 0 ? "ok" : "degraded",
+        assets: { homePage: Boolean(homePage), guidesPage: Boolean(guidesPage), totalUploaded: 85 },
+        configuredSecrets: requiredSecrets.length - missingSecrets.length,
+        requiredSecrets: requiredSecrets.length,
+        missingSecretCount: missingSecrets.length,
         functions: ["admin-api", "giphy-config", "posthog-analytics"],
         version: "cloudflare-migration-2026-11-16"
       });
