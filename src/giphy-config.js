@@ -44,7 +44,7 @@ return async function handler(event) {
 
   const base = String(env.SUPABASE_URL || "").replace(/\/+$/, "");
   const anon = env.SUPABASE_ANON_KEY;
-  const apiKey = process.env[envName];
+  const apiKey = env[envName];
   if (!base || !anon) {
     return json(503, { error: "No está configurada la autenticación de OdontoUdeC." });
   }
