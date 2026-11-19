@@ -9,79 +9,85 @@ window.ODONTOUDEC_SURVEY = Object.freeze({
   selection: "single",
   categories: [
     { id: "ortodoncista", title: "Mejor Ortodoncista", required: true, options: [
-      "LINCE VIDES FANNY ELVIRA",
-      "VARGAS ESPINOSA GERMAN",
       "INSIGNARES ARANA INGRID MARIA",
+      "LINCE VIDES FANNY ELVIRA",
+      "MEDINA MARQUEZ EDUARDO",
+      "PATERNINA HERNANDEZ ADOLFO",
+      "RAMIREZ GARCÍA JISETH",
       "RESTREPO FRANCO ANGELICA MARIA",
-      "PATERNINA HERNANDEZ ADOLFO"
+      "VARGAS ESPINOSA GERMÁN"
     ]},
     { id: "odontopediatra", title: "Mejor Odontopediatra", required: true, options: [
-      "PLAZAS ROMAN JAIME ENRIQUE",
-      "MARTELO GOMEZ PIEDA MARY",
-      "LLAMAS GARCIA JOSE IGNACIO",
-      "GOMEZ RAMIREZ SANDRA PATRICIA",
+      "ALFARO ZOLA LIZELIA MARGARITA",
       "CACERES MATTA SANDRA VIVIANA",
-      "CARMONA ARANGO LUIS EDUARDO",
-      "PÉREZ TRESPALACIOS GLORIA E.",
-      "CESÁR GUARDO"
+      "CARMONA LUIS EDUARDO",
+      "GOMEZ RAMIREZ SANDRA PATRICIA",
+      "GUARDO VERGARA CESAR AUGUSTO",
+      "LLAMAS GARCIA JOSE IGNACIO",
+      "MARTELO GOMÉZ PIEDAD",
+      "PEREZ TRESPALACIOS GLORIA E.",
+      "PLAZAS ROMAN JAIME ENRIQUE",
+      "RAMOS MARTÍNEZ KETTY"
     ]},
     { id: "endodoncista", title: "Mejor Endodoncista", required: true, options: [
-      "VELASCO ZÚÑIGA GUSTAVO",
-      "BARCHA BARRETO DEMETRIO ALFONSO",
-      "BURGOS FUENTES TERESITA",
       "ALVEAR PÉREZ JAVIER IGNACIO",
+      "BARCHA DEMETRIO",
+      "BURGOS FUENTES TERESA",
       "COVO MORALES EDUARDO E.",
-      "RAMOS MANOTAS JACOBO",
+      "FLOREZ ARIZA JOSE ELIAS",
       "OSORIO CABARCAS GISELLA ISABEL",
-      "FLOREZ ARIZA JOSE ELIAS"
+      "RAMOS MANOTAS JACOBO",
+      "VELASCO ZÚÑIGA GUSTAVO"
     ]},
     { id: "rehabilitador_oral", title: "Mejor Rehabilitador Oral", required: true, options: [
-      "CASTILLO TOVAR LAURA",
-      "ABDALA ESCALA AIZAR",
+      "ABDALA ESCOBAR AIZAR",
       "ARIZA MARTINEZ STEPHANYE",
-      "CUADRO CAUSIL ALFONSO MANUEL",
-      "HERRERA DIAZ PAOLA",
-      "MATSON ROBLES ALVARO ANDRES",
-      "OSORIO FERNANDEZ MARIA CLAUDIA",
-      "REALES GUTIERREZ YURANIS",
-      "TORRES REYES LIDIS MARIA",
       "BERROCAL RIVAS JAIRO A.",
       "CARVAJAL CABRALES KATHERINE",
+      "CASTILLO TOVAR LAURA",
+      "CUADRO CAUSIL ALFONSO",
+      "HERRERA DIAZ PAOLA",
+      "MADRID TRONCONIS CRISTIAN",
+      "MATSON ROBLES ÁLVARO ANDRÉS",
+      "MENDEZ SILVA JAVIER HENRIQUE",
       "MORALES VILLA LUIS MIGUEL",
-      "MENDEZ SILVA JAVIER ENRIQUE"
+      "OSORIO FERNÁNDEZ MARIA CLAUDIA",
+      "REALES GUTIERREZ YURANIS",
+      "TORRES REYES LIDIS MARINA"
     ]},
     { id: "periodoncista", title: "Mejor Periodoncista", required: true, options: [
-      "BENEDETTI ANGULO GUIDO A.",
-      "DÍAZ CABALLERO ANTONIO",
-      "PULIDO ROZO MIRIAM A.",
-      "VEGA GUTIERREZ MARYURY",
       "ACOSTA RAISH HABED EDUARDO",
-      "ROVIRA ORTIZ CARMEN JULIA",
-      "RICO VELASCO DAVID ALBERTO",
+      "BENEDETTI ANGULO GUIDO A.",
       "CRESCENTE PERTUZ NATALIA ANDREA",
-      "PORRAS MENDOZA KARINA"
+      "DÍAZ CABALLERO ANTONIO",
+      "PORRAS MENDOZA KARINA",
+      "PULIDO ROZO MIRIAM M.",
+      "RICO VELASCO DAVID ALBERTO",
+      "ROVIRA ORTIZ CARMEN JULIA",
+      "VEGA GUTIERREZ MARYURY"
     ]},
     { id: "cirujano", title: "Mejor Cirujano", required: true, options: [
+      "BUELVAS ACOSTA RODRIGO",
+      "CANTILLO PALLARES OSWALDO",
+      "GRANOBLES SEGOVIA ANTONIO JOSÉ",
       "GUZMAN DE AVILA JAIME",
       "HARRIS RICARDO JONATHAN",
-      "LEOTTAU JHON FIDEL",
+      "LEOTAU JHON FIDEL",
       "LOPEZ APARICIO ERICH BAYRON",
       "PEREZ BENAVIDES JORGE",
-      "RODRÍGUEZ VARGAS FEDERICO V.",
-      "TORRES OSORIO LENIN",
-      "CANTILLO OSWALDO",
-      "ADEL MARTINEZ"
+      "PUELLO DEL RIO EDWIN",
+      "RÓDRIGUEZ VARGAS FEDERICO V."
     ]},
     { id: "semiologo", title: "Mejor Semiólogo", required: true, options: [
-      "HIGUERA BLANCO JULIAN",
       "ÁLVAREZ VILLADIEGO PATRICIA",
-      "CARBONELL MUÑOZ ZOILA",
+      "CARBONEL MUÑOZ ZOILA",
       "CARMONA LORDUY MARTHA C.",
-      "HARRIS RICARDO JONATHAN",
-      "JIMÉNEZ MALAGÓN MARIA DEL C.",
+      "HIGUERA BLANCO JULIAN",
+      "JIMENEZ MALAGON MARIA DEL C.",
+      "OROZCO ARIZA JOSÉ DE JESÚS",
       "TETAY SALGADO SINDY",
       "TORRES OSORIO LENIN",
-      "JOSÉ OROZCO"
+      "VERGARA HERNANDEZ CLARA INÉS"
     ]},
     { id: "docente", title: "Mejor Docente", required: true, type: "free_text", options: [] },
     { id: "coordinador_clinica", title: "Mejor Coordinador de Clínica", required: true, options: [
@@ -97,8 +103,8 @@ window.ODONTOUDEC_SURVEY = Object.freeze({
       "GUZMAN DE AVILA JAIME",
       "PEREZ BENAVIDES JORGE",
       "RESTREPO FRANCO ANGELICA MARIA",
-      "ABDALA ESCALA AIZAR",
-      "JIMÉNEZ MALAGÓN MARIA DEL C."
+      "ABDALA ESCOBAR AIZAR",
+      "JIMENEZ MALAGON MARIA DEL C."
     ]},
     { id: "docente_didactico", title: "Docente más Didáctico", required: true, type: "free_text", options: [] },
     { id: "docente_colaborador", title: "Docente más Colaborador", required: true, type: "free_text", options: [] },
