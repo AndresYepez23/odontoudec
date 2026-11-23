@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { readJsonObject, RequestBodyError } from '../_shared/request-body.ts';
 
 const allowedOrigins = new Set([
   "https://odontoudec.online",
@@ -18,7 +19,7 @@ const getCorsHeaders = (req: Request) => {
 const reply = (req: Request, body: Record<string, unknown>, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { ...getCorsHeaders(req), "Content-Type": "application/json" },
+    headers: { ...getCorsHeaders(req), "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 const clean = (v: unknown, max: number) => typeof v === "string" ? v.trim().slice(0, max) : "";
 
@@ -38,7 +39,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: getCorsHeaders(req) });
   if (req.method !== "POST") return reply(req, { error: "Método no permitido." }, 405);
   try {
-    const body = await req.json();
+    const body = await readJsonObject(req, 12000);
     const name = clean(body.name, 100);
     const phone = clean(body.phone, 30);
     const summary = clean(body.summary, 500);
@@ -78,6 +79,7 @@ Deno.serve(async (req: Request) => {
     if (error) throw error;
     return reply(req, { ok: true, case_id: data });
   } catch (error) {
+    if (error instanceof RequestBodyError) return reply(req, { error: 'Solicitud inválida o demasiado grande.' }, error.status);
     const message = error instanceof Error ? error.message : "No se pudo procesar la solicitud.";
     return reply(req, {
       error: message.includes("varias solicitudes")

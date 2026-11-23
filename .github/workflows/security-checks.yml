@@ -1,0 +1,35 @@
+name: OdontoUDEC security checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run test:security
+      - run: npx playwright install --with-deps chromium
+      - name: Chromium XSS regression (local fixtures only)
+        run: |
+          export ODONTO_CHROMIUM
+          ODONTO_CHROMIUM="$(node -e "console.log(require('playwright').chromium.executablePath())")"
+          npm run test:browser
+  survey-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      # Existing mismatch also fails on base 5eab707; keep visible, do not mask it.
+      - run: node scripts/validate-survey-contract.mjs
