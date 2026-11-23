@@ -1,0 +1,18 @@
+name: Survey loading
+on:
+  pull_request:
+    paths: ['encuesta-estudiantil.html', 'assets/encuesta-estudiantil-data.js', 'tests/survey-loading.cjs', '.github/workflows/survey-loading.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --package-lock=false playwright@1.62.1
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/survey-loading.cjs
