@@ -1,0 +1,14 @@
+{
+  "name": "odontoudec-security-checks",
+  "private": true,
+  "scripts": {
+    "build:cloudflare": "node scripts/build-cloudflare.mjs",
+    "test:security": "node scripts/build-cloudflare.mjs && node tests/security.test.mjs && node tests/database-security.mjs",
+    "test:browser": "node tests/browser-security.cjs",
+    "test:survey": "node scripts/validate-survey-contract.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.14",
+    "playwright": "1.62.1"
+  }
+}

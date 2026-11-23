@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { readJsonObject, RequestBodyError } from '../_shared/request-body.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,10 +7,10 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const json = (body: unknown, status = 200) =>
+const json = (body: unknown, status = 200, extraHeaders = {}) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...corsHeaders, "Content-Type": "application/json", "Cache-Control": "no-store", ...extraHeaders },
   });
 
 Deno.serve(async (req) => {
@@ -24,7 +25,8 @@ Deno.serve(async (req) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const groqApiKey = Deno.env.get("GROQ_API_KEY");
-  if (!supabaseUrl || !anonKey || !groqApiKey) {
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !anonKey || !groqApiKey || !serviceKey) {
     return json({ error: "OdontoBot aún no está configurado en el servidor." }, 503);
   }
 
@@ -37,9 +39,9 @@ Deno.serve(async (req) => {
 
   let payload: { messages?: Array<{ role: string; content: string }> };
   try {
-    payload = await req.json();
-  } catch {
-    return json({ error: "Solicitud inválida." }, 400);
+    payload = await readJsonObject(req, 60000);
+  } catch (error) {
+    return json({ error: "Solicitud inválida." }, error instanceof RequestBodyError ? error.status : 400);
   }
 
   const messages = Array.isArray(payload.messages) ? payload.messages : [];
@@ -51,6 +53,20 @@ Deno.serve(async (req) => {
 
   if (!cleanMessages.length || cleanMessages[cleanMessages.length - 1].role !== "user") {
     return json({ error: "Escribe una pregunta para OdontoBot." }, 400);
+  }
+
+  // Reserve before consuming Groq; the caller ID comes from getUser, never JSON.
+  try {
+    const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    const { data, error } = await admin.rpc('reserve_odonto_bot_request', { p_user_id: user.id });
+    if (error || !data || typeof data.allowed !== 'boolean') throw new Error('quota unavailable');
+    if (!data.allowed) {
+      const retry = Math.max(1, Math.min(86400, Number(data.retry_after) || 60));
+      return json({ error: 'Alcanzaste el límite temporal de OdontoBot. Inténtalo más tarde.', code: 'BOT_LIMIT' }, 429,
+        { 'Retry-After': String(retry) });
+    }
+  } catch {
+    return json({ error: 'No se pudo comprobar la cuota de OdontoBot.', code: 'LIMITS_UNAVAILABLE' }, 503);
   }
 
   const systemPrompt = `Eres OdontoBot, asistente académico de OdontoUdeC para estudiantes de odontología.
@@ -75,6 +91,7 @@ Para casos clínicos simulados, aclara que son educativos y razona con prudencia
         max_tokens: 900,
         messages: [{ role: "system", content: systemPrompt }, ...cleanMessages],
       }),
+      signal: AbortSignal.timeout(30000),
     });
 
     const data = await response.json();
@@ -89,7 +106,7 @@ Para casos clínicos simulados, aclara que son educativos y razona con prudencia
     }
     return json({ reply: reply.trim() });
   } catch (error) {
-    console.error("OdontoBot network error", error);
+    console.error("OdontoBot network request failed");
     return json({ error: "No fue posible conectar con OdontoBot." }, 502);
   }
 });

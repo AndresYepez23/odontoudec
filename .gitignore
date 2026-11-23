@@ -1,1 +1,4 @@
 .onesignal/
+supabase/.temp/
+.cloudflare-build/
+node_modules/

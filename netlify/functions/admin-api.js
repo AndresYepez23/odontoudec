@@ -47,7 +47,7 @@ function serviceHeaders() {
 async function authenticate(event) {
   const headers = event.headers || {};
   const authorization = headers.authorization || headers.Authorization || "";
-  const token = authorization.replace(/^Bearer\s+/i, "").trim();
+  const token = authorization.match(/^Bearer\s+(\S+)$/i)?.[1] || "";
   if (!token) return { error: json(401, { code: "unauthorized", message: "Inicia sesión para continuar." }) };
 
   const userResponse = await fetch(SUPABASE_URL + "/auth/v1/user", {
@@ -408,6 +408,12 @@ exports.handler = async function (event) {
   }
   if (event.httpMethod !== "GET" && event.httpMethod !== "POST") {
     return json(405, { code: "method_not_allowed", message: "Método no permitido." });
+  }
+  if (event.httpMethod === 'POST') {
+    const bytes = event.isBase64Encoded
+      ? Buffer.from(event.body || '', 'base64').byteLength
+      : new TextEncoder().encode(event.body || '').byteLength;
+    if (bytes > 32000) return json(413, { code: 'request_too_large', message: 'Solicitud demasiado grande.' });
   }
   if (!SUPABASE_URL || !ANON_KEY || !SERVICE_KEY) {
     return json(503, {

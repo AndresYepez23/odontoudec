@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { readJsonObject, RequestBodyError } from '../_shared/request-body.ts';
 
 const SURVEY_KEY = "reconocimientos-2026";
 const MAX_TEXT = 500;
@@ -69,7 +70,7 @@ Deno.serve(async (req: Request) => {
     const {data:{user},error:authError} = await admin.auth.getUser(token);
     if (authError || !user) return reply(req,{error:"La sesión no es válida. Vuelve a iniciar sesión."},401);
 
-    const body = await req.json().catch(()=>null);
+    const body = await readJsonObject(req, 32000);
     if (!body || typeof body !== "object" || Array.isArray(body)) return reply(req,{error:"Solicitud inválida."},400);
 
     if (body.action === "status") {
@@ -119,7 +120,8 @@ Deno.serve(async (req: Request) => {
     }
     return reply(req,{error:"Acción no reconocida."},400);
   } catch (error) {
-    console.error("survey-submissions:",error);
+    if (error instanceof RequestBodyError) return reply(req,{error:'Solicitud inválida o demasiado grande.'},error.status);
+    console.error("survey-submissions: operation failed");
     return reply(req,{error:"No pudimos procesar la solicitud. Inténtalo nuevamente."},500);
   }
 });
